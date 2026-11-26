@@ -166,8 +166,7 @@ textarea{resize:vertical;min-height:64px}
 .sheet tr.cancel td:not(.notea):not(.acts) input{text-decoration:line-through;color:#9a98a0}
 .sheet .tag{font-weight:700;font-size:12px;color:#d9671f}
 .sheet tr.cancel .tag{color:#9a98a0}
-.sheet tr.free .tag{color:#1c1c1f}
-.sheet tr.free td:not(.notea):not(.acts){background:#f29a55}
+.sheet tr.free .tag{color:var(--acc)}
 .sheet td.notea textarea{border:0;background:transparent;width:100%;resize:none;text-align:center;font:inherit;padding:10px 10px 4px;border-radius:0;display:block}
 .sheet tfoot td{border:0}
 .sheet .sum{background:var(--acc);color:#1c1c1f;font-weight:700}
@@ -488,7 +487,9 @@ function freeTpl(){
   const P=t=>({t:'p',st:Object.assign({},body.st,{pb:0}),mk:body.mk,runs:[[t,bs]]});
   const L=t=>({t:'p',st:Object.assign({},body.st,{il:28,fi:-14,sb:2,sa:0,pb:0}),mk:body.mk,li:{fmt:'bullet',txt:'•'},runs:[[t,bs]]});
   const title={t:'p',st:Object.assign({},bl[iH].st,{al:'center',pb:0,sb:0,sa:6}),mk:bl[iH].mk,runs:[[fr?'CONTRAT DE PARTICIPATION GRATUITE À UNE CAMPAGNE D’INFLUENCE':'FREE PARTICIPATION AGREEMENT – INFLUENCER CAMPAIGN',hs]]};
-  const sub={t:'p',st:Object.assign({},body.st,{al:'center',pb:0,sb:2,sa:4}),mk:body.mk,runs:[[(fr?'Projet : {{projet}}  ·  Influenceur : @{{handle}}  ·  Période : {{periode}}':'Project: {{projet}}  ·  Influencer: @{{handle}}  ·  Period: {{periode}}'),bs]]};
+  const bsB=(()=>{ const st=Object.assign({},TPL.styles[bs],{b:true,c:'000000'}); let i=TPL.styles.findIndex(x=>JSON.stringify(x)===JSON.stringify(st)); if(i<0){ TPL.styles.push(st); i=TPL.styles.length-1; } return i; })();
+  const lab=fr?['Projet : ','  ·  Influenceur : ','  ·  Période : ']:['Project: ','  ·  Influencer: ','  ·  Period: '];
+  const sub={t:'p',st:Object.assign({},body.st,{al:'center',pb:0,sb:2,sa:4}),mk:body.mk,runs:[[lab[0],bsB],['{{projet}}',bs],[lab[1],bsB],['@{{handle}}',bs],[lab[2],bsB],['{{periode}}',bs]]};
   const parties=bl.slice(iE,iP+1).map(clone);
   parties.forEach(b=>{ if(b.t==='p') b.runs.forEach(r=>{ if(r[0]) r[0]=r[0].replace(', {{id_phrase}}','{{id_opt}}'); }); delete b.ag; if(b.st) b.st=Object.assign({},b.st,{pb:0}); });
   const cross=S.opt!=='nocp', med=S.opt==='cp_free'||S.opt==='cp_paid', prods=dotOn()?prodList():[];
@@ -1323,7 +1324,8 @@ function recordCampaign(){
   const handle=S.handle.replace(/^@/,'').trim();
   let r=c.rows.find(x=>x.handle.toLowerCase()===handle.toLowerCase());
   if(!r){ r={handle,sophie:'',colC:''}; c.rows.push(r); }
-  Object.assign(r,{handle,nom:S.nom,deal:(freeOn()?'FREE · ':'')+dealText(),periode:S.periode,prix:freeOn()?0:(TOT()||0),free:freeOn(),cancelled:false,snap:snapS(),updated:Date.now()});
+  const ht=freeOn()?0:(TOT()||0), tv=!freeOn()&&tvaOn();
+  Object.assign(r,{handle,nom:S.nom,ninf:freeOn()?'-':((r.ninf&&r.ninf!=='-')?r.ninf:'Contrat envoyé'),deal:(freeOn()?'FREE · ':'')+dealText(),periode:S.periode,prix:ht,tva:tv,ttc:tv?Math.round(ht*(1+tvaRate()/100)*100)/100:'',free:freeOn(),cancelled:false,snap:snapS(),updated:Date.now()});
   c.brand=Object.fromEntries(BRAND_KEYS.map(k=>[k,S[k]]));
   if(S.logo){ c.logo=S.logo; const b=brandKey(); if(b){ LOGOS[b]=S.logo; saveLogos(); } }
   c.updated=Date.now(); CAMPS.splice(CAMPS.indexOf(c),1); CAMPS.unshift(c); // la campagne utilisée remonte en haut
@@ -1331,6 +1333,8 @@ function recordCampaign(){
 }
 // lignes automatiques de la colonne A : fees engagés (somme), fees MAX et reste
 const rPrix=r=>r.cancelled?0:(Number(r.prix)||0);
+const rTTC=r=>(r.cancelled||r.ttc===''||r.ttc==null)?0:(Number(r.ttc)||0);
+const ttcTot=c=>c.rows.reduce((t,r)=>t+rTTC(r),0);
 const kEur=n=>Math.round(Number(n)||0).toLocaleString('en-US')+'€';
 function feesLines(c){
   const total=c.rows.reduce((t,r)=>t+rPrix(r),0), fm=Number(c.feesMax)||0;
@@ -1377,21 +1381,25 @@ function drawSheet(){
   const rows=c.rows.map((r,i)=>`<tr class="${r.cancelled?'cancel':''}${r.free?' free':''}">${i===0?`<td class="notea" rowspan="${n}"><textarea data-note rows="${Math.max(2,n)}" placeholder="Texte libre (ex. 10K budget global&#10;3K Hono / 7K fees)">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td>`:''}
     <td><input data-r="${i}" data-f="sophie" value="${esc(r.sophie||'')}"></td>
     <td><input data-r="${i}" data-f="colC" value="${esc(r.colC||'')}"></td>
-    <td><input data-r="${i}" data-f="deal" value="${esc(r.deal||'')}"></td>
+    <td><input data-r="${i}" data-f="ninf" value="${esc(r.ninf??(r.free?'-':'Contrat envoyé'))}"></td>
     <td><input data-r="${i}" data-f="handle" value="${esc(r.handle||'')}"></td>
     <td><input data-r="${i}" data-f="periode" value="${esc(r.periode||'')}"></td>
-    <td>${r.cancelled?'<span class="tag">ANNULÉ</span>':r.free?'<span class="tag">FREE</span>':`<input data-r="${i}" data-f="prix" value="${eur(r.prix)}" inputmode="decimal">`}</td>
+    <td>${r.cancelled?'<span class="tag">ANNULÉ</span>':r.free?'<span class="tag zero">€0.00</span>':`<input data-r="${i}" data-f="prix" value="${eur(r.prix)}" inputmode="decimal">`}</td>
+    <td>${r.cancelled||r.free?'':`<input data-r="${i}" data-f="ttc" value="${r.ttc!==''&&r.ttc!=null?eur(r.ttc):''}" placeholder="—" inputmode="decimal">`}</td>
+    <td><input data-r="${i}" data-f="deal" value="${esc(r.deal||'')}" title="${esc(r.deal||'')}"></td>
+    <td><input data-r="${i}" data-f="facture" value="${esc(r.facture||'')}" placeholder="à remplir"></td>
     <td class="acts"><button data-edit="${i}" title="${r.snap?'Rouvrir ce contrat dans le formulaire pour le modifier':'Contrat enregistré avant cette version : à ressaisir'}" ${r.snap?'':'disabled'}>Modifier</button><button data-cancel="${i}" title="${r.cancelled?'Rétablir cet influenceur':'Annulation : la ligne reste visible, barrée, et sort de la somme'}">${r.cancelled?'Rétablir':'Annuler'}</button><button class="del" data-del="${i}" title="Retirer complètement la ligne">✕</button></td></tr>`).join('');
-  document.getElementById('cSheet').innerHTML=`<table class="sheet"><colgroup><col style="width:${Math.max(180,(c.title||'').length*9+30)}px"><col style="width:150px"><col style="width:90px"><col style="min-width:330px"><col style="width:170px"><col style="width:150px"><col style="width:135px"><col style="width:190px"></colgroup><thead><tr><th>${esc(c.title)}</th><th>Note Sophie</th><th></th><th>Note influence</th><th>Créateur contenus</th><th>Période activation</th><th>Prix HT</th><th style="background:none"></th></tr></thead>
-    <tbody>${rows||`<tr><td class="notea"><textarea data-note rows="3" placeholder="Texte libre (ex. 10K budget global&#10;3K Hono / 7K fees)">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td><td colspan="6" style="color:#999">Aucun influenceur pour l’instant : ils s’ajoutent à chaque PDF généré avec ce nom de campagne</td></tr>`}</tbody>
-    <tfoot><tr><td colspan="5"></td><td class="sum">Somme :</td><td class="sum">${Math.round(total).toLocaleString('en-US')}€</td><td></td></tr></tfoot></table>`;
+  document.getElementById('cSheet').innerHTML=`<table class="sheet"><colgroup><col style="width:${Math.max(180,(c.title||'').length*9+30)}px"><col style="width:150px"><col style="width:90px"><col style="width:150px"><col style="width:170px"><col style="width:150px"><col style="width:135px"><col style="width:135px"><col style="min-width:330px"><col style="width:150px"><col style="width:190px"></colgroup><thead><tr><th>${esc(c.title)}</th><th>Note Sophie</th><th></th><th>Note influence</th><th>Créateur contenus</th><th>Période activation</th><th>Prix HT</th><th>Prix TTC</th><th>Livrable</th><th>Facture</th><th style="background:none"></th></tr></thead>
+    <tbody>${rows||`<tr><td class="notea"><textarea data-note rows="3" placeholder="Texte libre (ex. 10K budget global&#10;3K Hono / 7K fees)">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td><td colspan="9" style="color:#999">Aucun influenceur pour l’instant : ils s’ajoutent à chaque PDF généré avec ce nom de campagne</td></tr>`}</tbody>
+    <tfoot><tr><td colspan="5"></td><td class="sum">Somme :</td><td class="sum">${Math.round(total).toLocaleString('en-US')}€</td><td class="sum">${ttcTot(c)?Math.round(ttcTot(c)).toLocaleString('en-US')+'€':''}</td><td colspan="2"></td><td></td></tr></tfoot></table>`;
 }
 document.getElementById('cSheet').addEventListener('change',e=>{
   const el=e.target;
   if(el.dataset.note!==undefined){ CUR.note=el.value; saveCamps(); return; }
   if(el.dataset.r===undefined) return;
   const r=CUR.rows[+el.dataset.r]; let v=el.value;
-  if(el.dataset.f==='prix'){ v=num(String(v).replace(/[€\s,]/g,''))||0; }
+  if(el.dataset.f==='prix'){ v=num(String(v).replace(/[€\s,]/g,''))||0; if(r.tva) r.ttc=Math.round(v*1.2*100)/100; }
+  if(el.dataset.f==='ttc'){ v=String(v).trim()?(num(String(v).replace(/[€\s,]/g,''))||0):''; }
   r[el.dataset.f]=v; saveCamps(); drawSheet(); campList();
 });
 document.getElementById('cSheet').addEventListener('click',e=>{
@@ -1424,30 +1432,32 @@ function xlBlock(ws,c,r0){
   const n=Math.max(1,c.rows.length);
   const aText=colAText(c);
   const aLines=aText?aText.split('\n').length:0, rowH=Math.max(20,Math.ceil((aLines*16+14)/n));
-  const head=[c.title,'NOTE SOPHIE','','NOTE INFLUENCE','CREATEUR CONTENUS','PÉRIODE ACTIVATION','PRIX HT'];
+  const head=[c.title,'NOTE SOPHIE','','NOTE INFLUENCE','CREATEUR CONTENUS','PÉRIODE ACTIVATION','PRIX HT','PRIX TTC','LIVRABLE','FACTURE'];
   const hr=ws.getRow(r0); head.forEach((h,i)=>{ const cl=hr.getCell(i+1); cl.value=(h||'').toUpperCase();
     cl.font={...XL_FONT,bold:true,color:{argb:'FF1C1C1F'}}; cl.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL_ORANGE}}; cl.alignment={horizontal:'center',vertical:'middle'}; });
   hr.height=22;
   for(let i=0;i<n;i++){
-    const r=c.rows[i]||{}, row=ws.getRow(r0+1+i); row.height=rowH;
-    const vals=[null,r.sophie||'',r.colC||'',r.deal||'',r.handle||'',r.periode||'',c.rows[i]?Number(r.prix)||0:null];
-    vals.forEach((v,j)=>{ if(j===0) return; const cl=row.getCell(j+1); cl.value=v; cl.font=XL_FONT; cl.border=XL_B; cl.alignment={horizontal:'center',vertical:'middle',wrapText:j===3}; });
-    row.getCell(7).numFmt='"€"#,##0.00';
-    if(r.free&&!r.cancelled){ [4,5,6,7].forEach(j=>{ const cl=row.getCell(j); cl.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL_FREE}}; cl.font={...XL_FONT,bold:j===7}; }); row.getCell(7).numFmt='"FREE"'; }
-    if(r.cancelled){ [2,3,4,5,6].forEach(j=>{ row.getCell(j).font={...XL_FONT,strike:true,color:{argb:'FF9A98A0'}}; }); row.getCell(7).value=0; row.getCell(7).numFmt='"ANNULÉ"'; row.getCell(7).font={...XL_FONT,bold:true,color:{argb:'FF9A98A0'}}; }
+    const r=c.rows[i]||{}, row=ws.getRow(r0+1+i); const lw=(ws.getColumn(9).width||40)*0.95; row.height=Math.max(rowH,Math.ceil(((r.deal||'').length||1)/lw)*15+6);
+    const has=!!c.rows[i], ttc=has&&!r.free&&r.ttc!==''&&r.ttc!=null?Number(r.ttc)||0:null;
+    const vals=[null,r.sophie||'',r.colC||'',has?(r.ninf??(r.free?'-':'Contrat envoyé')):'',r.handle||'',r.periode||'',has?Number(r.prix)||0:null,ttc,r.deal||'',r.facture||''];
+    vals.forEach((v,j)=>{ if(j===0) return; const cl=row.getCell(j+1); cl.value=v; cl.font=XL_FONT; cl.border=XL_B; cl.alignment={horizontal:'center',vertical:'middle',wrapText:j===8}; });
+    row.getCell(7).numFmt='"€"#,##0.00'; row.getCell(8).numFmt='"€"#,##0.00';
+    if(r.free&&!r.cancelled){ row.getCell(7).font={...XL_FONT,bold:true,color:{argb:XL_ORANGE}}; }
+    if(r.cancelled){ row.getCell(8).value=null; [2,3,4,5,6,9,10].forEach(j=>{ row.getCell(j).font={...XL_FONT,strike:true,color:{argb:'FF9A98A0'}}; }); row.getCell(7).value=0; row.getCell(7).numFmt='"ANNULÉ"'; row.getCell(7).font={...XL_FONT,bold:true,color:{argb:'FF9A98A0'}}; }
   }
   if(n>1) ws.mergeCells(r0+1,1,r0+n,1);
   const a=ws.getCell(r0+1,1); a.value=aText||null; a.font=XL_FONT; a.alignment={horizontal:'center',vertical:'middle',wrapText:true};
   a.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF3F3F3'}}; a.border=XL_B;
   const fr=ws.getRow(r0+n+1); fr.height=22;
-  const s1=fr.getCell(6), s2=fr.getCell(7);
+  const s1=fr.getCell(6), s2=fr.getCell(7), s3=fr.getCell(8);
   s1.value='Somme :'; s2.value={formula:`SUM(G${r0+1}:G${r0+n})`,result:c.rows.reduce((t,r)=>t+rPrix(r),0)}; s2.numFmt='#,##0"€"';
-  [s1,s2].forEach(cl=>{ cl.font={...XL_FONT,bold:true,color:{argb:'FF1C1C1F'}}; cl.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL_ORANGE}}; cl.alignment={horizontal:'center',vertical:'middle'}; });
+  s3.value={formula:`SUM(H${r0+1}:H${r0+n})`,result:ttcTot(c)}; s3.numFmt='#,##0"€";;""';
+  [s1,s2,s3].forEach(cl=>{ cl.font={...XL_FONT,bold:true,color:{argb:'FF1C1C1F'}}; cl.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL_ORANGE}}; cl.alignment={horizontal:'center',vertical:'middle'}; });
   return r0+n+1;
 }
 function xlColumns(ws,camps){
   const tl=Math.max(...camps.map(c=>(c.title||'').length)), dl=Math.max(0,...camps.flatMap(c=>c.rows.map(r=>(r.deal||'').length)));
-  ws.columns=[{width:Math.max(26,Math.ceil(tl*1.2)+4)},{width:22},{width:16},{width:Math.max(40,dl+4)},{width:26},{width:24},{width:18}];
+  ws.columns=[{width:Math.max(26,Math.ceil(tl*1.2)+4)},{width:22},{width:16},{width:22},{width:26},{width:24},{width:18},{width:18},{width:Math.max(40,Math.min(70,dl+4))},{width:18}];
   ws.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,paperSize:9};
 }
 async function xlDownload(wb,name){
