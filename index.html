@@ -151,6 +151,17 @@ textarea{resize:vertical;min-height:64px}
 .sheet td input:focus{background:var(--acc-soft);box-shadow:none}
 .sheet td.notea{background:#f3f3f3;vertical-align:middle}
 .sheet{table-layout:auto}
+.sheet{width:100%;table-layout:fixed}
+.sheet th{white-space:normal!important;font-size:10.5px!important;padding:7px 4px!important;line-height:1.2}
+.sheet td input{padding:0 4px!important;font-size:12px}
+.sheet textarea.cell{border:0;background:transparent;width:100%;resize:none;overflow:hidden;text-align:center;font:inherit;font-size:12px;padding:8px 4px;border-radius:0;display:block;min-height:34px;line-height:1.3}
+.sheet textarea.cell:focus{background:var(--acc-soft);box-shadow:none}
+.sheet tr.cancel textarea.cell{text-decoration:line-through;color:#9a98a0}
+.sheet td.acts button{padding:4px 7px!important;margin-right:2px!important;font-size:13px!important}
+.sheet td.livr textarea{border:0;background:transparent;width:100%;resize:none;overflow:hidden;text-align:center;font:inherit;padding:8px;border-radius:0;display:block;min-height:34px;line-height:1.35}
+.sheet td.livr textarea:focus{background:var(--acc-soft);box-shadow:none}
+.sheet tr.cancel td.livr textarea{text-decoration:line-through;color:#9a98a0}
+.sheet td{vertical-align:middle}
 #prodAdd{border:1px dashed var(--acc);background:var(--acc-soft);color:#1c1c1f;border-radius:8px;padding:8px 14px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;margin-left:26px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}.row3 select{min-width:0;font-size:12px}
 .mplab{font-size:11.5px;color:var(--mute);margin:8px 0 5px}
@@ -1077,6 +1088,7 @@ function fitPreview(){
   const avail=sc.clientWidth-48, w=tpl().page.w*4/3; // largeur de la page en pixels
   doc.style.zoom=(Math.min(avail,560)/w).toFixed(3);
 }
+window.addEventListener('resize',()=>{ if(CUR) fitLivr(); });
 window.addEventListener('resize',()=>fitPreview());
 function fileName(){
   const h=S.handle.replace(/^@/,'').trim(), c=campagne().trim(), y=String(S.annee).trim();
@@ -1372,6 +1384,7 @@ function openCamp(c){
   CUR=c; document.getElementById('campView').classList.add('on'); campList();
   document.getElementById('cTitle').value=c.title; drawSheet();
 }
+function fitLivr(){ document.querySelectorAll('#cSheet textarea.cell').forEach(t=>{ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }); }
 function drawSheet(){
   const c=CUR, n=c.rows.length, total=c.rows.reduce((a,r)=>a+rPrix(r),0);
   const cc=document.getElementById('cCount'), fm=Number(c.feesMax)||0;
@@ -1379,20 +1392,22 @@ function drawSheet(){
   cc.classList.toggle('miss',fm>0&&total>fm); cc.title=fm>0&&total>fm?'La somme dépasse le fees MAX':'';
   document.getElementById('cFees').value=fm?fm:'';
   const rows=c.rows.map((r,i)=>`<tr class="${r.cancelled?'cancel':''}${r.free?' free':''}">${i===0?`<td class="notea" rowspan="${n}"><textarea data-note rows="${Math.max(2,n)}" placeholder="Texte libre (ex. 10K budget global&#10;3K Hono / 7K fees)">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td>`:''}
-    <td><input data-r="${i}" data-f="sophie" value="${esc(r.sophie||'')}"></td>
-    <td><input data-r="${i}" data-f="colC" value="${esc(r.colC||'')}"></td>
-    <td><input data-r="${i}" data-f="ninf" value="${esc(r.ninf??(r.free?'-':'Contrat envoyé'))}"></td>
-    <td><input data-r="${i}" data-f="handle" value="${esc(r.handle||'')}"></td>
-    <td><input data-r="${i}" data-f="periode" value="${esc(r.periode||'')}"></td>
+    <td><textarea class="cell" data-r="${i}" data-f="sophie" rows="1">${esc(r.sophie||'')}</textarea></td>
+    <td><textarea class="cell" data-r="${i}" data-f="colC" rows="1">${esc(r.colC||'')}</textarea></td>
+    <td><textarea class="cell" data-r="${i}" data-f="ninf" rows="1">${esc(r.ninf??(r.free?'-':'Contrat envoyé'))}</textarea></td>
+    <td><textarea class="cell" data-r="${i}" data-f="handle" rows="1">${esc(r.handle||'')}</textarea></td>
+    <td><textarea class="cell" data-r="${i}" data-f="periode" rows="1">${esc(r.periode||'')}</textarea></td>
     <td>${r.cancelled?'<span class="tag">ANNULÉ</span>':r.free?'<span class="tag zero">€0.00</span>':`<input data-r="${i}" data-f="prix" value="${eur(r.prix)}" inputmode="decimal">`}</td>
     <td>${r.cancelled||r.free?'':`<input data-r="${i}" data-f="ttc" value="${r.ttc!==''&&r.ttc!=null?eur(r.ttc):''}" placeholder="—" inputmode="decimal">`}</td>
-    <td><input data-r="${i}" data-f="deal" value="${esc(r.deal||'')}" title="${esc(r.deal||'')}"></td>
-    <td><input data-r="${i}" data-f="facture" value="${esc(r.facture||'')}" placeholder="à remplir"></td>
-    <td class="acts"><button data-edit="${i}" title="${r.snap?'Rouvrir ce contrat dans le formulaire pour le modifier':'Contrat enregistré avant cette version : à ressaisir'}" ${r.snap?'':'disabled'}>Modifier</button><button data-cancel="${i}" title="${r.cancelled?'Rétablir cet influenceur':'Annulation : la ligne reste visible, barrée, et sort de la somme'}">${r.cancelled?'Rétablir':'Annuler'}</button><button class="del" data-del="${i}" title="Retirer complètement la ligne">✕</button></td></tr>`).join('');
-  document.getElementById('cSheet').innerHTML=`<table class="sheet"><colgroup><col style="width:${Math.max(180,(c.title||'').length*9+30)}px"><col style="width:150px"><col style="width:90px"><col style="width:150px"><col style="width:170px"><col style="width:150px"><col style="width:135px"><col style="width:135px"><col style="min-width:330px"><col style="width:150px"><col style="width:190px"></colgroup><thead><tr><th>${esc(c.title)}</th><th>Note Sophie</th><th></th><th>Note influence</th><th>Créateur contenus</th><th>Période activation</th><th>Prix HT</th><th>Prix TTC</th><th>Livrable</th><th>Facture</th><th style="background:none"></th></tr></thead>
+    <td class="livr"><textarea class="cell" data-r="${i}" data-f="deal" rows="1">${esc(r.deal||'')}</textarea></td>
+    <td><textarea class="cell" data-r="${i}" data-f="facture" rows="1" placeholder="à remplir">${esc(r.facture||'')}</textarea></td>
+    <td class="acts"><button data-edit="${i}" title="${r.snap?'Rouvrir ce contrat dans le formulaire pour le modifier':'Contrat enregistré avant cette version : à ressaisir'}" ${r.snap?'':'disabled'}>✎</button><button data-cancel="${i}" title="${r.cancelled?'Rétablir cet influenceur':'Annulation : la ligne reste visible, barrée, et sort de la somme'}">${r.cancelled?'↺':'⊘'}</button><button class="del" data-del="${i}" title="Retirer complètement la ligne">✕</button></td></tr>`).join('');
+  document.getElementById('cSheet').innerHTML=`<table class="sheet"><colgroup><col style="width:12%"><col style="width:8%"><col style="width:3%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:17%"><col style="width:8%"><col style="width:9%"></colgroup><thead><tr><th>${esc(c.title)}</th><th>Note Sophie</th><th></th><th>Note<br>influence</th><th>Créateur<br>contenus</th><th>Période<br>activation</th><th>Prix HT</th><th>Prix TTC</th><th>Livrable</th><th>Facture</th><th style="background:none"></th></tr></thead>
     <tbody>${rows||`<tr><td class="notea"><textarea data-note rows="3" placeholder="Texte libre (ex. 10K budget global&#10;3K Hono / 7K fees)">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td><td colspan="9" style="color:#999">Aucun influenceur pour l’instant : ils s’ajoutent à chaque PDF généré avec ce nom de campagne</td></tr>`}</tbody>
     <tfoot><tr><td colspan="5"></td><td class="sum">Somme :</td><td class="sum">${Math.round(total).toLocaleString('en-US')}€</td><td class="sum">${ttcTot(c)?Math.round(ttcTot(c)).toLocaleString('en-US')+'€':''}</td><td colspan="2"></td><td></td></tr></tfoot></table>`;
+  fitLivr();
 }
+document.getElementById('cSheet').addEventListener('input',e=>{ if(e.target.classList.contains('cell')) fitLivr(); });
 document.getElementById('cSheet').addEventListener('change',e=>{
   const el=e.target;
   if(el.dataset.note!==undefined){ CUR.note=el.value; saveCamps(); return; }
