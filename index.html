@@ -293,8 +293,8 @@ textarea{resize:vertical;min-height:64px}
         <div class="plat" data-pl="pl_ig"><label class="chk"><input type="checkbox" data-k="pl_ig"><b>Instagram</b></label>
           <div class="pcnt"><span>Reels</span><div class="stepper"><button data-s="reels" data-d="-1">−</button><input data-k="reels" inputmode="numeric"><button data-s="reels" data-d="1">+</button></div></div>
           <div class="pcnt"><span>Sets de Stories</span><div class="stepper"><button data-s="stories" data-d="-1">−</button><input data-k="stories" inputmode="numeric"><button data-s="stories" data-d="1">+</button></div></div>
-          <div></div><div></div>
-          <div class="pcnt"><span>Clips par set</span><div class="stepper"><button data-s="clips" data-d="-1">−</button><input data-k="clips" inputmode="numeric"><button data-s="clips" data-d="1">+</button></div></div></div>
+          <div class="clipsp"></div><div class="clipsp"></div>
+          <div class="pcnt" id="clipsBox"><span>Clips par set</span><div class="stepper"><button data-s="clips" data-d="-1">−</button><input data-k="clips" inputmode="numeric"><button data-s="clips" data-d="1">+</button></div></div></div>
         <div class="plat" data-pl="pl_tt"><label class="chk"><input type="checkbox" data-k="pl_tt"><b>TikTok</b></label>
           <div class="pcnt"><span>Publications</span><div class="stepper"><button data-s="tiktok" data-d="-1">−</button><input data-k="tiktok" inputmode="numeric"><button data-s="tiktok" data-d="1">+</button></div></div></div>
         <div class="plat" data-pl="pl_yt"><label class="chk"><input type="checkbox" data-k="pl_yt"><b>YouTube</b></label>
@@ -704,6 +704,7 @@ const tvaOn=()=>!!S.tva&&lang()==='fr';
 const tvaRate=()=>20; // TVA française : toujours 20 %
 const money=n=>(Math.round(n*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/\u202f/g,'\u00a0')+'€';
 const rateTxt=()=>String(tvaRate()).replace('.',',')+' %';
+function clipsUI(){ const on=(parseInt(S.stories,10)||0)>0; ['clipsBox'].concat([...document.querySelectorAll('.clipsp')]).forEach(x=>{ const el=typeof x==='string'?document.getElementById(x):x; el.style.display=on?'':'none'; }); }
 function mpUI(){
   const ugc=S.type==='ugc', box=document.getElementById('mpBox');
   box.style.display=(medBoxOn()||ugc)?'':'none';
@@ -1127,6 +1128,7 @@ function syncUI(){
   document.getElementById('medLabel').textContent=`Montant médiatisation HT (${CU})`;
   document.getElementById('medBox').style.display=medOn()?'':'none';
   mpUI();
+  clipsUI();
   medCalc();
   // logo
   document.getElementById('dropIn').innerHTML=S.logo?`<img src="${S.logo}"><small>${S.marque?'Logo mémorisé pour '+esc(S.marque)+' · ':''}glissez un autre logo pour le remplacer</small>`:'Glissez le logo de la marque ici<small>ou cliquez pour choisir une image (PNG, JPG, SVG)</small>';
@@ -1187,6 +1189,7 @@ document.addEventListener('input',e=>{
   if(k==='total'||k==='nb_inv'||k==='med_prix') S.inv=[];
   save();
   if(k==='nb_inv'||k==='total'||k==='med_prix') invUI();
+  if(k==='stories') clipsUI();
   if(k==='total'||k==='tva_rate'||k==='med_prix') tvaUI();
   if(k==='total'||k==='med_prix'||k==='med_mois') medCalc();
   if(/^(adr|ag)_(cp|pays)$/.test(k)) addrUI();
