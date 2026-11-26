@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Influence Contrat</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Influence Contrat">
+<meta name="theme-color" content="#16161a">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-512.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --bg:#f4f3f1; --panel:#ffffff; --ink:#1c1c1f; --mute:#77757a; --line:#e4e2df;
+  --acc:#f7b27c; --acc-soft:#fff4ea; --ok:#f7b27c; --acc-ink:#c4661f; --side:#16161a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+  font:13px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.app{display:grid;grid-template-columns:260px 410px 1fr;height:100vh}
+/* ---------- colonne modèle ---------- */
+.side{background:var(--side);color:#e9e8e6;padding:22px 18px;overflow:auto;display:flex;flex-direction:column;gap:18px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand img{width:34px;height:34px;border-radius:8px}
+.brand b{font-size:15px;letter-spacing:.2px}
+.brand small{display:block;color:#8d8b90;font-size:11px;font-weight:400}
+.grp h4{margin:0 0 8px;font-size:10.5px;letter-spacing:1.1px;text-transform:uppercase;color:#8d8b90;font-weight:600}
+.seg{display:flex;background:#25252a;border-radius:9px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;color:#cfcdd0;padding:7px 4px;border-radius:7px;font:inherit;font-size:12px;cursor:pointer}
+.seg button.on{background:#3a3a41;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.seg.light{background:#efeeec}
+.seg.light button{color:#55535a;padding:9px 4px}
+.seg.light button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.cards{display:flex;flex-direction:column;gap:6px}
+.card{border:1px solid #2e2e34;background:#1d1d22;border-radius:10px;padding:9px 11px;cursor:pointer;text-align:left;color:#d9d7da;font:inherit;font-size:12px;line-height:1.35}
+.card b{display:block;color:#fff;font-size:12.5px;font-weight:600;margin-bottom:1px}
+.card.on{border-color:var(--acc);background:#2a2019}
+.card.on b{color:var(--acc)}
+.used{margin-top:auto;font-size:11.5px;color:#8d8b90;border-top:1px solid #2a2a30;padding-top:12px}
+.used b{color:#fff}
+.side .link{background:none;border:0;color:#bdbbc0;font:inherit;font-size:12px;padding:0;cursor:pointer;text-align:left;margin-top:6px}
+.side .link:hover{color:#fff}
+/* ---------- formulaire ---------- */
+.form{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;gap:0;padding:14px 6px 0;justify-content:space-between;overflow:hidden;border-bottom:1px solid var(--line);flex-wrap:nowrap}
+.tab{border:0;background:none;font:inherit;font-size:11px;padding:8px 3px 10px;color:var(--mute);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;position:relative}
+.tab.on{color:var(--ink);border-bottom-color:var(--acc);font-weight:600}
+.tab .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:transparent;box-shadow:inset 0 0 0 1.5px var(--acc);margin-left:5px;vertical-align:1px}
+.tab .dot.ok{background:var(--acc);box-shadow:none}
+.pane{padding:18px 18px 24px;overflow:auto;flex:1;display:none}
+.pane.on{display:block}
+label.f{display:block;margin-bottom:13px}
+label.f span{display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px;font-weight:500}
+label.f span em{font-style:normal;color:#b4b1b6;font-weight:400}
+input,textarea,select{width:100%;font:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fbfbfa;color:var(--ink);outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--acc);background:#fff;box-shadow:0 0 0 3px var(--acc-soft)}
+input.req:placeholder-shown{border-color:#fbd5b6}
+input::placeholder,textarea::placeholder{color:#a3a1a8;opacity:1}
+textarea{resize:vertical;min-height:64px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3 select.opt-empty{color:#a3a1a8;font-style:italic}.row3 select option{color:#1c1c1f;font-style:normal}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.idrow{display:grid;grid-template-columns:110px 1fr;gap:8px}
+.drop{border:1.5px dashed #d6d3cf;border-radius:12px;padding:16px;text-align:center;color:var(--mute);cursor:pointer;margin-bottom:14px;background:#fbfbfa;transition:.15s}
+.drop.over{border-color:var(--acc);background:var(--acc-soft);color:var(--acc-ink)}
+.drop img{max-width:180px;max-height:80px;display:block;margin:0 auto 8px}
+.drop small{display:block;font-size:11px;margin-top:3px}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fbfbfa}
+.stepper button{border:0;background:none;width:34px;height:40px;font-size:17px;color:var(--mute);cursor:pointer}
+.stepper button:hover{color:var(--acc)}
+.stepper input{border:0;text-align:center;font-size:17px;font-weight:600;background:none;padding:0;box-shadow:none!important}
+.cnt{text-align:center}
+.plat{display:grid;grid-template-columns:130px 1fr 1fr;gap:10px;align-items:end;border:1px solid var(--line);border-radius:10px;padding:10px 11px;margin-bottom:8px}
+.plat.off{opacity:.45}
+.plat.off .pcnt{pointer-events:none}
+.chk{display:flex;align-items:center;gap:8px;align-self:center;cursor:pointer;font-size:13px}
+.chk input{width:16px;height:16px;accent-color:var(--acc);margin:0}
+.addrrow{display:grid;grid-template-columns:96px 1fr 1fr 1fr;gap:8px}
+.addrrow .f span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agentchk{padding:10px 11px;border:1px solid var(--line);border-radius:10px}
+#agentFields{margin-top:12px}
+.pcnt>span{display:block;font-size:11px;color:var(--mute);margin-bottom:4px;text-align:center}
+.pcnt .stepper button{height:34px}
+.pcnt .stepper input{font-size:15px}
+.cnt>span{display:block;font-size:11.5px;color:var(--mute);margin-bottom:5px;font-weight:500}
+.hint{font-size:11.5px;color:var(--mute);background:#f7f6f4;border-radius:8px;padding:9px 11px;margin:4px 0 14px}
+.warn{color:var(--acc-ink);background:var(--acc-soft)}
+.inv{border:1px solid var(--line);border-radius:10px;padding:10px 11px 2px;margin-bottom:9px}
+.inv h5{margin:0 0 8px;font-size:11.5px;color:var(--mute);font-weight:600}
+.sect{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:#a3a0a6;font-weight:600;margin:18px 0 10px}
+.sect:first-child{margin-top:0}
+/* ---------- aperçu ---------- */
+.prev{display:flex;flex-direction:column;min-height:0}
+.bar{display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--line)}
+.fname{flex:1;min-width:0}
+.fname small{display:block;font-size:10.5px;color:var(--mute);letter-spacing:.3px}
+.fname b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fname b.miss{color:var(--acc)}
+.btn{border:0;border-radius:9px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn.pri{background:var(--acc);color:#1c1c1f;box-shadow:0 1px 0 rgba(0,0,0,.08)}
+.btn.pri:hover{filter:brightness(1.05)}
+.btn.pri:disabled{background:#fbdcc3;cursor:default}
+.btn.sec{background:#efeeec;color:var(--ink)}
+.status{font-size:11.5px;color:var(--mute);white-space:nowrap}
+.status.miss{color:var(--acc-ink)}
+.scroll{flex:1;overflow:auto;padding:26px 0 60px}
+.page{margin:0 auto;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 30px rgba(0,0,0,.06);box-sizing:border-box;color:#000}
+.page>div,.page td>div{white-space:pre-wrap;word-wrap:break-word}
+.page table{border-collapse:collapse;margin:0}
+.page table td{vertical-align:top;padding:5pt}
+.page table.box td{border:0.75pt solid #000}
+.page .logo{display:flex;align-items:center}
+.page .logo img{width:auto;height:auto;object-fit:contain}
+.page .logo .ph{display:inline-block;border:1px dashed var(--acc);color:var(--acc-ink);font:600 9pt -apple-system,sans-serif;padding:8px 14px;border-radius:6px}
+.page .pb{border-top:1px dashed #d8d6d2;margin-top:28pt;position:relative}
+.page .pb::before{content:"nouvelle page";position:absolute;top:-16pt;right:0;color:#bbb;font:8px -apple-system,sans-serif}
+.v{background:#ffeedd;border-radius:2px;box-shadow:0 0 0 1px #ffeedd}
+.m{background:var(--acc-soft);color:var(--acc-ink);border-radius:2px;font-weight:600;box-shadow:0 0 0 1px var(--acc-soft)}
+.page.clean .v,.page.clean .m{background:none;box-shadow:none;color:inherit;font-weight:inherit}
+/* ---------- réglages ---------- */
+.camplist{display:flex;flex-direction:column;gap:4px;max-height:220px;overflow:auto}
+.camp{display:flex;align-items:center;gap:8px;border:0;background:#1d1d22;border:1px solid #2e2e34;color:#d9d7da;border-radius:9px;padding:8px 10px;font:inherit;font-size:12px;cursor:pointer;text-align:left}
+.camp:hover{border-color:var(--acc)}
+.camp.on{border-color:var(--acc);background:#2a2019}
+.camp b{flex:1;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.camp span{color:#8d8b90;font-size:11px}
+.year{display:flex;flex-direction:column;gap:4px}
+.yhead{display:flex;align-items:center;gap:6px;border:0;background:none;color:#cfcdd0;font:inherit;font-size:12px;padding:6px 2px;cursor:pointer;text-align:left}
+.yhead i{font-style:normal;width:12px;color:#8d8b90}
+.yhead b{color:#fff;font-size:13px}
+.yhead span{margin-left:auto;color:#8d8b90;font-size:11px}
+.year .yexcel{margin:2px 0 8px 2px}
+.camplist{max-height:300px}
+.camplist .empty{color:#77757a;font-size:11.5px;line-height:1.4}
+.campview{position:fixed;left:260px;right:0;top:0;bottom:0;background:var(--bg);display:none;flex-direction:column;z-index:5}
+.campview.on{display:flex}
+.campview .bar{gap:10px}
+.fees{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mute);font-weight:600;white-space:nowrap}
+.fees input{width:110px;padding:7px 9px}
+.sheet td.notea .feesline{font-weight:600;font-size:12px;padding:0 10px 12px;color:#1c1c1f}
+.sheet td.notea{position:relative}
+.campview .bar .status{white-space:normal;max-width:260px;line-height:1.3}
+.campview .bar input.ctitle{flex:1;min-width:200px;font-size:15px;font-weight:600;border:1px solid transparent;background:transparent;padding:6px 8px}
+.campview .bar input.ctitle:hover,.campview .bar input.ctitle:focus{border-color:var(--line);background:#fff}
+.cbody{flex:1;overflow:auto;padding:22px 26px 40px}
+.sheet{border-collapse:collapse;background:#fff;font:12.5px Poppins,-apple-system,sans-serif;box-shadow:0 1px 3px rgba(0,0,0,.06);min-width:100%}
+.sheet th{background:var(--acc);color:#1c1c1f;font-weight:700;text-transform:uppercase;padding:9px 10px;font-size:12px;letter-spacing:.2px;white-space:nowrap}
+.sheet td{border:1px dotted #9a98a0;padding:0;text-align:center;height:34px}
+.sheet td input{border:0;background:transparent;text-align:center;width:100%;height:34px;padding:0 8px;font:inherit;border-radius:0}
+.sheet td input:focus{background:var(--acc-soft);box-shadow:none}
+.sheet td.notea{background:#f3f3f3;vertical-align:middle}
+.sheet{table-layout:auto}
+#prodAdd{border:1px dashed var(--acc);background:var(--acc-soft);color:#1c1c1f;border-radius:8px;padding:8px 14px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;margin-left:26px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}.row3 select{min-width:0;font-size:12px}
+.mplab{font-size:11.5px;color:var(--mute);margin:8px 0 5px}
+.mpchips{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}.mpchips .chk{margin:0}
+.prodrow{display:flex;align-items:center;gap:8px;margin-top:8px}.prodrow span{width:18px;color:var(--mute);font-size:12px;text-align:right}
+.prodrow input{flex:1}.prodrow button{border:0;background:none;color:var(--mute);cursor:pointer;font-size:13px}
+.medbox{border:1px solid var(--acc);background:var(--acc-soft);border-radius:10px;padding:12px 14px 4px;margin:4px 0 14px}
+.medh{font-weight:600;font-size:13px;margin-bottom:8px}.medh small{font-weight:400;color:var(--mute)}
+.sheet td.acts{border:0;background:var(--bg);white-space:nowrap;text-align:left;padding-left:6px}
+.sheet td.acts button{font-size:11px;padding:4px 8px;margin-right:4px;border-radius:6px;border:1px solid #d9d6de;background:#fff;cursor:pointer}
+.sheet td.acts button:disabled{opacity:.35;cursor:default}
+.sheet td.acts button.del{border:0;background:none}
+.sheet tr.cancel td:not(.notea):not(.acts) input{text-decoration:line-through;color:#9a98a0}
+.sheet .tag{font-weight:700;font-size:12px;color:#d9671f}
+.sheet tr.cancel .tag{color:#9a98a0}
+.sheet tr.free .tag{color:#1c1c1f}
+.sheet tr.free td:not(.notea):not(.acts){background:#f29a55}
+.sheet td.notea textarea{border:0;background:transparent;width:100%;resize:none;text-align:center;font:inherit;padding:10px 10px 4px;border-radius:0;display:block}
+.sheet tfoot td{border:0}
+.sheet .sum{background:var(--acc);color:#1c1c1f;font-weight:700}
+.sheet .del{border:0;background:none;color:#b4b1b6;cursor:pointer;font-size:15px;width:30px}
+.sheet .del:hover{color:#c4661f}
+.chint{color:var(--mute);font-size:12px;margin:12px 2px 0}
+.modal{position:fixed;inset:0;background:rgba(20,20,24,.35);display:none;align-items:center;justify-content:center;z-index:9}
+.modal.on{display:flex}
+.modal .box{background:#fff;border-radius:14px;width:420px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal h3{margin:0 0 6px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1c1c1f;color:#fff;padding:10px 16px;border-radius:10px;font-size:12.5px;opacity:0;transition:.2s;pointer-events:none}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ===== Colonne 1 : choix du modèle ===== -->
+  <aside class="side">
+    <div class="brand"><img src="icon-512.png" alt=""><div><b>Influence Contrat</b><small>Agence YLG</small></div></div>
+
+    <div class="grp"><h4>Type de contrat</h4>
+      <div class="seg" id="s-type"><button data-v="infl" class="on">Influence</button><button data-v="ugc">UGC</button></div></div>
+
+    <div class="grp" id="g-paid"><h4>Influenceur</h4>
+      <div class="seg" id="s-paid"><button data-v="paid" class="on">Paid</button><button data-v="free">Free</button></div></div>
+
+    <div class="grp" id="g-pays"><h4>Campagne</h4>
+      <div class="seg" id="s-pays"><button data-v="FR" class="on">France · FR</button><button data-v="UK">UK · EN</button><button data-v="ES">Espagne · EN</button></div></div>
+
+    <div class="grp" id="g-profil"><h4>Profil influenceur</h4>
+      <div class="seg" id="s-profil"><button data-v="classic" class="on">Classique</button><button data-v="veto">Univers véto</button></div></div>
+
+    <div class="grp" id="g-opt"><h4>Crosspost &amp; médiatisation</h4>
+      <div class="cards" id="s-opt">
+        <button class="card on" data-v="nocp"><b>Sans crosspost</b>Médiatisation refusée</button>
+        <button class="card" data-v="cp"><b>Crosspost</b>Médiatisation refusée</button>
+        <button class="card" data-v="cp_free"><b>Crosspost + médiatisation offerte</b>Ads autorisées sans rétribution</button>
+        <button class="card" data-v="cp_paid"><b>Crosspost + médiatisation payante</b>Ads autorisées contre rétribution</button>
+      </div></div>
+
+    <div class="grp" id="g-camp"><h4>Campagnes</h4><div id="campList" class="camplist"></div><button class="link" id="campNew">＋ Créer une campagne à l'avance</button><datalist id="campNames"></datalist>
+</div>
+
+    <div class="used">Modèle utilisé : <b id="used">Contrat 9</b>
+      <button class="link" id="newBtn">＋ Nouveau contrat (formulaire vide)</button>
+      <button class="link" id="setBtn">⚙︎ Réglages (signature)</button>
+    </div>
+  </aside>
+
+  <!-- ===== Colonne 2 : onglets à remplir ===== -->
+  <section class="form">
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-p="marque">Marque</button>
+      <button class="tab" data-p="infl">Influenceur</button>
+      <button class="tab" data-p="cont">Contenus</button>
+      <button class="tab" data-p="dot">Dotation</button>
+      <button class="tab" data-p="remu">Rémunération</button>
+      <button class="tab" data-p="dates">Dates</button>
+    </nav>
+
+    <div class="pane on" id="p-marque">
+      <label class="f" id="campPickWrap" style="display:none"><span>Reprendre une campagne déjà enregistrée</span><select id="campPick" style="color:#a3a1a8"></select></label>
+      <div class="drop" id="drop"><div id="dropIn">Glissez le logo de la marque ici<small>ou cliquez pour choisir une image (PNG, JPG, SVG)</small></div></div>
+      <input type="file" id="logoFile" accept="image/*" hidden>
+      <div class="row">
+        <label class="f"><span>Marque</span><input class="req" data-k="marque" placeholder="Ajouter la marque"></label>
+        <label class="f"><span>Entreprise (client)</span><input class="req" data-k="entreprise" placeholder="Ajouter le client"></label>
+      </div>
+      <label class="f"><span>Courte description de la marque</span><input class="req" data-k="marque_desc_txt" placeholder="Ajouter une courte description de la marque"></label>
+      <div class="row">
+        <label class="f"><span>Nom de la campagne</span><input class="req" data-k="campagne" list="campNames" autocomplete="off" placeholder="Ajouter la campagne"></label>
+        <label class="f"><span>Année</span><input class="req" data-k="annee" inputmode="numeric" placeholder="Ajouter l'année"></label>
+      </div>
+      <label class="f"><span>Période de la campagne <em>(page de garde)</em></span><input class="req" data-k="periode" placeholder="Ajouter la période (ex. Janvier – Mars 2027)"></label>
+    </div>
+
+    <div class="pane" id="p-infl">
+      <label class="f"><span>Prénom et NOM</span><input class="req" data-k="nom" placeholder="Ajouter le prénom et le NOM"></label>
+      <label class="f"><span>Mention influenceur (pseudo, sans @)</span><input class="req" data-k="handle" placeholder="Ajouter le pseudo (sans @)"></label>
+      <div id="inflOwn">
+      <div class="addr" data-addr="adr"><label class="f"><span>Adresse (n° et rue)</span><input class="req" data-k="adr_rue" placeholder="Ajouter le n° et la rue"></label>
+        <div class="addrrow">
+          <label class="f a-cp"><span>Code postal</span><input class="req" data-k="adr_cp"></label>
+          <label class="f a-ville"><span>Ville</span><input class="req" data-k="adr_ville"></label>
+          <label class="f a-reg"><span>Province <em>(facultatif)</em></span><input data-k="adr_reg"></label>
+          <label class="f a-pays"><span>Pays</span><input data-k="adr_pays"></label>
+        </div><div class="hint warn a-warn" style="display:none;margin-top:-6px"></div></div>
+      <label class="f"><span id="idLabel">Identifiant</span>
+        <div class="idrow"><select data-k="id_type" id="idType"></select><input class="req" data-k="id_num" placeholder="Ajouter le numéro"></div></label>
+      <div class="hint id-help" id="idHelp" style="margin-top:-6px"></div>
+      <label class="chk" style="margin:0 0 14px"><input type="checkbox" data-k="id_pending"><span style="font-size:12.5px">Immatriculation en cours (pas encore de numéro)</span></label>
+      </div>
+      <div id="agentBox">
+        <div class="sect">Agent</div>
+        <label class="chk agentchk"><input type="checkbox" data-k="agent"><b>L'influenceur passe par un agent / une agence</b></label>
+        <div class="hint" style="margin-top:8px">Si l'influenceur n'a pas d'agent, ne cochez pas cette case.</div>
+        <div id="agentFields">
+          <label class="f"><span>Société de l'agent (raison sociale)</span><input class="req" data-k="agent_nom" placeholder="Ajouter la société de l'agent"></label>
+          <label class="f"><span>Nom court dans le contrat <em>(facultatif)</em></span><input data-k="agent_court" placeholder="Ajouter le nom court"></label>
+          <label class="f"><span id="agIdLabel">Identifiant de la société</span>
+            <div class="idrow"><select data-k="agent_id_type" id="agIdType"></select><input class="req" data-k="agent_id_num" placeholder="Ajouter le numéro de la société"></div></label>
+          <div class="hint id-help" id="agIdHelp" style="margin-top:-6px"></div>
+          <div class="addr" data-addr="ag"><label class="f"><span>Adresse du siège (n° et rue)</span><input class="req" data-k="ag_rue" placeholder="Ajouter le n° et la rue"></label>
+        <div class="addrrow">
+          <label class="f a-cp"><span>Code postal</span><input class="req" data-k="ag_cp"></label>
+          <label class="f a-ville"><span>Ville</span><input class="req" data-k="ag_ville"></label>
+          <label class="f a-reg"><span>Province <em>(facultatif)</em></span><input data-k="ag_reg"></label>
+          <label class="f a-pays"><span>Pays</span><input data-k="ag_pays"></label>
+        </div><div class="hint warn a-warn" style="display:none;margin-top:-6px"></div></div>
+          <div class="row" style="grid-template-columns:90px 1fr">
+            <label class="f"><span>Civilité</span><select data-k="agent_civ"><option value="M">M.</option><option value="F">Mme</option></select></label>
+            <label class="f"><span>Représentant (Prénom NOM)</span><input class="req" data-k="agent_rep" placeholder="Ajouter le prénom et le NOM du représentant"></label>
+          </div>
+          <label class="f"><span>Pièce d'identité du représentant <em>(facultatif)</em></span><input data-k="agent_rep_id" placeholder="Ajouter la pièce d'identité"></label>
+          <div class="hint">Avec un agent, c'est sa société qui signe et qui facture : l'adresse et le n° de l'influenceur ne sont plus utilisés.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane" id="p-cont">
+      <div id="c-infl">
+        <div class="sect">Réseaux sociaux et contenus attendus</div>
+        <div class="plat" data-pl="pl_ig"><label class="chk"><input type="checkbox" data-k="pl_ig"><b>Instagram</b></label>
+          <div class="pcnt"><span>Reels</span><div class="stepper"><button data-s="reels" data-d="-1">−</button><input data-k="reels" inputmode="numeric"><button data-s="reels" data-d="1">+</button></div></div>
+          <div class="pcnt"><span>Sets de Stories</span><div class="stepper"><button data-s="stories" data-d="-1">−</button><input data-k="stories" inputmode="numeric"><button data-s="stories" data-d="1">+</button></div></div>
+          <div></div><div></div>
+          <div class="pcnt"><span>Clips par set</span><div class="stepper"><button data-s="clips" data-d="-1">−</button><input data-k="clips" inputmode="numeric"><button data-s="clips" data-d="1">+</button></div></div></div>
+        <div class="plat" data-pl="pl_tt"><label class="chk"><input type="checkbox" data-k="pl_tt"><b>TikTok</b></label>
+          <div class="pcnt"><span>Publications</span><div class="stepper"><button data-s="tiktok" data-d="-1">−</button><input data-k="tiktok" inputmode="numeric"><button data-s="tiktok" data-d="1">+</button></div></div></div>
+        <div class="plat" data-pl="pl_yt"><label class="chk"><input type="checkbox" data-k="pl_yt"><b>YouTube</b></label>
+          <div class="pcnt"><span>Vidéos</span><div class="stepper"><button data-s="youtube" data-d="-1">−</button><input data-k="youtube" inputmode="numeric"><button data-s="youtube" data-d="1">+</button></div></div></div>
+        <div class="plat" data-pl="pl_fb"><label class="chk"><input type="checkbox" data-k="pl_fb"><b>Facebook (Meta)</b></label>
+          <div class="pcnt"><span>Publications</span><div class="stepper"><button data-s="facebook" data-d="-1">−</button><input data-k="facebook" inputmode="numeric"><button data-s="facebook" data-d="1">+</button></div></div></div>
+        <div class="hint" id="contHint" style="margin-top:12px"></div>
+      </div>
+      <div id="c-ugc" style="display:none">
+        <div class="row">
+          <div class="cnt"><span>Contenus vidéo UGC</span><div class="stepper"><button data-s="ugc" data-d="-1">−</button><input data-k="ugc" inputmode="numeric"><button data-s="ugc" data-d="1">+</button></div></div>
+          <label class="f"><span>Créé(s) en</span><input data-k="date_ugc" class="req" placeholder="Ajouter le mois (ex. octobre 2026)"></label>
+        </div>
+      </div>
+      <div id="mpBox" class="medbox" style="margin-top:14px">
+        <div class="medh" id="mpTitle">Médiatisation (publicité)</div>
+        <div class="mplab" id="mpPlLab">Supports autorisés</div>
+        <div class="mpchips">
+          <label class="chk"><input type="checkbox" data-mp="ig"><b>Instagram</b></label>
+          <label class="chk"><input type="checkbox" data-mp="fb"><b>Facebook (Meta)</b></label>
+          <label class="chk"><input type="checkbox" data-mp="tt"><b>TikTok</b></label>
+          <label class="chk"><input type="checkbox" data-mp="yt"><b id="ytLab">YouTube</b></label>
+        </div>
+        <div class="mplab" style="margin-top:12px">Territoire</div>
+        <div class="seg light" id="s-terr"><button data-v="monde">Monde entier</button><button data-v="pays">Pays (3 max)</button></div>
+        <div class="row3" id="terrPays">
+          <select data-mk="p1"><option value="">Pays 1</option><option value="fr">France</option><option value="be">Belgique</option><option value="ch">Suisse</option><option value="lu">Luxembourg</option><option value="es">Espagne</option><option value="pt">Portugal</option><option value="it">Italie</option><option value="de">Allemagne</option><option value="at">Autriche</option><option value="nl">Pays-Bas</option><option value="uk">Royaume-Uni</option><option value="ie">Irlande</option><option value="pl">Pologne</option><option value="se">Suède</option><option value="dk">Danemark</option><option value="no">Norvège</option><option value="fi">Finlande</option><option value="gr">Grèce</option><option value="us">États-Unis</option><option value="ca">Canada</option><option value="ma">Maroc</option><option value="tn">Tunisie</option><option value="dz">Algérie</option><option value="ae">Émirats arabes unis</option></select>
+          <select data-mk="p2"><option value="">Pays 2</option><option value="fr">France</option><option value="be">Belgique</option><option value="ch">Suisse</option><option value="lu">Luxembourg</option><option value="es">Espagne</option><option value="pt">Portugal</option><option value="it">Italie</option><option value="de">Allemagne</option><option value="at">Autriche</option><option value="nl">Pays-Bas</option><option value="uk">Royaume-Uni</option><option value="ie">Irlande</option><option value="pl">Pologne</option><option value="se">Suède</option><option value="dk">Danemark</option><option value="no">Norvège</option><option value="fi">Finlande</option><option value="gr">Grèce</option><option value="us">États-Unis</option><option value="ca">Canada</option><option value="ma">Maroc</option><option value="tn">Tunisie</option><option value="dz">Algérie</option><option value="ae">Émirats arabes unis</option></select>
+          <select data-mk="p3"><option value="">Pays 3</option><option value="fr">France</option><option value="be">Belgique</option><option value="ch">Suisse</option><option value="lu">Luxembourg</option><option value="es">Espagne</option><option value="pt">Portugal</option><option value="it">Italie</option><option value="de">Allemagne</option><option value="at">Autriche</option><option value="nl">Pays-Bas</option><option value="uk">Royaume-Uni</option><option value="ie">Irlande</option><option value="pl">Pologne</option><option value="se">Suède</option><option value="dk">Danemark</option><option value="no">Norvège</option><option value="fi">Finlande</option><option value="gr">Grèce</option><option value="us">États-Unis</option><option value="ca">Canada</option><option value="ma">Maroc</option><option value="tn">Tunisie</option><option value="dz">Algérie</option><option value="ae">Émirats arabes unis</option></select>
+        </div>
+        <div style="height:10px"></div>
+        <div class="row">
+          <label class="f"><span>Durée</span><div style="display:flex;gap:6px"><input data-mk="mois" class="req" inputmode="numeric" style="width:70px"><div class="seg light" id="s-unit" style="flex:1"><button data-v="mois">mois</button><button data-v="ans">an(s)</button></div></div></label>
+          <label class="f"><span>À compter de</span><select data-mk="start"><option value="pub">1re publication</option><option value="sign">signature</option></select></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane" id="p-dot">
+      <label class="chk agentchk"><input type="checkbox" data-k="dot"><b>Dotation produits</b></label>
+      <div class="hint" style="margin-top:8px">Si la marque n'envoie pas de produits, ne cochez pas : la partie « Dotation produits » est alors retirée du contrat.</div>
+      <div id="prodBox">
+        <div id="prodList"></div>
+        <button class="link" id="prodAdd" style="margin-top:6px">＋ Ajouter un produit</button>
+      </div>
+    </div>
+    <div class="pane" id="p-remu">
+      <div class="row">
+        <label class="f"><span id="totLabel">Rémunération totale HT (€)</span><input class="req" data-k="total" inputmode="decimal" placeholder="Ajouter le montant HT"></label>
+        <div class="f" id="nbInvWrap"><span style="display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px;font-weight:500">Nombre de factures</span>
+          <div class="seg light" id="s-inv"><button data-v="1">1 facture</button><button data-v="2">2 factures</button></div></div>
+      </div>
+      <div id="medBox" class="medbox">
+        <div class="medh">Médiatisation payante <small>(s'ajoute à la prestation, avec le détail dans le contrat ; réseaux et durée dans l'onglet Contenus)</small></div>
+        <div class="row">
+          <label class="f"><span id="medLabel">Montant médiatisation HT (€)</span><input class="req" data-k="med_prix" inputmode="decimal" placeholder="Ajouter le montant HT"></label>
+        </div>
+        <div class="hint" id="medCalc"></div>
+      </div>
+      <div id="invs"></div>
+      <div class="hint" id="remuHint"></div>
+      <div id="tvaBox">
+        <label class="chk agentchk"><input type="checkbox" data-k="tva"><b>L'influenceur facture la TVA</b></label>
+        <div class="hint" style="margin-top:8px">Rare : la plupart des influenceurs sont en franchise de TVA. Ne cochez que si sa facture comporte de la TVA (20 %).</div>
+        <div id="tvaFields"><div class="hint" id="tvaCalc"></div></div>
+      </div>
+      <div class="hint" id="tvaEN" style="display:none">Contrat anglais : la TVA est en autoliquidation (« Reverse charge »), l'influenceur ne la facture pas. Les montants restent HT.</div>
+    </div>
+
+    <div class="pane" id="p-dates">
+      <div class="row">
+        <label class="f"><span>Début du contrat</span><input type="date" class="req" data-k="date_debut"></label>
+        <label class="f"><span>Fin du contrat</span><input type="date" class="req" data-k="date_fin"></label>
+      </div>
+      <label class="f"><span>Date de signature <em>(« Fait à Paris, le … »)</em></span><input type="date" class="req" data-k="date_sign"></label>
+      <div class="hint">La date de signature se met à jour toute seule à la date du jour à chaque nouveau contrat.</div>
+    </div>
+  </section>
+
+  <!-- ===== Colonne 3 : aperçu ===== -->
+  <section class="prev">
+    <div class="bar">
+      <div class="fname"><small>NOM DU FICHIER PDF</small><b id="fname">—</b></div>
+      <span class="status" id="status"></span>
+      <button class="btn sec" id="cleanBtn" title="Masquer les surlignages">Aperçu propre</button>
+      <button class="btn pri" id="pdfBtn">Générer le PDF</button>
+    </div>
+    <div class="scroll"><div class="page" id="doc"></div></div>
+  </section>
+</div>
+
+<section class="campview" id="campView">
+  <div class="bar">
+    <input class="ctitle" id="cTitle" title="Titre de la colonne A (nom de la campagne)">
+    <label class="fees">Fees MAX <input id="cFees" inputmode="decimal" placeholder="€ HT"></label>
+    <span class="status" id="cCount"></span>
+    <button class="btn sec" id="cDelete" title="Supprimer la campagne de la liste">Supprimer</button>
+    <button class="btn sec" id="cClose">Fermer</button>
+    <button class="btn pri" id="cExcel">Télécharger en Excel</button>
+  </div>
+  <div class="cbody"><div id="cSheet"></div>
+    <p class="chint">Chaque PDF généré ajoute (ou met à jour) l'influenceur dans sa campagne. Toutes les cases sont modifiables ici avant l'export.</p></div>
+</section>
+<div class="modal" id="settings"><div class="box">
+  <h3>Réglages</h3>
+  <p class="hint" style="margin-top:8px">La signature de l'agence est gardée uniquement sur ce Mac (elle n'est pas publiée avec l'appli).</p>
+  <div class="drop" id="sigDrop"><div id="sigIn">Glissez l'image de signature ici<small>ou cliquez pour choisir</small></div></div>
+  <input type="file" id="sigFile" accept="image/*" hidden>
+  <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn sec" id="sigDel">Retirer</button><button class="btn pri" id="setClose">Fermer</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script src="templates.js"></script>
+<script src="pdfmake.min.js"></script>
+<script src="vfs_fonts.js"></script>
+<script src="exceljs.min.js"></script>
+<script>
+'use strict';
+/* ================= Nombres en lettres ================= */
+const FR_U=['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
+const FR_T=['','','vingt','trente','quarante','cinquante','soixante'];
+function fr99(n){
+  if(n<20) return FR_U[n];
+  let t=Math.floor(n/10), u=n%10;
+  if(t===7||t===9){ const base=t===7?'soixante':'quatre-vingt'; return base+(t===7&&u===1?' et ':'-')+FR_U[10+u]; }
+  if(t===8) return u===0?'quatre-vingts':'quatre-vingt-'+FR_U[u];
+  return FR_T[t]+(u===0?'':(u===1?' et un':'-'+FR_U[u]));
+}
+function fr999(n,last){
+  const c=Math.floor(n/100), r=n%100; let s='';
+  if(c) s=(c>1?FR_U[c]+' ':'')+'cent'+(c>1&&r===0&&last?'s':'');
+  if(r) s+=(s?' ':'')+fr99(r);
+  return s;
+}
+function frWords(n){
+  n=Math.round(n); if(n===0) return 'zéro';
+  const parts=[]; const mil=Math.floor(n/1e6), th=Math.floor(n%1e6/1000), r=n%1000;
+  if(mil) parts.push(fr999(mil,true)+(mil>1?' millions':' million'));
+  if(th) parts.push(th===1?'mille':fr999(th,false)+' mille');
+  if(r) parts.push(fr999(r,true));
+  return parts.join(' ');
+}
+const EN_U=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+const EN_T=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+function en999(n){ const c=Math.floor(n/100), r=n%100; let s=c?EN_U[c]+' hundred':''; if(r){ s+=(s?' and ':'')+(r<20?EN_U[r]:EN_T[Math.floor(r/10)]+(r%10?'-'+EN_U[r%10]:'')); } return s; }
+function enWords(n){
+  n=Math.round(n); if(n===0) return 'zero';
+  const p=[]; const mil=Math.floor(n/1e6), th=Math.floor(n%1e6/1000), r=n%1000;
+  if(mil) p.push(en999(mil)+' million'); if(th) p.push(en999(th)+' thousand'); if(r) p.push((p.length&&r<100?'and ':'')+en999(r));
+  return p.join(' ');
+}
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):s;
+
+/* ================= État ================= */
+const TODAY=()=>new Date().toISOString().slice(0,10);
+const DEF={type:'infl',pays:'FR',profil:'classic',opt:'nocp',
+  marque:'',entreprise:'',marque_desc_txt:'',campagne:'',annee:'',periode:'',
+  nom:'',handle:'',adresse:'',id_type:'',id_num:'',
+  reels:1,stories:1,clips:3,tiktok:1,youtube:1,facebook:1,pl_ig:true,pl_tt:true,pl_yt:false,pl_fb:false,paid:'paid',ugc:1,date_ugc:'',id_pending:false,tva:false,tva_rate:'20',adr_rue:'',adr_cp:'',adr_ville:'',adr_reg:'',adr_pays:'',ag_rue:'',ag_cp:'',ag_ville:'',ag_reg:'',ag_pays:'',agent:false,agent_nom:'',agent_court:'',agent_id_type:'',agent_id_num:'',agent_adresse:'',agent_civ:'M',agent_rep:'',agent_rep_id:'',produits:'',dot:false,prods:[],
+  total:'',med_prix:'',med_mois:'3',mp:null,med_brand:false,med_unit:'mois',med_terr:'monde',med_terr_txt:'',med_p1:'',med_p2:'',med_p3:'',med_start:'pub',med_where:'infl',u_mois:'2',u_unit:'ans',u_terr:'monde',u_terr_txt:'',u_p1:'',u_p2:'',u_p3:'',u_start:'sign',u_mp:null,nb_inv:'1',inv:[],date_debut:'',date_fin:'',date_sign:TODAY(),logo:''};
+let S=load();
+['id_type','agent_id_type'].forEach(k=>{ if(S[k]==='CIF') S[k]='NIFS'; });
+function load(){ try{ const s=JSON.parse(localStorage.getItem('ic_state')||'null');
+  if(s&&s.done) return Object.assign({},DEF,{type:s.type||DEF.type});
+  if(s){ if(!Array.isArray(s.prods)&&s.produits){ s.prods=s.produits.split('\n').map(x=>x.trim()).filter(Boolean); s.dot=!!s.prods.length; } return Object.assign({},DEF,s); } }catch(e){} return Object.assign({},DEF); }
+const saveNow=()=>{ try{ localStorage.setItem('ic_state',JSON.stringify(S)); }catch(e){} };
+let saveT; function save(){ if(S.done&&!save._keep) S.done=false; clearTimeout(saveT); saveT=setTimeout(()=>{ try{ localStorage.setItem('ic_state',JSON.stringify(S)); }catch(e){} },300); }
+let SIG=''; try{ SIG=localStorage.getItem('ic_sig')||''; }catch(e){}
+
+const ID_TYPES={FR:[['SIREN','SIREN'],['SIRET','SIRET']],UK:[['UTR','UTR'],['CRN','Company No.']],ES:[['NIF','NIF (particulier)'],['NIE','NIE'],['NIFS','NIF société']]};
+const OPT_EN={nocp:['without crosspost','Paid media refused'],cp:['with crosspost','Paid media refused'],cp_free:['with crosspost','Paid media granted free of charge'],cp_paid:['with crosspost','Paid media against payment']};
+
+function tpl(){
+  if(S.type==='ugc') return TPL.tpls.find(t=>t.id==='ugc');
+  return TPL.tpls.find(t=>t.pays===S.pays&&t.profil===S.profil&&t.opt===S.opt);
+}
+const lang=()=>S.type==='ugc'?'fr':(S.pays==='FR'?'fr':'en');
+const num=v=>{ const n=parseFloat(String(v).replace(/\s/g,'').replace(',','.')); return isNaN(n)?null:n; };
+const clips=()=>Math.max(1,parseInt(S.clips,10)||3);
+const PL={reels:'pl_ig',stories:'pl_ig',tiktok:'pl_tt',youtube:'pl_yt',facebook:'pl_fb'};
+const cnt=k=>(PL[k]&&!S[PL[k]])?0:Math.max(0,parseInt(S[k],10)||0);
+// réseaux cochés, dans l'ordre Instagram, TikTok, YouTube, Facebook
+const MP=['ig','tt','fb','yt'];
+const mpKey=()=>S.type==='ugc'?'u_mp':'mp';
+const mpOn=k=>{ const o=S[mpKey()]; if(o) return !!o[k]; return S.type==='ugc'?true:!!S['pl_'+k]; };
+function plats(fr,reel,med){ const f=k=>med?mpOn(k):!!S['pl_'+k]; const L=[]; if(f('ig')) L.push(reel?(fr?'Instagram (Reel)':'Instagram (Reels)'):'Instagram'); if(med&&S.type==='ugc'&&f('fb')) L.push('Facebook'); if(f('tt')) L.push('TikTok'); if(f('yt')) L.push(med&&S.type==='ugc'?'YouTube Shorts':'YouTube'); if(f('fb')&&!(med&&S.type==='ugc')) L.push('Facebook'); return L.length?L:['Instagram']; }
+const medBoxOn=()=>S.type!=='ugc'&&(S.opt==='cp_paid'||S.opt==='cp_free')&&S.paid!=='free';
+const joinOr=(L,sep)=>L.length<2?L[0]:L.slice(0,-1).join(', ')+sep+L[L.length-1];
+const dotOn=()=>S.type!=='ugc'&&!!S.dot;
+const prodList=()=>(S.prods||[]).map(x=>String(x).trim()).filter(Boolean);
+const medOn=()=>S.type!=='ugc'&&S.opt==='cp_paid'&&S.paid!=='free';
+const MK=x=>(S.type==='ugc'?'u_':'med_')+x;
+const medN=()=>Math.max(1,parseInt(S[MK('mois')],10)||1);
+const medWhere=()=>'infl';
+function durTxt(fr){ const n=medN(), y=S[MK('unit')]==='ans';
+  return fr?`${frWords(n)} (${n}) ${y?(n>1?'ans':'an'):'mois'}`:`${enWords(n)} (${n}) ${y?(n>1?'years':'year'):(n>1?'months':'month')}`; }
+function durCourt(fr){ const n=medN(), y=S[MK('unit')]==='ans'; return fr?`${n} ${y?(n>1?'ans':'an'):'mois'}`:`${n} ${y?(n>1?'years':'year'):(n>1?'months':'month')}`; }
+function startTxt(fr){ const sg=S[MK('start')]==='sign';
+  if(S.type==='ugc') return sg?'à compter de la date de signature des présentes':'à compter de la première diffusion des contenus';
+  return fr?(sg?'à compter de la date de signature des présentes':'à compter de la première publication des Contenus'):(sg?'from the date of signature hereof':'from the first publication of the Content'); }
+const PAYS={fr:['France','France'],be:['Belgique','Belgium'],ch:['Suisse','Switzerland'],lu:['Luxembourg','Luxembourg'],es:['Espagne','Spain'],pt:['Portugal','Portugal'],it:['Italie','Italy'],de:['Allemagne','Germany'],at:['Autriche','Austria'],nl:['Pays-Bas','Netherlands'],uk:['Royaume-Uni','United Kingdom'],ie:['Irlande','Ireland'],pl:['Pologne','Poland'],se:['Suède','Sweden'],dk:['Danemark','Denmark'],no:['Norvège','Norway'],fi:['Finlande','Finland'],gr:['Grèce','Greece'],us:['États-Unis','United States'],ca:['Canada','Canada'],ma:['Maroc','Morocco'],tn:['Tunisie','Tunisia'],dz:['Algérie','Algeria'],ae:['Émirats arabes unis','United Arab Emirates']};
+// anciennes valeurs (France, Espagne, UK, UE, Autre) -> nouveau format
+function terrMigrate(){ ['med_','u_'].forEach(p=>{ const t=S[p+'terr']; if(t&&t!=='monde'&&t!=='pays'){ if(PAYS[t]){ S[p+'p1']=t; S[p+'terr']='pays'; } else S[p+'terr']='monde'; } }); }
+const terrList=()=>[...new Set(['p1','p2','p3'].map(k=>S[MK(k)]).filter(k=>k&&PAYS[k]))];
+function terrTxt(fr){ if((S[MK('terr')]||'monde')!=='pays') return fr?'Monde entier':'Worldwide';
+  const L=terrList().map(k=>PAYS[k][fr?0:1]); if(!L.length) return ''; return L.length===1?L[0]:L.slice(0,-1).join(', ')+(fr?' et ':' and ')+L[L.length-1]; }
+// total du contrat = prestation contenus + médiatisation payante
+function TOT(){ const t=num(S.total); if(t==null) return null; return t+(medOn()?(num(S.med_prix)||0):0); }
+function fmtNum(n){ const L=lang(); const s=Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,L==='fr'?'\u00a0':','); return s; }
+function fmtDate(d){ if(!d) return ''; const [y,m,j]=d.split('-'); return `${j}/${m}/${y}`; }
+const words=n=>lang()==='fr'?frWords(n):enWords(n);
+const curWord=()=>S.pays==='UK'?'Pounds':'Euros';
+const cur=()=>S.pays==='UK'?'£':'€';
+function campagne(){ return String(S.campagne||'').trim(); }
+
+/* factures : montants (auto-répartis sauf si modifiés) */
+function invoices(){
+  const n=S.type==='ugc'?1:parseInt(S.nb_inv,10)||1, tot=TOT();
+  const out=[]; let auto=tot!=null?Math.floor(tot/n):null;
+  for(let i=0;i<n;i++){
+    const saved=S.inv[i]||{};
+    let a=saved.amount!==undefined&&saved.amount!==''?num(saved.amount):(auto!=null?(i===n-1?tot-auto*(n-1):auto):null);
+    out.push({amount:a,moment:saved.moment||defMoment(i,n)});
+  }
+  return out;
+}
+function defMoment(i,n){
+  const fr=lang()==='fr';
+  if(i===n-1) return fr?"à la fin du contrat après publication de l'ensemble des contenus.":'upon completion of the contract after publication of all deliverables.';
+  return fr?'après publication du premier contenu.':'upon publication of the first deliverable.';
+}
+
+/* ================= Remplissage des champs ================= */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let missing=new Set();
+// un « segment » = [texte, genre] ; genre 'v' = info remplie, 'm' = info manquante, '' = texte fixe
+const V=s=>[[String(s),'v']];
+const T=s=>[[String(s),'']];
+const need=(v,label)=>{ if(v===''||v==null){ missing.add(label); return [['['+label+']','m']]; } return V(v); };
+
+function pl(k,s,p){ return cnt(k)===1?s:p; }
+function enumFR(mod){
+  const it=[]; const r=cnt('reels'),s=cnt('stories'),t=cnt('tiktok');
+  if(r) it.push(`${r} ${pl('reels','Reel','Reels')} Instagram ${mod} crosspost`);
+  if(s) it.push(`${s} ${pl('stories','set','sets')} de ${clips()} Stories`);
+  if(t) it.push(`${t} ${pl('tiktok','publication','publications')} TikTok (${pl('tiktok','repost Instagram accepté','reposts Instagram acceptés')})`);
+  const y=cnt('youtube'),f=cnt('facebook');
+  if(y) it.push(`${y} ${pl('youtube','vidéo YouTube','vidéos YouTube')}`);
+  if(f) it.push(`${f} ${pl('facebook','publication Facebook','publications Facebook')}`);
+  return it.length>1?it.slice(0,-1).join(', ')+' et '+it[it.length-1]:(it[0]||'');
+}
+function enumEN(spec){
+  const plus=spec.endsWith('+'), mod=spec.replace('+','');
+  const it=[]; const r=cnt('reels'),s=cnt('stories'),t=cnt('tiktok');
+  if(r) it.push(`${r} Instagram ${pl('reels','Reel','Reels')} ${mod} crosspost`);
+  if(s) it.push(`${s} ${pl('stories','set','sets')} of ${clips()} Stories`);
+  if(t) it.push(`${t} TikTok ${pl('tiktok','post','posts')}`+(plus?` with Instagram ${pl('tiktok','repost','reposts')} accepted`:''));
+  const y=cnt('youtube'),f=cnt('facebook');
+  if(y) it.push(`${y} YouTube ${pl('youtube','video','videos')}`);
+  if(f) it.push(`${f} Facebook ${pl('facebook','post','posts')}`);
+  if(it.length<2) return it[0]||'';
+  return it.length===2?it.join(' and '):it.slice(0,-1).join(', ')+', and '+it[it.length-1];
+}
+function idPhrase(){
+  const t=S.id_type, FRc=S.type==='ugc'||S.pays==='FR';
+  if(S.id_pending){ // immatriculation en cours : pas encore de numéro
+    if(FRc) return V(`en cours d'immatriculation au répertoire SIRENE (le numéro ${t==='SIRET'?'SIRET':'SIREN'} sera communiqué à l'Agence YLG dès son obtention et au plus tard avant l'émission de la première facture)`);
+    if(S.pays==='UK') return V(t==='CRN'?'currently in the process of being registered with Companies House (the Company Registration No. will be provided to Agence YLG as soon as it is issued and in any event before the first invoice is issued)'
+                                       :'currently in the process of registering with HMRC for a Unique Taxpayer Reference (UTR) (the UTR will be provided to Agence YLG as soon as it is issued and in any event before the first invoice is issued)');
+    return V(`currently in the process of obtaining a Spanish Tax Identification Number (${t==='NIE'?'NIE':'NIF'}) (the number will be provided to Agence YLG as soon as it is issued and in any event before the first invoice is issued)`);
+  }
+  const N=need(S.id_num,'Numéro '+(t||'identifiant'));
+  if(FRc) return t==='SIRET'?[...T('inscrit au répertoire SIRENE sous le n° SIRET '),...N]:[...T('inscrit au répertoire SIREN sous le n° '),...N];
+  if(S.pays==='UK') return t==='CRN'?[...T('operating under Company Registration No. '),...N]:[...T('registered under Unique Taxpayer Reference (UTR) '),...N];
+  return [...T(`operating under Spanish Tax Identification Number (${t==='NIFS'||!t?'NIF':t}) `),...N];
+}
+function seg(key){
+  const [k,a,b,c]=key.split(':');
+  switch(k){
+    case 'projet': { const cp=campagne(); return [...(cp?V(cp):need('','Nom de la campagne')),...T(' '),...need(S.annee,'Année')]; }
+    case 'handle': return need(S.handle.replace(/^@/,'').trim(),'Mention influenceur');
+    case 'periode': return need(S.periode,'Période');
+    case 'nom': return need(S.nom,'Prénom NOM');
+    case 'adresse': return addrSegs('adr','Adresse de l’influenceur');
+    case 'marque': return need(S.marque,'Marque');
+    case 'entreprise': return need(S.entreprise,'Entreprise');
+    case 'marque_desc': return [...need(S.marque,'Marque'),...V(', '),...need(S.marque_desc_txt,'Description de la marque')];
+    case 'id_phrase': return idPhrase();
+    case 'date_debut': return need(fmtDate(S.date_debut),'Date de début');
+    case 'date_fin': return need(fmtDate(S.date_fin),'Date de fin');
+    case 'date_sign': return need(fmtDate(S.date_sign),'Date de signature');
+    case 'date_ugc': return need(S.date_ugc,'Mois de création UGC');
+    case 'n': return V(cnt(a));
+    case 'w': return V(words(cnt(a)));
+    case 'W': return V(cap(words(cnt(a))));
+    case 'pl': return T(cnt(a)===1?b:c);
+    case 'de': return T(cnt(a)===1?"d'un":'de '+frWords(cnt(a)));
+    case 'li': return [];
+    case 'enum': return V(a==='fr'?enumFR(b):enumEN(b));
+    case 'inv_phrase': { const n=invoices().length; return V(n===1?"d'une (1) facture":`de ${frWords(n)} (${n}) factures`); }
+    case 'total_n': { const t=TOT(); return t==null?need('','Montant'):V(fmtNum(t)); }
+    case 'total_w': { const t=TOT(); return t==null?need('','Montant en lettres'):V(words(t)); }
+    case 'plats': case 'mplats': { const fr=a==='fr', m=k==='mplats';
+      if(b==='virg'||b==='comma') return V(plats(fr,false,m).join(', '));
+      if(b==='sur') return V(joinOr(plats(true,!m,m),' et/ou '));
+      if(b==='on') return V(joinOr(plats(false,!m,m),' and/or '));
+      return V(joinOr(plats(fr,false,m),fr?' et/ou ':' and/or ')); }
+    case 'med_tools': { const fr=lang()==='fr', L=[];
+      if(mpOn('ig')||mpOn('fb')) L.push('Meta Ads Manager (Partnership Ads)'); if(mpOn('tt')) L.push('TikTok Ads Manager (Spark Ads)'); if(mpOn('yt')) L.push('Google Ads (YouTube)');
+      if(medWhere()!=='infl') L.push('Dark Ads'); if(!L.length) L.push('Meta Ads Manager (Partnership Ads)');
+      return V(joinOr(L,fr?' ou ':' or ')); }
+    case 'med_brand': { return []; if(!S.med_brand) return []; const fr=lang()==='fr', pl=joinOr(plats(fr,false,true),fr?' et/ou ':' and/or ');
+      return [...T(fr?' Le Client est en outre autorisé à diffuser les Contenus en publicité (Boosting Ads) depuis les comptes de la Marque ':' The Client is also authorised to run the Content as paid advertising (Boosting Ads) from the accounts of the Brand '),...need(S.marque,'Marque'),...T(fr?' sur ':' on '),...V(pl),...T(fr?', pendant la même durée.':', for the same period.')]; }
+    case 'med_brand_annex': return medWhere()!=='infl'?T(lang()==='fr'?' · Boosting Ads depuis les comptes de la Marque : AUTORISÉ':' · Boosting Ads from the Brand’s accounts: AUTHORIZED'):[];
+    case 'clips': return V(clips());
+    case 'ttc': { if(!tvaOn()) return []; const t=TOT(); if(t==null) return [];
+      return [...T(', soit '),...V(money(t*(1+tvaRate()/100))),...T(` TTC (TVA ${rateTxt()} : `),...V(money(t*tvaRate()/100)),...T(')')]; }
+    case 'ag_name': return need(S.agent_nom,'Société de l’agent');
+    case 'cur': return T(cur());
+    case 'dot_t': return dotOn()?T(lang()==='fr'?' ET DOTATION PRODUITS':' AND PRODUCTS SUPPLY'):[];
+    case 'med_n': { const m=num(S.med_prix); return m==null?need('','Montant médiatisation'):V(fmtNum(m)); }
+    case 'med_w': { const m=num(S.med_prix); return m==null?need('','Montant médiatisation'):V(words(m)); }
+    case 'med_duree': return V(durTxt(lang()==='fr'));
+    case 'med_resume': { const fr=lang()==='fr', paid=S.opt==='cp_paid', t=terrTxt(fr);
+      return [...T(fr?(paid?'contre rétribution, ':'à titre gracieux, ')+'pour une durée de ':(paid?'for a fee, ':'free of charge, ')+'for a term of '),...V(durTxt(fr)),
+        ...T(fr?', territoire : ':', territory: '),...(t?V(t):need('','Territoire')),...T(fr?", dans les conditions prévues à l'article 6":', under the terms of Article 6')]; }
+    case 'med_annex2': { const fr=lang()==='fr', t=terrTxt(fr);
+      return [...T(fr?' · Territoire : ':' · Territory: '),...(t?V(t):need('','Territoire')),...T(fr?' · Durée : ':' · Term: '),...V(durCourt(fr)),...T(fr?(S[MK('start')]==='sign'?' à compter de la signature':' à compter de la 1re publication'):(S[MK('start')]==='sign'?' from signature':' from first publication'))]; }
+    case 'med_a7': { const fr=lang()==='fr';
+      return [...T(fr?"Par exception, l'autorisation de médiatisation prévue à l'article 6 reste valable pendant toute la durée qui y est fixée (":'By way of exception, the media authorization set out in Article 6 shall remain valid for the full period specified therein ('),
+        ...V(durTxt(fr)),...T(' '+startTxt(fr)+(fr?'), y compris au-delà du terme du présent Contrat.':'), including beyond the expiry of this Agreement.'))]; }
+    case 'med_de_duree': { const d=durTxt(true); return [...T(/^[aeiouyhé]/i.test(d)?'d’':'de '),...V(d)]; }
+    case 'med_start': return T(startTxt(lang()==='fr'));
+    case 'med_duree_long': return [...V(durTxt(lang()==='fr')),...T(' '+startTxt(lang()==='fr')+'.')];
+    case 'med_court': return V(durCourt(lang()==='fr'));
+    case 'med_terr': { const t=terrTxt(lang()==='fr'); return t?V(t):need('','Territoire'); }
+    case 'med_supports': { const fr=lang()==='fr', w=medWhere(), pl=joinOr(plats(fr,false,true),fr?' et/ou ':' and/or '), pc=plats(fr,false,true).join(', ');
+      const infl=fr?[...T("comptes de l'Influenceur sur "),...V(pl)]:[...T("the Influencer's accounts on "),...V(pl)];
+      const brand=fr?[...T('réseaux sociaux officiels de la Marque '),...need(S.marque,'Marque'),...T(' ('),...V(pc),...T(')')]:[...T('official social media accounts of the Brand '),...need(S.marque,'Marque'),...T(' ('),...V(pc),...T(')')];
+      const out=w==='infl'?infl:w==='brand'?brand:[...infl,...T(fr?' ; ':'; and '),...brand];
+      return [...out,...T('.')]; }
+    case 'med_detail': { const p=num(S.total), m=num(S.med_prix), n=medN();
+      if(p==null||m==null) return need('','Montant médiatisation');
+      return T(lang()==='fr'
+        ?`Ce montant comprend ${fmtNum(p)},00€ HT au titre de la création et de la publication des Contenus, et ${fmtNum(m)},00€ HT au titre de la médiatisation des Contenus pendant ${durTxt(true)}.`
+        :`This amount includes ${cur()}${fmtNum(p)}.00 for the creation and publication of the Content, and ${cur()}${fmtNum(m)}.00 for the paid media amplification of the Content for ${durTxt(false)}.`); }
+    case 'cur_word': return T(curWord());
+  }
+  return [['{{'+key+'}}','m']];
+}
+// texte d'un run (avec {{jetons}}) → segments
+function expand(text){
+  const out=[]; let last=0; const re=/\{\{([^}]+)\}\}/g; let m;
+  while((m=re.exec(text))){ if(m.index>last) out.push([text.slice(last,m.index),'']); out.push(...seg(m[1])); last=re.lastIndex; }
+  if(last<text.length) out.push([text.slice(last),'']);
+  return out;
+}
+
+
+/* ================= TVA (optionnelle, contrats français) ================= */
+const tvaOn=()=>!!S.tva&&lang()==='fr';
+const tvaRate=()=>20; // TVA française : toujours 20 %
+const money=n=>(Math.round(n*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/\u202f/g,'\u00a0')+'€';
+const rateTxt=()=>String(tvaRate()).replace('.',',')+' %';
+function mpUI(){
+  const ugc=S.type==='ugc', box=document.getElementById('mpBox');
+  box.style.display=(medBoxOn()||ugc)?'':'none';
+  document.getElementById('mpTitle').textContent=ugc?'Droits d’exploitation des contenus UGC':'Médiatisation '+(S.opt==='cp_paid'?'payante':'offerte')+' (publicité)';
+  document.getElementById('mpPlLab').textContent=ugc?'Supports autorisés (réseaux sociaux officiels de la marque)':'Réseaux où les Contenus peuvent être sponsorisés / boostés';
+  document.getElementById('ytLab').textContent=ugc?'YouTube Shorts':'YouTube';
+  document.querySelectorAll('[data-mp]').forEach(el=>el.checked=mpOn(el.dataset.mp));
+  document.querySelectorAll('#s-unit button').forEach(b=>b.classList.toggle('on',b.dataset.v===(S[MK('unit')]||'mois')));
+  document.querySelectorAll('[data-mk]').forEach(el=>{ if(document.activeElement!==el) el.value=S[MK(el.dataset.mk)]??''; });
+  terrMigrate(); const tp=(S[MK('terr')]||'monde')==='pays';
+  document.querySelectorAll('#s-terr button').forEach(b=>b.classList.toggle('on',b.dataset.v===(tp?'pays':'monde')));
+  document.getElementById('terrPays').style.display=tp?'':'none';
+  ['p2','p3'].forEach(k=>{ const el=document.querySelector(`[data-mk="${k}"]`); el.classList.toggle('opt-empty',!S[MK(k)]); });
+}
+document.getElementById('s-terr').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; S[MK('terr')]=b.dataset.v; save(); syncUI(); });
+document.getElementById('s-unit').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; S[MK('unit')]=b.dataset.v; save(); syncUI(); });
+['input','change'].forEach(ev=>document.getElementById('mpBox').addEventListener(ev,e=>{ const k=e.target.dataset.mk; if(!k) return; S[MK(k)]=e.target.value; save(); mpUI(); render(); tabDots(); }));
+function medCalc(){ const el=document.getElementById('medCalc'); if(!el) return;
+  const p=num(S.total), m=num(S.med_prix), CU=S.type!=='ugc'&&S.pays==='UK'?'£':'€', f=x=>Math.round(x).toLocaleString('fr-FR')+' '+CU;
+  el.textContent=medOn()&&p!=null&&m!=null?`Total du contrat : ${f(p)} (contenus) + ${f(m)} (médiatisation ${durCourt(true)}) = ${f(p+m)} HT`:''; }
+function tvaUI(){
+  const fr=lang()==='fr';
+  document.getElementById('tvaBox').style.display=fr?'':'none';
+  document.getElementById('tvaEN').style.display=fr?'none':'';
+  document.getElementById('tvaFields').style.display=tvaOn()?'':'none';
+  const t=TOT(), c=document.getElementById('tvaCalc');
+  c.textContent=tvaOn()&&t!=null?`${money(t)} HT + TVA ${rateTxt()} ${money(t*tvaRate()/100)} = ${money(t*(1+tvaRate()/100))} TTC`:'';
+}
+
+/* ================= Identifiants : aide et format selon le pays ================= */
+const ID_INFO={
+  SIREN:{help:'SIREN : 9 chiffres, identifiant de l’entreprise (micro-entrepreneur inclus).',re:/^\d{9}$/,ex:'883 238 925'},
+  SIRET:{help:'SIRET : 14 chiffres (SIREN + 5 chiffres de l’établissement).',re:/^\d{14}$/,ex:'883 238 925 00017'},
+  NIF:{help:'NIF (particulier) : numéro fiscal espagnol d’une personne, 8 chiffres + 1 lettre (ex. 12345678Z).',re:/^\d{8}[A-Z]$/,ex:'12345678Z'},
+  NIE:{help:'NIE : identifiant fiscal des étrangers résidant en Espagne, X/Y/Z + 7 chiffres + 1 lettre (ex. X1234567L).',re:/^[XYZ]\d{7}[A-Z]$/,ex:'X1234567L'},
+  NIFS:{help:'NIF société : numéro fiscal d’une société espagnole (anciennement CIF), 1 lettre + 7 chiffres + 1 caractère (ex. B44957462).',re:/^[ABCDEFGHJNPQRSUVW]\d{7}[A-Z0-9]$/,ex:'B44957462'},
+  UTR:{help:'UTR (Unique Taxpayer Reference) : 10 chiffres, pour un influenceur à son compte (sole trader).',re:/^\d{10}$/,ex:'1234567890'},
+  CRN:{help:'Company Registration No. : 8 caractères, pour une société enregistrée à Companies House (ex. 12345678 ou SC123456).',re:/^([A-Z]{2}\d{6}|\d{8})$/,ex:'12345678'},
+};
+function idHelp(type,num,el){ const I=ID_INFO[type]; if(!I){ el.style.display='none'; return; }
+  const n=(num||'').replace(/[\s.\-]/g,'').toUpperCase();
+  const bad=n&&!I.re.test(n);
+  el.innerHTML=I.help+(bad?`<br><b>Format inhabituel pour un ${type==='CRN'?'Company No.':type==='NIFS'?'NIF société':type}</b> (exemple : ${I.ex}). Vérifiez le numéro.`:'');
+  el.className='hint id-help'+(bad?' warn':''); el.style.display=''; }
+
+// choisit tout seul le type d'identifiant d'après le numéro tapé (le menu reste modifiable)
+const ID_ORDER={FR:['SIREN','SIRET'],ES:['NIE','NIF','NIFS'],UK:['UTR','CRN']};
+function autoIdType(typeKey,numKey,selId,helpId){
+  const P=S.type==='ugc'?'FR':S.pays, n=(S[numKey]||'').replace(/[\s.\-]/g,'').toUpperCase();
+  if(!n) return;
+  const ok=(ID_ORDER[P]||[]).filter(t=>ID_INFO[t]&&ID_INFO[t].re.test(n));
+  if(!ok.length||ok.includes(S[typeKey])) return;
+  S[typeKey]=ok[0]; const sel=document.getElementById(selId); if(sel) sel.value=ok[0];
+  const h=document.getElementById(helpId); if(h){ idHelp(S[typeKey],S[numKey],h); h.innerHTML='<b>Type détecté automatiquement : '+(ok[0]==='CRN'?'Company Registration No.':ok[0]==='NIFS'?'NIF société':ok[0])+'</b><br>'+h.innerHTML; }
+}
+
+/* ================= Adresses : format selon le pays ================= */
+// pays d'une adresse : celui écrit dans le champ Pays, sinon le pays de la campagne
+function addrCountry(p){
+  const v=(S[p+'_pays']||'').trim().toLowerCase();
+  if(/spain|espagne|españa|espana/.test(v)) return 'ES';
+  if(/united kingdom|royaume|^uk$|england|angleterre|scotland|écosse|wales|pays de galles|great britain|grande-bretagne/.test(v)) return 'UK';
+  if(/france/.test(v)) return 'FR';
+  if(v) return 'OTHER';
+  return S.type==='ugc'?'FR':S.pays;
+}
+const COUNTRY_EN={ES:'Spain',UK:'United Kingdom',FR:'France'};
+const ADDR_UI={
+  FR:{cp:['Code postal','75011'],ville:['Ville','Paris'],reg:null,pays:['Pays (facultatif)','ex. Spain'],order:['cp','ville','pays']},
+  ES:{cp:['Code postal','28013'],ville:['Ville','Madrid'],reg:['Province (facultatif)','Madrid'],pays:['Pays','Spain'],order:['cp','ville','reg','pays']},
+  UK:{cp:['Code postal','NW1 6XE'],ville:['Ville','London'],reg:['Comté (facultatif)','Greater London'],pays:['Pays','United Kingdom'],order:['ville','cp','reg','pays']},
+  OTHER:{cp:['Code postal',''],ville:['Ville',''],reg:['Région (facultatif)',''],pays:['Pays',''],order:['cp','ville','reg','pays']},
+};
+function cpCheck(c,cp){ if(!cp) return '';
+  if((c==='FR'||c==='ES')&&!/^\d{5}$/.test(cp.replace(/\s/g,''))) return `Code postal ${c==='FR'?'français':'espagnol'} : 5 chiffres (ex. ${ADDR_UI[c].cp[1]}).`;
+  if(c==='UK'&&!/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i.test(cp.trim())) return 'Code postal britannique attendu, ex. NW1 6XE ou SW1A 1AA.';
+  return ''; }
+const ukPC=cp=>{ const c=cp.replace(/\s+/g,'').toUpperCase(); return c.length>3?c.slice(0,-3)+' '+c.slice(-3):c; };
+function addrText(p){
+  // compatibilité : ancienne adresse en un seul champ
+  if(p==='adr'&&!S.adr_rue&&!S.adr_ville&&S.adresse) return S.adresse.replace(/\n+/g,', ');
+  if(p==='ag'&&!S.ag_rue&&!S.ag_ville&&S.agent_adresse) return S.agent_adresse.replace(/\n+/g,', ');
+  const g=k=>(S[p+'_'+k]||'').trim();
+  const rue=g('rue'), cp=g('cp'), ville=g('ville'), reg=g('reg'), c=addrCountry(p);
+  if(!rue||!ville) return '';
+  const contractEN=lang()==='en';
+  // pays affiché : celui saisi, sinon celui de la campagne pour les contrats anglais (Spain / United Kingdom)
+  let pays=g('pays'); if(!pays&&contractEN&&c!=='FR'&&c!=='OTHER') pays=COUNTRY_EN[c];
+  const tail=pays?` (${pays})`:'';
+  if(c==='UK') return `${rue}, ${ville}${reg?', '+reg:''}${cp?', '+ukPC(cp):''}${tail}`;
+  if(c==='ES') return `${rue}, ${[cp,ville].filter(Boolean).join(' ')}${reg&&reg.toLowerCase()!==ville.toLowerCase()?', '+reg:''}${tail}`;
+  return `${rue}, ${[cp,ville].filter(Boolean).join(' ')}${reg?', '+reg:''}${tail}`;
+}
+const addrSegs=(p,label)=>need(addrText(p),label);
+// adapte libellés, ordre et exemples des champs d'adresse au pays
+function addrUI(){
+  document.querySelectorAll('[data-addr]').forEach(box=>{
+    const p=box.dataset.addr, c=addrCountry(p), U=ADDR_UI[c];
+    
+    ['cp','ville','reg','pays'].forEach(k=>{ const el=box.querySelector('.a-'+k); const d=U[k];
+      if(!d){ el.style.display='none'; return; } el.style.display=''; el.style.order=U.order.indexOf(k);
+      el.querySelector('span').innerHTML=d[0].replace(/\((facultatif)\)/,'<em>($1)</em>');
+      const inp=el.querySelector('input'); if(k!=='pays'||!(S[p+'_pays']||'')) inp.placeholder=k==='pays'?((d[1]&&!/^ex\./.test(d[1]))?d[1]:'Ajouter le pays'):({cp:'Ajouter le CP',ville:'Ajouter la ville',reg:'Facultatif'}[k]||'');
+    });
+    box.querySelector('.addrrow').style.gridTemplateColumns=U.reg?'1fr 1fr':'110px 1fr 1fr';
+    const w=box.querySelector('.a-warn'), msg=cpCheck(c,(S[p+'_cp']||'').trim());
+    w.textContent=msg; w.style.display=msg?'':'none';
+  });
+}
+
+/* ================= Agent de l'influenceur ================= */
+const agentOn=()=>!!S.agent&&S.type!=='ugc'&&S.paid!=='free';
+const AG_TYPES={FR:[['SIREN','SIREN'],['SIRET','SIRET']],UK:[['CRN','Company No.'],['UTR','UTR']],ES:[['NIFS','NIF société'],['NIF','NIF (particulier)'],['NIE','NIE']]};
+function agShort(){ if(S.agent_court.trim()) return S.agent_court.trim();
+  return S.agent_nom.trim().replace(/,?\s*(S\.L\.U\.?|S\.L\.?|S\.A\.?|SLU|SL|SA|SAS|SASU|SARL|EURL|Ltd\.?|LTD|Limited|LLP|GmbH)$/i,'').trim(); }
+function agIdLong(fr){ const t=S.agent_id_type||'';
+  if(fr) return t==='SIRET'?'SIRET':'SIREN';
+  if(S.pays==='ES') return `Spanish Tax Identification Number (${t==='NIFS'||!t?'NIF':t})`;
+  if(S.pays==='UK') return t==='UTR'?'Unique Taxpayer Reference (UTR)':'Company Registration No.';
+  return t==='SIRET'?'SIRET number':'SIREN number'; }
+function agIdShort(){ const t=S.agent_id_type||''; return t==='CRN'?'Company No.':(t==='NIFS'||!t?'NIF':t); }
+const civ=fr=>S.agent_civ==='F'?(fr?'Mme':'Ms.'):(fr?'M.':'Mr.');
+// texte de chaque paragraphe concerné ; [texte, 'b'] = en gras
+const AGENT_TXT={
+  party:fr=>{ const N=need(S.agent_nom,'Société de l’agent'), id=need(S.agent_id_num,'N° de la société de l’agent'), ad=addrSegs('ag','Adresse de l’agent'), rep=need(S.agent_rep,'Représentant de l’agent');
+    const rid=S.agent_rep_id.trim(), nom=seg('nom'), h=seg('handle');
+    return fr?[...B(N),...T(`, immatriculée sous le numéro ${agIdLong(true)} `),...id,...T(', dont le siège social est situé '),...ad,...T(`, représentée par ${civ(true)} `),...rep,...(rid?[...T(', titulaire de la pièce d’identité '),...V(rid)]:[]),
+        ...T(', agissant en qualité de partie contractante et de représentant de '),...nom,...T(', identifié sur les réseaux sociaux sous le pseudonyme @'),...h,...T('. '),...nom,...T(' créera et publiera personnellement les Contenus prévus dans le cadre de la Campagne.')]
+      :[...B(N),...T(`, with ${agIdLong(false)} `),...id,...T(' and registered office at '),...ad,...T(`, represented by ${civ(false)} `),...rep,...(rid?[...T(', holder of '),...V(rid)]:[]),
+        ...T(', acting as the contracting party and representative of '),...nom,...T(', identified on social media under the handle @'),...h,...T('. '),...nom,...T(' will personally create and publish the Content agreed under this Campaign.')]; },
+  alias:fr=>{ const sh=agShort()||'[Agent]'; return fr?[...T('Ci-après dénommée « '),...B(V(sh)),...T(' » ou le « '),...B(T('Représentant')),...T(' »,')]
+                                               :[...T('Hereinafter referred to as "'),...B(V(sh)),...T('" or the "'),...B(T('Representative')),...T('",')]; },
+  preamble:fr=>{ const sh=need(agShort(),'Société de l’agent'); return fr
+      ?[...sh,...T(", agissant en qualité de représentant de l'Influenceur, souhaite participer à la Campagne et a accepté de conclure avec l'Agence YLG le présent contrat (le « "),...B(T('Contrat')),...T(" »), l'Influenceur créant et publiant personnellement les Contenus convenus.")]
+      :[...sh,...T(", acting as the Influencer's representative, wishes to participate in the Campaign and has agreed to enter into this Agreement with Agence YLG, while the Influencer will personally create and publish the agreed Content.")]; },
+  fee:fr=>{ const N=need(S.agent_nom,'Société de l’agent'); return fr?[...T("La rémunération de l'Influenceur, payable à "),...N,...T(', est fixée à : ')]:[...T("The fee for the Influencer's services, payable to "),...N,...T(', is fixed at:')]; },
+  pay:fr=>{ const N=need(S.agent_nom,'Société de l’agent'); return fr
+      ?[...T('Le paiement de la rémunération se fera directement à '),...N,...T(' à 30 jours à compter de la date de réception de la facture émise par '),...N,...T(endDot())]
+      :[...T('Payment shall be made directly to '),...N,...T(' within 30 days from the date of receipt of a valid invoice issued by '),...N,...T(endDot())]; },
+  invintro:fr=>{ if(fr) return null; const N=need(S.agent_nom,'Société de l’agent');
+    return [...T('All invoices listed below shall be issued by '),...N,...T(', and all corresponding payments shall be made directly to '),...N,...T(':')]; },
+  tax:null,
+  sigtitle:fr=>B(need(S.agent_nom,'Société de l’agent')),
+  signame:fr=>{ const nom=seg('nom'), h=seg('handle'), rid=S.agent_rep_id.trim();
+    return [...T(agIdShort()+' '),...need(S.agent_id_num,'N° de la société de l’agent'),...T('\n'+(fr?'Représentée par ':'Represented by ')),...need(S.agent_rep,'Représentant de l’agent'),
+      ...(rid?[...T('\n'),...V(rid)]:[]),...T('\n'+(fr?'Pour le compte de ':'On behalf of ')),...nom,...T(' (@'),...h,...T(')')]; },
+};
+const B=segs=>segs.map(([t,k])=>[t,k,'b']); // segment en gras
+const endDot=()=>/\.$/.test(S.agent_nom.trim())?'':'.';
+function agentItem(b){
+  const fr=lang()==='fr', segs=AGENT_TXT[b.ag](fr);
+  if(!segs) return null;
+  const textRuns=b.runs.filter(r=>r[0]!==null&&r[0].trim());
+  const base=ST((textRuns.find(r=>!ST(r[1]).b)||textRuns[0]||[null,b.mk])[1]);
+  const plainS=Object.assign({},base,{b:b.ag==='sigtitle'?true:false}), boldS=Object.assign({},base,{b:true});
+  const runs=[]; segs.forEach(sg=>{ const st=sg[2]==='b'?boldS:plainS; const l=runs[runs.length-1];
+    if(l&&l.s===st) l.segs.push([sg[0],sg[1]]); else runs.push({segs:[[sg[0],sg[1]]],s:st}); });
+  return {k:'p',st:b.st,mk:ST(b.mk),li:b.li,runs,pb:b.st.pb,text:runs.map(r=>r.segs.map(x=>x[0]).join('')).join('')};
+}
+
+/* ================= Construction du document (modèle commun aperçu + PDF) ================= */
+const ST=i=>TPL.styles[i]||{};
+const plain=b=>(b.runs||[]).map(r=>r[0]||'').join('');
+const isEmpty=b=>b.t==='p'&&!(b.runs||[]).some(r=>r[0]===null)&&!plain(b).trim();
+function invoiceItems(){
+  const fr=lang()==='fr';
+  return invoices().map(iv=>{
+    const A=iv.amount==null?need('','Montant facture'):null;
+    if(fr) return [...T('Une (1) facture de '),...(A||V(frWords(iv.amount))),...T(' ('),...(A||V(fmtNum(iv.amount))),...T(tvaOn()?') euros HT, soit ':') euros '),
+      ...(tvaOn()&&!A?[...V(money(iv.amount*(1+tvaRate()/100))),...T(' TTC, ')]:[]),...V(iv.moment)];
+    return [...T('One (1) invoice of '),...(A||V(enWords(iv.amount))),...T(' '+curWord()+' ('+cur()),...(A||V(fmtNum(iv.amount))),...T('.00) excluding VAT/Reverse charge applies '),...V(iv.moment)];
+  });
+}
+// lignes vides invisibles en fin de bloc : retirées (elles poussaient les signatures sur une page de plus)
+const blankItem=e=>e.k==='p'&&!e.img&&!e.runs.some(r=>r.segs.some(x=>x[0].trim()));
+function trimEnd(items){ while(items.length>1&&blankItem(items[items.length-1])) items.pop(); return items; }
+// renvoie une liste d'éléments : {k:'p', st, mk, runs:[{segs, s}] , li?, img?} | {k:'logo'} | {k:'tbl'}
+function build(blocks,top){
+  const out=[]; if(top) build._tt=0;
+  for(const b of blocks){
+    if(b.dot&&!dotOn()) continue;
+    if(b.t==='tbl'){ out.push({k:'tbl',cols:b.cols,border:b.border,rows:b.rows.map(r=>r.map(c=>trimEnd(build(c,false))))}); continue; }
+    if(b.t==='logo'){ out.push({k:'logo',st:b.st,mk:ST(b.mk)}); continue; }
+    if(b.t==='block'){
+      const items=b.k==='INVOICES'?invoiceItems():(prodList().length?prodList().map(x=>V(x)):[need('','Produit de la dotation')]);
+      items.forEach((segs,i)=>out.push({k:'p',st:(b.k==='PRODUITS'&&i)?Object.assign({},b.st,{sb:0}):b.st,mk:ST(b.mk),li:b.li,runs:[{segs,s:ST(b.rs)}]}));
+      continue;
+    }
+    const txt=plain(b);
+    const lm=txt.match(/\{\{li:(\w+)\}\}/);
+    if(lm&&lm[1]==='tiktok'){ // après la ligne TikTok de l'annexe : YouTube et Facebook si cochés
+      const detail=(build._tt=(build._tt||0)+1)%2===1, fr=lang()==='fr', rs=ST(b.runs[b.runs.length-1][1]);
+      const extra=[]; const y=cnt('youtube'), f=cnt('facebook');
+      const line=(n,frS,frP,enS,enP)=>detail
+        ? (fr?[...T('La production et la diffusion '+(n===1?"d'une":'de '+frWords(n))+' ('),...V(n),...T(') '+(n===1?frS:frP)+'.')]
+             :[...T('Production and publication of '),...V(enWords(n)),...T(' ('),...V(n),...T(') '+(n===1?enS:enP)+'.')])
+        : (fr?[...V(n),...T(' '+(n===1?frS:frP))]:[...V(n),...T(' '+(n===1?enS:enP))]);
+      if(y) extra.push(line(y,'vidéo YouTube','vidéos YouTube','YouTube video','YouTube videos'));
+      if(f) extra.push(line(f,'publication Facebook','publications Facebook','Facebook post','Facebook posts'));
+      if(cnt('tiktok')>0) out.push(itemFrom(b,txt));
+      extra.forEach(segs=>out.push({k:'p',st:b.st,mk:ST(b.mk),li:b.li,runs:[{segs,s:rs}]}));
+      continue;
+    }
+    if(lm&&cnt(lm[1])===0) continue;
+    out.push(itemFrom(b,txt)); continue;
+  }
+  return finish(out,top);
+}
+function itemFrom(b,txt){
+    if(agentOn()&&b.ag&&AGENT_TXT[b.ag]){ const it=agentItem(b); if(it) return it; }
+    const runs=[]; let img=null;
+    for(const r of b.runs){
+      if(r[0]===null){ img=Object.assign({},r[2]);
+        // signature : même taille que sur vos contrats édités (61 pt de haut max)
+        if(TPL.images[img.img]==='SIG'&&img.h>61){ img.w=img.w*61/img.h; img.h=61; }
+        continue; }
+      let tx=r[0];
+      if(agentOn()&&b.ag==='tax') tx=tx.replace('Where the Influencer is tax resident','Where {{ag_name}} is tax resident').replace('The Influencer shall issue invoices','{{ag_name}} shall issue all invoices');
+      if(agentOn()&&b.ag==='invintro') tx=tx.replace("que l'influenceur procédera","que {{ag_name}} procédera");
+      runs.push({segs:expand(tx),s:ST(r[1])});
+    }
+    return {k:'p',st:b.st,mk:ST(b.mk),li:b.li,runs,img,pb:b.st.pb,pbAfter:b.pbAfter,text:txt};
+}
+function finish(out,top){
+  // Google Docs : entre deux paragraphes, l'écart = le plus grand des deux espacements (pas la somme)
+  let prev=null;
+  out.forEach(e=>{ if(e.k==='tbl'){ prev=null; return; }
+    const sb=(e.st&&e.st.sb)||0; e.gap=(prev&&!e.pb)?Math.max(0,sb-((prev.st&&prev.st.sa)||0)):sb; prev=e; });
+  if(top){
+    trimEnd(out);
+    // page de garde seule en page 1 ; annexe sur une nouvelle page
+    const txt=e=>e.k==='p'?e.runs.map(r=>r.segs.map(s=>s[0]).join('')).join('').trim():'';
+    const brk=[out.findIndex(e=>/^(ENTRE\s*:|ENTRE LES SOUSSIGN|BETWEEN)/i.test(txt(e))), out.findIndex(e=>/^ANNEXE? (AU|TO)\b/i.test(txt(e)))].filter(i=>i>0);
+    for(const i of brk) out[i].pb=1;
+    // retirer les paragraphes vides juste avant un saut de page (ils pousseraient le texte sur une page blanche)
+    for(let i=out.length-1;i>0;i--) if(out[i].pb){ let j=i-1; while(j>=0&&out[j].k==='p'&&!out[j].img&&!txt(out[j])){ out.splice(j,1); j--; i--; } }
+    out.forEach((e,i)=>{ if(e.pbAfter&&out[i+1]){ out[i+1].pb=1; } });
+    const first=out.findIndex(e=>e.pb); out.forEach((e,i)=>e.cover=first>0&&i<first);
+    // titres de la page de garde : taille uniforme (24 pt), sauf « CONTENUS UGC » qui reste comme dans le modèle
+    if(first>0) out.slice(0,first).forEach(e=>{ if(e.k!=='p') return;
+      const t=e.runs.map(r=>r.segs.map(x=>x[0]).join('')).join('').trim();
+      if(/^CONTENUS UGC$/i.test(t)) return;
+      e.runs.forEach(r=>{ if((r.s.s||0)>=24) r.s=Object.assign({},r.s,{s:COVER_TITLE}); });
+      if((e.mk.s||0)>=24) e.mk=Object.assign({},e.mk,{s:COVER_TITLE}); });
+    // lignes Projet / Influenceur / Date de la page 1 : interligne compact (comme le contrat Douxo) et tout en noir
+    if(first>0) out.slice(0,first).forEach(e=>{ if(e.k!=='p') return;
+      const t=e.runs.map(r=>r.segs.map(x=>x[0]).join('')).join('').trim();
+      if(!/^(Projet|Influenceur|Influencer|Date)\s*:/i.test(t)) return;
+      e.st=Object.assign({},e.st,{lh:1.5,sb:0,sa:0}); e.gap=0;
+      e.runs.forEach(r=>{ r.s=Object.assign({},r.s,{c:'000000',s:COVER_LINES}); });
+      e.mk=Object.assign({},e.mk,{c:'000000',s:COVER_LINES}); });
+    if(first>0) coverFit(out,first);
+  }
+  return out;
+}
+// la page de garde doit toujours tenir en page 1 : on mesure, et on retire des lignes vides si besoin
+let _cv; function textW(t,s){ _cv=_cv||document.createElement('canvas').getContext('2d');
+  _cv.font=`${s.i?'italic ':''}${s.b?700:400} ${s.s||11}pt ${FONT(s.f)}`; return _cv.measureText(t).width*0.75; }
+function itemH(e,availW){
+  const st=e.st||{}, mk=e.mk||{}, gap=e.gap!=null?e.gap:(st.sb||0);
+  if(e.k==='logo') return gap+LOGO_BOX.h+(st.sa||0);
+  if(e.img) return gap+e.img.h+(st.sa||0);
+  const w=availW-(st.il||0)-(st.ir||0); let lines=1, maxS=mk.s||11, cur=0;
+  e.runs.forEach(r=>{ const t=r.segs.map(x=>x[0]).join(''); maxS=Math.max(maxS,r.s.s||11); cur+=textW(t,r.s); });
+  if(cur>0) lines=Math.max(1,Math.ceil(cur/w*1.04));
+  const nat=FONT(mk.f)==='Poppins'?1.5:1.172, lh=lineH(st,mk);
+  return gap+lines*maxS*nat*lh+(st.sa||0);
+}
+function coverFit(out,first){
+  const p=tpl().page, avail=p.h-p.mt-p.mb-14, w=p.w-p.ml-p.mr;
+  const total=()=>out.slice(0,first).reduce((a,e)=>a+itemH(e,w),0);
+  let guard=40;
+  while(total()>avail&&guard--){
+    // retirer d'abord la ligne vide la plus haute de la page de garde
+    let best=-1,bh=0;
+    for(let i=0;i<first;i++){ const e=out[i]; if(e.k==='p'&&!e.img&&!e.runs.some(r=>r.segs.some(x=>x[0].trim()))){ const h=itemH(e,w); if(h>bh){bh=h;best=i;} } }
+    if(best<0) break;
+    out.splice(best,1); first--;
+  }
+  out.slice(0,first).forEach(e=>e.cover=true);
+}
+
+/* ---- métrique des polices : interligne naturel (Google Docs multiplie celui-ci) ---- */
+const FONT=f=>/poppins/i.test(f||'')?'Poppins':'Roboto';
+const NAT={Roboto:1.172,Poppins:1.5};
+const colr=c=>'#'+(c||'000000');
+function lineH(st,mk){ const f=FONT(mk.f), s=mk.s||11; return st.lh<0?(-st.lh)/(s*NAT[f]):(st.lh||1.15); }
+const LOGO_BOX={w:180,h:80};
+const COVER_TITLE=24; // taille des grands titres de la page 1
+const COVER_LINES=18; // taille des lignes Projet / Influenceur / Date
+
+/* ---- aperçu HTML ---- */
+function htmlRuns(e){
+  return e.runs.map(r=>{
+    const s=r.s, f=FONT(s.f);
+    const css=`font-family:${f};font-size:${s.s||11}pt;color:${colr(s.c)};font-weight:${s.b?700:400};font-style:${s.i?'italic':'normal'};${s.u?'text-decoration:underline;':''}`;
+    return `<span style="${css}">`+r.segs.map(([t,k])=>k?`<span class="${k}">${esc(t)}</span>`:esc(t)).join('').replace(/\n/g,'<br>')+'</span>';
+  }).join('');
+}
+function htmlBlock(e){
+  if(e.k==='tbl'){
+    const tot=e.cols.reduce((a,b)=>a+b,0)||1;
+    return `<table class="${e.border?'box':''}" style="width:${tot}pt">`+e.rows.map(r=>'<tr>'+r.map((c,i)=>`<td style="width:${e.cols[i]||tot/r.length}pt">${c.map(htmlBlock).join('')}</td>`).join('')+'</tr>').join('')+'</table>';
+  }
+  const st=e.st||{}, mk=e.mk||{}, f=FONT(mk.f), size=mk.s||11;
+  const al={both:'justify',center:'center',right:'right',end:'right'}[st.al]||'left';
+  const pad=`padding:${e.gap!=null?e.gap:(st.sb||0)}pt ${st.ir||0}pt ${st.sa||0}pt ${st.il||0}pt;`;
+  const lh=lineH(st,mk)*NAT[f];
+  const base=`font-family:${f};font-size:${size}pt;line-height:${lh};text-align:${al};${pad}`;
+  const cls=(e.pb?'pb ':'')+(e.cover?'cv':'');
+  if(e.k==='logo'){
+    const inner=S.logo?`<img src="${S.logo}" style="max-width:${LOGO_BOX.w}pt;max-height:${LOGO_BOX.h}pt">`:`<span class="ph">LOGO DE LA MARQUE</span>`;
+    return `<div class="logo ${cls}" style="${pad}justify-content:${al==='center'?'center':'flex-start'};height:${LOGO_BOX.h}pt;box-sizing:content-box">${inner}</div>`;
+  }
+  if(e.img){
+    const src=imgSrc(e.img.img);
+    const im=src?`<img src="${src}" style="width:${e.img.w}pt;height:${e.img.h}pt">`:`<span style="display:inline-block;width:${e.img.w}pt;height:${e.img.h}pt"></span>`;
+    return `<div class="${cls}" style="${base}">${im}</div>`;
+  }
+  const body=htmlRuns(e)||'&nbsp;';
+  if(e.li){
+    const hang=Math.max(14,-(st.fi||0)||18);
+    return `<div class="${cls}" style="${base}padding-left:${(st.il||36)}pt;text-indent:-${hang}pt"><span style="display:inline-block;width:${hang}pt;text-indent:0;font-family:Roboto;font-size:${bulletGlyph(e.li,(e.runs[0]?e.runs[0].s.s:size)||11).s}pt">${bulletGlyph(e.li,11).t}</span>${body}</div>`;
+  }
+  return `<div class="${cls}" style="${base}${st.fi?`text-indent:${st.fi}pt;`:''}">${body.trim()?body:'&nbsp;'}</div>`;
+}
+function imgSrc(k){ const d=TPL.images[k]; if(!d) return ''; if(d==='SIG') return SIG||''; return 'data:image/jpeg;base64,'+d; }
+
+const freeOn=()=>S.type!=='ugc'&&S.paid==='free';
+function renderFree(){
+  missing=new Set();
+  const doc=document.getElementById('doc'); doc.style.width='560px'; doc.style.padding='40px 44px'; doc.style.zoom=1;
+  const camp=campagne()?(campagne()+' '+S.annee).trim():'';
+  const h=S.handle.replace(/^@/,'').trim();
+  const lack=[!camp&&'Nom de la campagne',!String(S.annee).trim()&&'Année',!h&&'Mention influenceur'].filter(Boolean); lack.forEach(x=>missing.add(x));
+  const line=(k,v)=>`<tr><td style="color:#77757a;padding:7px 14px 7px 0;white-space:nowrap">${k}</td><td style="padding:7px 0;font-weight:600">${v?esc(v):'<span class="m">à remplir</span>'}</td></tr>`;
+  doc.innerHTML=`<div style="font:14px/1.5 -apple-system,Inter,sans-serif;color:#1c1c1f">
+    <div style="display:inline-block;background:var(--acc);border-radius:20px;padding:4px 12px;font-weight:700;font-size:12px;letter-spacing:.5px">INFLUENCEUR FREE</div>
+    <h2 style="margin:14px 0 6px;font-size:20px">Pas de contrat à éditer</h2>
+    <p style="color:#55535a;margin:0 0 18px">L'influenceur participe gratuitement. Il est simplement ajouté au tableau de sa campagne, avec un prix à 0 €.</p>
+    <table style="border-collapse:collapse;width:100%">${line('Campagne',camp)}${line('Influenceur',S.nom)}${line('Pseudo',h&&'@'+h)}${line('Contenus attendus',dealText())}${line('Période',S.periode)}${line('Prix','0 € (free)')}</table></div>`;
+  document.getElementById('used').textContent='Aucun (influenceur free)';
+  const fe=document.getElementById('fname'); fe.textContent='Pas de PDF : influenceur free'; fe.classList.remove('miss');
+  const stEl=document.getElementById('status'); stEl.textContent=missing.size?`${missing.size} info${missing.size>1?'s':''} manquante${missing.size>1?'s':''}`:'✓ Prêt'; stEl.classList.toggle('miss',!!missing.size); stEl.title=[...missing].join(', ');
+  document.getElementById('pdfBtn').textContent='Ajouter à la campagne';
+  tabDots();
+}
+function render(){
+  document.getElementById('pdfBtn').textContent='Générer le PDF';
+  if(freeOn()) return renderFree();
+  missing=new Set();
+  const t=tpl(), items=build(t.blocks,true);
+  if(!SIG) missing.add('Signature de May (Réglages)');
+  const doc=document.getElementById('doc');
+  const p=t.page;
+  doc.style.width=p.w+'pt'; doc.style.padding=`${p.mt}pt ${p.mr}pt ${p.mb}pt ${p.ml}pt`;
+  doc.innerHTML=items.map(htmlBlock).join('');
+  fitPreview();
+  document.getElementById('used').textContent=t.id==='ugc'?'Contrat UGC rémunération':'Contrat '+t.id;
+  const fn=fileName();
+  const fe=document.getElementById('fname'); fe.textContent=fn.name; fe.classList.toggle('miss',!fn.ok);
+  const stEl=document.getElementById('status');
+  stEl.textContent=missing.size?`${missing.size} info${missing.size>1?'s':''} manquante${missing.size>1?'s':''}`:'✓ Prêt';
+  stEl.classList.toggle('miss',!!missing.size); stEl.title=[...missing].join(', ');
+  tabDots();
+}
+function fitPreview(){
+  const doc=document.getElementById('doc'), sc=document.querySelector('.scroll');
+  const avail=sc.clientWidth-48, w=tpl().page.w*4/3; // largeur de la page en pixels
+  doc.style.zoom=(Math.min(avail,560)/w).toFixed(3);
+}
+window.addEventListener('resize',()=>fitPreview());
+function fileName(){
+  const h=S.handle.replace(/^@/,'').trim(), c=campagne().trim(), y=String(S.annee).trim();
+  const ok=!!(h&&c&&y);
+  const clean=s=>s.replace(/[\/\\:*?"<>|]/g,'-');
+  return {ok,name:`@${clean(h||'pseudo')} - ${clean(c||'campagne')} - ${clean(y||'année')}.pdf`};
+}
+const TAB_KEYS={marque:['marque','entreprise','marque_desc_txt','campagne','annee','periode'],infl:['nom','handle','adr_rue','adr_cp','adr_ville','id_num'],infl_ag:['nom','handle','agent_nom','agent_id_num','ag_rue','ag_cp','ag_ville','agent_rep'],cont:[],dot:[],remu:['total'],dates:['date_debut','date_fin','date_sign']};
+function tabDots(){
+  document.querySelectorAll('.tab').forEach(b=>{
+    let keys=TAB_KEYS[b.dataset.p]; if(S.type==='ugc'&&b.dataset.p==='dates') keys=['date_sign'];
+    if(S.type==='ugc'&&b.dataset.p==='marque') keys=keys.filter(k=>k!=='marque_desc_txt');
+    if(b.dataset.p==='infl'&&agentOn()) keys=TAB_KEYS.infl_ag;
+    if(b.dataset.p==='remu'&&medOn()) keys=[...keys,'med_prix'];
+    if(b.dataset.p==='cont'&&(medBoxOn()||S.type==='ugc')) keys=[...keys,MK('mois')];
+    const dotMiss=b.dataset.p==='dot'&&dotOn()&&!prodList().length;
+    if(b.dataset.p==='infl'&&S.id_pending) keys=keys.filter(k=>k!=='id_num');
+    if(b.dataset.p==='infl'&&freeOn()) keys=['nom','handle'];
+    if(b.dataset.p==='marque'&&freeOn()) keys=['campagne','annee','periode'];
+    if(S.type==='ugc'&&b.dataset.p==='cont') keys=['date_ugc'];
+    const miss=dotMiss||keys.some(k=>!String(S[k]||'').trim())||(b.dataset.p==='marque'&&!S.logo);
+    let d=b.querySelector('.dot'); if(!d){ d=document.createElement('span'); d.className='dot'; b.appendChild(d); }
+    d.classList.toggle('ok',!miss);
+  });
+}
+
+/* ================= Interface ================= */
+function syncUI(){
+  document.querySelectorAll('[data-k]').forEach(el=>{ const k=el.dataset.k; if(!(k in S)) return; if(el.type==='checkbox') el.checked=!!S[k]; else if(document.activeElement!==el) el.value=S[k]; });
+  document.querySelectorAll('.plat').forEach(d=>d.classList.toggle('off',!S[d.dataset.pl]));
+  setSeg('s-type',S.type); setSeg('s-pays',S.pays); setSeg('s-profil',S.profil); setSeg('s-paid',S.paid||'paid');
+  if(!['1','2'].includes(String(S.nb_inv))) S.nb_inv='1'; setSeg('s-inv',String(S.nb_inv));
+  document.querySelectorAll('#s-opt .card').forEach(b=>b.classList.toggle('on',b.dataset.v===S.opt));
+  const ugc=S.type==='ugc';
+  ['g-pays','g-profil','g-opt'].forEach(id=>document.getElementById(id).style.display=ugc?'none':'');
+  document.getElementById('c-infl').style.display=ugc?'none':'';
+  document.getElementById('c-ugc').style.display=ugc?'':'none';
+  document.getElementById('nbInvWrap').style.display=ugc?'none':'';
+  document.querySelector('[data-k="marque_desc_txt"]').closest('label').style.display=ugc?'none':'';
+  document.querySelector('#p-dates .row').style.display=ugc?'none':'';
+  // identifiant selon le pays
+  const P=ugc?'FR':S.pays, types=ID_TYPES[P];
+  const sel=document.getElementById('idType');
+  sel.innerHTML=types.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+  if(!types.some(t=>t[0]===S.id_type)) S.id_type=types[0][0];
+  sel.value=S.id_type;
+  document.getElementById('idLabel').textContent={FR:'Identifiant fiscal (France) : SIREN ou SIRET',UK:'Identifiant (Royaume-Uni) : UTR ou Company Registration No.',ES:'Identifiant fiscal (Espagne) : NIF, NIE ou NIF société'}[P];
+  const CU=!ugc&&S.pays==='UK'?'£':'€';
+  document.getElementById('totLabel').textContent=medOn()?`Prestation contenus HT (${CU})`:`Rémunération totale HT (${CU})`;
+  document.getElementById('medLabel').textContent=`Montant médiatisation HT (${CU})`;
+  document.getElementById('medBox').style.display=medOn()?'':'none';
+  mpUI();
+  medCalc();
+  // logo
+  document.getElementById('dropIn').innerHTML=S.logo?`<img src="${S.logo}"><small>${S.marque?'Logo mémorisé pour '+esc(S.marque)+' · ':''}glissez un autre logo pour le remplacer</small>`:'Glissez le logo de la marque ici<small>ou cliquez pour choisir une image (PNG, JPG, SVG)</small>';
+  const fr0=freeOn();
+  document.getElementById('g-paid').style.display=ugc?'none':'';
+  ['remu','dates'].forEach(t=>document.querySelector(`.tab[data-p="${t}"]`).style.display=fr0?'none':'');
+  if(fr0&&document.querySelector('.tab.on')&&['remu','dates'].includes(document.querySelector('.tab.on').dataset.p)) document.querySelector('.tab[data-p="marque"]').click();
+  document.getElementById('inflOwn').style.display=fr0?'none':'';
+  document.querySelector('.tab[data-p="dot"]').style.display=(ugc||fr0)?'none':'';
+  if((ugc||fr0)&&document.querySelector('.tab.on')&&document.querySelector('.tab.on').dataset.p==='dot') document.querySelector('.tab[data-p="marque"]').click();
+  prodUI();
+  ['g-profil','g-opt'].forEach(id=>document.getElementById(id).style.display=(ugc||fr0)?'none':'');
+  const ag=agentOn();
+  document.getElementById('agentBox').style.display=(S.type==='ugc'||fr0)?'none':'';
+  document.getElementById('agentFields').style.display=ag?'':'none';
+  document.getElementById('inflOwn').style.opacity=ag?.4:1;
+  const AP=S.pays, at=AG_TYPES[AP]||AG_TYPES.FR, asel=document.getElementById('agIdType');
+  asel.innerHTML=at.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+  if(!at.some(t=>t[0]===S.agent_id_type)) S.agent_id_type=at[0][0];
+  asel.value=S.agent_id_type; document.querySelector('[data-k="agent_civ"]').value=S.agent_civ||'M';
+  idHelp(S.id_type,S.id_num,document.getElementById('idHelp'));
+  idHelp(S.agent_id_type,S.agent_id_num,document.getElementById('agIdHelp'));
+  { const inp=document.querySelector('[data-k="id_num"]'); inp.disabled=!!S.id_pending; inp.style.opacity=S.id_pending?.4:1; inp.placeholder=S.id_pending?'Numéro à venir':'Ajouter le numéro'; if(S.id_pending) document.getElementById('idHelp').style.display='none'; }
+  addrUI(); tvaUI(); contHint(); invUI(); render();
+}
+function setSeg(id,v){ document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on',b.dataset.v===v)); }
+function contHint(){
+  document.getElementById('contHint').textContent='Cochez chaque réseau où l’influenceur publie et indiquez le nombre de contenus : le contrat et l’annexe se mettent à jour tout seuls.';
+}
+function invUI(){
+  const box=document.getElementById('invs'); const ivs=invoices();
+  if(S.type==='ugc'||ivs.length===1){ box.innerHTML=''; } else {
+    box.innerHTML=ivs.map((iv,i)=>`<div class="inv"><h5>Facture ${i+1}</h5><div class="row" style="grid-template-columns:110px 1fr">
+      <label class="f"><span>Montant HT</span><input data-inv="${i}" data-f="amount" value="${iv.amount??''}" inputmode="decimal"></label>
+      <label class="f"><span>Quand</span><input data-inv="${i}" data-f="moment" value="${esc(iv.moment)}"></label></div></div>`).join('');
+  }
+  const h=document.getElementById('remuHint'); const tot=TOT();
+  const sum=ivs.reduce((a,b)=>a+(b.amount||0),0);
+  if(tot!=null&&ivs.length>1&&Math.abs(sum-tot)>0.001){ h.className='hint warn'; h.textContent=`Attention : la somme des factures (${fmtNum(sum)}) ne correspond pas au total (${fmtNum(tot)}).`; }
+  else { h.className='hint'; h.textContent=tot!=null?`En lettres : ${words(tot)} ${S.type!=='ugc'&&S.pays!=='FR'?curWord().toLowerCase():'euros'}.`:'Le montant s’écrit automatiquement en lettres dans le contrat.'; }
+}
+
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(el.dataset.mp!==undefined){ const K=mpKey(); if(!S[K]) S[K]=Object.fromEntries(MP.map(k=>[k,mpOn(k)])); S[K][el.dataset.mp]=el.checked;
+    if(!MP.some(k=>S[K][k])){ S[K][el.dataset.mp]=true; el.checked=true; toast('Au moins un réseau pour la médiatisation'); }
+    save(); syncUI(); return; }
+  if(el.dataset.inv!==undefined){ const i=+el.dataset.inv; S.inv[i]=Object.assign({},S.inv[i]||{},{[el.dataset.f]:el.value}); save(); render(); const h=document.getElementById('remuHint'); invHintOnly(); return; }
+  const k=el.dataset.k; if(!k) return;
+  if(el.type==='checkbox'){
+    S[k]=el.checked;
+    if(!['pl_ig','pl_tt','pl_yt','pl_fb'].some(x=>S[x])){ S[k]=true; el.checked=true; toast('Au moins un réseau social doit être coché'); }
+    save(); syncUI(); return;
+  }
+  S[k]=el.value;
+  if(k==='total'||k==='nb_inv'||k==='med_prix') S.inv=[];
+  save();
+  if(k==='nb_inv'||k==='total'||k==='med_prix') invUI();
+  if(k==='total'||k==='tva_rate'||k==='med_prix') tvaUI();
+  if(k==='total'||k==='med_prix'||k==='med_mois') medCalc();
+  if(/^(adr|ag)_(cp|pays)$/.test(k)) addrUI();
+  if(k==='id_num'||k==='id_type') idHelp(S.id_type,S.id_num,document.getElementById('idHelp'));
+  if(k==='id_num') autoIdType('id_type','id_num','idType','idHelp');
+  if(k==='agent_id_num'||k==='agent_id_type') idHelp(S.agent_id_type,S.agent_id_num,document.getElementById('agIdHelp'));
+  if(k==='agent_id_num') autoIdType('agent_id_type','agent_id_num','agIdType','agIdHelp');
+  render();
+});
+function invHintOnly(){ const ivs=invoices(),tot=TOT(),h=document.getElementById('remuHint'); const sum=ivs.reduce((a,b)=>a+(b.amount||0),0);
+  if(tot!=null&&ivs.length>1&&Math.abs(sum-tot)>0.001){ h.className='hint warn'; h.textContent=`Attention : la somme des factures (${fmtNum(sum)}) ne correspond pas au total (${fmtNum(tot)}).`; } else { h.className='hint'; h.textContent=tot!=null?`En lettres : ${words(tot)}.`:''; } }
+document.addEventListener('change',e=>{ if(e.target.tagName==='SELECT'||e.target.type==='date'){ e.target.dispatchEvent(new Event('input',{bubbles:true})); } });
+
+document.querySelectorAll('.seg:not(#s-inv)').forEach(seg=>seg.addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  S[{ 's-type':'type','s-pays':'pays','s-profil':'profil','s-paid':'paid'}[seg.id]]=b.dataset.v; S.inv=S.inv.map(i=>({amount:i.amount})); save(); syncUI();
+}));
+document.getElementById('s-inv').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; S.nb_inv=b.dataset.v; S.inv=[]; save(); syncUI(); });
+document.getElementById('s-opt').addEventListener('click',e=>{ const b=e.target.closest('.card'); if(!b) return; S.opt=b.dataset.v; save(); syncUI(); });
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('.tab'); if(!b) return;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.p));
+});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-s]'); if(!b) return;
+  const k=b.dataset.s; S[k]=k==='clips'?Math.max(1,clips()+(+b.dataset.d)):Math.max(0,cnt(k)+(+b.dataset.d)); save(); syncUI();
+});
+
+/* logo : glisser-déposer → PNG */
+function toPNG(file,cb){
+  const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{
+    const max=900, sc=Math.min(1,max/Math.max(img.width||max,img.height||max));
+    const c=document.createElement('canvas'); c.width=Math.round((img.width||600)*sc); c.height=Math.round((img.height||300)*sc);
+    const x=c.getContext('2d'); x.drawImage(img,0,0,c.width,c.height); cb(trim(c));
+  }; img.src=r.result; }; r.readAsDataURL(file);
+}
+// retire les bords vides (transparents ou blancs) autour du logo
+function trim(c){
+  const x=c.getContext('2d'), {width:W,height:H}=c, d=x.getImageData(0,0,W,H).data;
+  let t=H,l=W,b=-1,r=-1;
+  for(let y=0;y<H;y++) for(let i=0;i<W;i++){ const k=(y*W+i)*4; const a=d[k+3]; const white=d[k]>245&&d[k+1]>245&&d[k+2]>245;
+    if(a>12&&!white){ if(y<t)t=y; if(y>b)b=y; if(i<l)l=i; if(i>r)r=i; } }
+  if(b<0) return c.toDataURL('image/png');
+  const m=4; l=Math.max(0,l-m); t=Math.max(0,t-m); r=Math.min(W-1,r+m); b=Math.min(H-1,b+m);
+  const o=document.createElement('canvas'); o.width=r-l+1; o.height=b-t+1; o.getContext('2d').drawImage(c,l,t,o.width,o.height,0,0,o.width,o.height);
+  return o.toDataURL('image/png');
+}
+function dropZone(zone,input,cb){
+  zone.addEventListener('click',()=>input.click());
+  input.addEventListener('change',()=>{ if(input.files[0]) toPNG(input.files[0],cb); input.value=''; });
+  zone.addEventListener('dragover',e=>{ e.preventDefault(); zone.classList.add('over'); });
+  zone.addEventListener('dragleave',()=>zone.classList.remove('over'));
+  zone.addEventListener('drop',e=>{ e.preventDefault(); zone.classList.remove('over'); const f=[...e.dataTransfer.files].find(f=>f.type.startsWith('image/')); if(f) toPNG(f,cb); });
+}
+dropZone(document.getElementById('drop'),document.getElementById('logoFile'),d=>{ S.logo=d; const b=brandKey(); S.logo_for=b; if(b){ LOGOS[b]=d; saveLogos(); } const cp=CAMPS.find(x=>x.key===campKey()); if(cp){ cp.logo=d; saveCamps(); } save(); syncUI(); toast('Logo ajouté'); });
+['dragover','drop'].forEach(ev=>window.addEventListener(ev,e=>e.preventDefault()));
+
+/* réglages signature */
+function prodUI(){
+  const box=document.getElementById('prodBox'); if(!box) return;
+  box.style.display=S.dot?'':'none';
+  if(S.dot&&!(S.prods||[]).length) S.prods=[''];
+  const L=document.getElementById('prodList'), act=document.activeElement, ai=act&&act.dataset?act.dataset.prod:undefined;
+  if(L.children.length===(S.prods||[]).length&&ai!==undefined) return; // en cours de frappe : ne pas redessiner
+  L.innerHTML=(S.prods||[]).map((x,i)=>`<div class="prodrow"><span>${i+1}</span><input data-prod="${i}" value="${esc(x)}" placeholder="Ajouter un produit"><button data-pdel="${i}" title="Retirer ce produit">✕</button></div>`).join('');
+}
+document.getElementById('prodList').addEventListener('input',e=>{ const i=e.target.dataset.prod; if(i===undefined) return; S.prods[+i]=e.target.value; save(); render(); tabDots(); });
+document.getElementById('prodList').addEventListener('click',e=>{ const b=e.target.closest('[data-pdel]'); if(!b) return; S.prods.splice(+b.dataset.pdel,1); if(!S.prods.length) S.dot=false; save(); syncUI(); });
+document.getElementById('prodAdd').onclick=()=>{ S.prods=[...(S.prods||[]),'']; save(); prodUI(); render(); const ins=document.querySelectorAll('#prodList input'); ins[ins.length-1].focus(); };
+const sigUI=()=>{ document.getElementById('sigIn').innerHTML=SIG?`<img src="${SIG}"><small>Glissez une autre image pour la remplacer</small>`:'Glissez l’image de signature ici<small>ou cliquez pour choisir</small>'; };
+dropZone(document.getElementById('sigDrop'),document.getElementById('sigFile'),d=>{ SIG=d; try{localStorage.setItem('ic_sig',d);}catch(e){} sigUI(); render(); });
+document.getElementById('setBtn').onclick=()=>{ sigUI(); document.getElementById('settings').classList.add('on'); };
+document.getElementById('setClose').onclick=()=>document.getElementById('settings').classList.remove('on');
+document.getElementById('sigDel').onclick=()=>{ SIG=''; try{localStorage.removeItem('ic_sig');}catch(e){} sigUI(); render(); };
+
+document.getElementById('newBtn').onclick=()=>{
+  if(!confirm('Nouveau contrat : tous les champs sont vidés. Pour reprendre une campagne déjà enregistrée, choisissez-la ensuite en haut de l’onglet Marque.')) return;
+  const n0=Object.assign({},DEF,{type:S.type,date_sign:TODAY()}); S=n0; save(); syncUI(); render(); document.querySelector('.tab[data-p="marque"]').click(); toast('Nouveau contrat prêt'); return;
+  const keep=['type','pays','profil','opt','marque','entreprise','marque_desc_txt','campagne','annee','periode','logo','logo_for','date_debut','date_fin','dot','prods','mp','med_brand','med_mois','med_unit','med_terr','med_terr_txt','med_start','med_where','med_p1','med_p2','med_p3','u_p1','u_p2','u_p3','u_mois','u_unit','u_terr','u_terr_txt','u_start','u_mp'];
+  const n=Object.assign({},DEF); keep.forEach(k=>n[k]=S[k]); n.date_sign=TODAY(); S=n; save(); syncUI(); toast('Nouveau contrat prêt');
+};
+document.getElementById('cleanBtn').onclick=e=>{ const d=document.getElementById('doc'); d.classList.toggle('clean'); e.target.textContent=d.classList.contains('clean')?'Voir les champs':'Aperçu propre'; };
+function toast(t){ const el=document.getElementById('toast'); el.textContent=t; el.classList.add('on'); setTimeout(()=>el.classList.remove('on'),1800); }
+
+
+/* ================= Campagnes : suivi par campagne + export Excel ================= */
+let CAMPS=[]; try{ CAMPS=JSON.parse(localStorage.getItem('ic_camps')||'[]'); }catch(e){ CAMPS=[]; }
+let LOGOS={}; try{ LOGOS=JSON.parse(localStorage.getItem('ic_logos')||'{}'); }catch(e){}
+const saveLogos=()=>{ try{ localStorage.setItem('ic_logos',JSON.stringify(LOGOS)); }catch(e){} };
+const brandKey=()=>String(S.marque||'').trim().toLowerCase();
+// quand la marque ou la campagne change : on reprend le logo de cette campagne, sinon le dernier logo de la marque, sinon rien
+function logoSync(){
+  const b=brandKey(); if(!b) return;
+  if(S.logo&&!S.logo_for){ S.logo_for=b; LOGOS[b]=S.logo; saveLogos(); return; } // logo glissé avant de taper la marque
+  const camp=CAMPS.find(x=>x.key===campKey()), cand=(camp&&camp.logo)||LOGOS[b]||'';
+  if(cand){ if(cand!==S.logo){ S.logo=cand; toast('Logo '+(camp&&camp.logo?'de la campagne':'de '+S.marque)+' repris'); } S.logo_for=b; }
+  else if(S.logo_for!==b){ S.logo=''; S.logo_for=''; if(S.marque) toast('Nouvelle marque : glissez son logo'); }
+  save(); syncUI(); render();
+}
+if(S.logo&&S.logo_for===undefined){ S.logo_for=brandKey(); if(S.logo_for){ LOGOS[S.logo_for]=S.logo; saveLogos(); } save(); }
+document.addEventListener('change',e=>{ const k=e.target.dataset&&e.target.dataset.k; if(k==='marque'||k==='campagne'||k==='annee') logoSync(); });
+const saveCamps=()=>{ try{ localStorage.setItem('ic_camps',JSON.stringify(CAMPS)); }catch(e){} };
+const campKey=()=>(campagne()+' '+S.annee).trim().toLowerCase();
+// deal contenus en version courte pour le tableau
+function dealText(){
+  if(S.type==='ugc'){ const n=Math.max(1,parseInt(S.ugc,10)||1); return `${n} ${n>1?'contenus vidéo UGC':'contenu vidéo UGC'}`; }
+  const P=[]; const r=cnt('reels'),st=cnt('stories'),t=cnt('tiktok'),y=cnt('youtube'),f=cnt('facebook');
+  if(r) P.push(`${r} Reel${r>1?'s':''}`);
+  if(st) P.push(`${st} set${st>1?'s':''} de ${clips()} Stories`);
+  if(t) P.push(`${t} TikTok`);
+  if(y) P.push(`${y} vidéo${y>1?'s':''} YouTube`);
+  if(f) P.push(`${f} post${f>1?'s':''} Facebook`);
+  const opt=freeOn()&&S.opt==='cp_paid'?' · crosspost':{nocp:'',cp:' · crosspost',cp_free:` · crosspost + médiatisation offerte ${durCourt(true)} (${plats(true,false,true).join(', ')})`+({brand:' sur comptes marque',both:' + comptes marque'}[medWhere()]||''),cp_paid:' · crosspost + médiatisation payante'+(num(S.med_prix)!=null?` ${Math.round(num(S.med_prix))}€ / ${durCourt(true)}`:'')+` (${plats(true,false,true).join(', ')})`+({brand:' sur comptes marque',both:' + comptes marque'}[medWhere()]||'')}[S.opt]||'';
+  return P.join(' + ')+opt;
+}
+const snapS=()=>{ const o=Object.assign({},S); delete o.logo; return o; };
+const BRAND_KEYS=['type','pays','profil','opt','marque','entreprise','marque_desc_txt','campagne','annee','periode','date_debut','date_fin','dot','prods','pl_ig','pl_tt','pl_yt','pl_fb','mp','med_mois','med_unit','med_start','med_terr','med_p1','med_p2','med_p3','u_mp','u_mois','u_unit','u_start','u_terr','u_p1','u_p2','u_p3'];
+function campPickUI(){ const w=document.getElementById('campPickWrap'), sel=document.getElementById('campPick'); if(!w) return;
+  w.style.display=CAMPS.length?'':'none';
+  sel.innerHTML='<option value="">Choisir une campagne…</option>'+CAMPS.map((c,i)=>`<option value="${i}">${esc(c.name)}</option>`).join(''); }
+document.getElementById('campPick').addEventListener('change',e=>{ const c=CAMPS[+e.target.value]; if(!c) return;
+  const B=c.brand||((c.rows.find(r=>r.snap)||{}).snap)||{campagne:c.base||c.name.replace(/\s+20\d\d$/,''),annee:c.year};
+  BRAND_KEYS.forEach(k=>{ if(B[k]!==undefined) S[k]=Array.isArray(B[k])?[...B[k]]:(B[k]&&typeof B[k]==='object'?Object.assign({},B[k]):B[k]); });
+  if(c.logo){ S.logo=c.logo; S.logo_for=String(S.marque||'').trim().toLowerCase(); }
+  save(); syncUI(); render(); e.target.value=''; toast('Infos de « '+c.name+' » reprises : il reste l’influenceur à remplir'); });
+function recordCampaign(){
+  const name=(campagne()+' '+S.annee).trim(); if(!campagne()) return '';
+  let c=CAMPS.find(x=>x.key===campKey());
+  if(!c){ c={key:campKey(),name,base:campagne(),year:String(S.annee).trim(),title:name.toUpperCase(),note:'',rows:[],created:Date.now()}; CAMPS.unshift(c); }
+  const handle=S.handle.replace(/^@/,'').trim();
+  let r=c.rows.find(x=>x.handle.toLowerCase()===handle.toLowerCase());
+  if(!r){ r={handle,sophie:'',colC:''}; c.rows.push(r); }
+  Object.assign(r,{handle,nom:S.nom,deal:(freeOn()?'FREE · ':'')+dealText(),periode:S.periode,prix:freeOn()?0:(TOT()||0),free:freeOn(),cancelled:false,snap:snapS(),updated:Date.now()});
+  c.brand=Object.fromEntries(BRAND_KEYS.map(k=>[k,S[k]]));
+  if(S.logo){ c.logo=S.logo; const b=brandKey(); if(b){ LOGOS[b]=S.logo; saveLogos(); } }
+  c.updated=Date.now(); CAMPS.splice(CAMPS.indexOf(c),1); CAMPS.unshift(c); // la campagne utilisée remonte en haut
+  saveCamps(); campList(); return name;
+}
+// lignes automatiques de la colonne A : fees engagés (somme), fees MAX et reste
+const rPrix=r=>r.cancelled?0:(Number(r.prix)||0);
+const kEur=n=>Math.round(Number(n)||0).toLocaleString('en-US')+'€';
+function feesLines(c){
+  const total=c.rows.reduce((t,r)=>t+rPrix(r),0), fm=Number(c.feesMax)||0;
+  const L=[`Fees engagés : ${kEur(total)}`];
+  if(fm){ L.push(`Fees MAX : ${kEur(fm)}`); L.push(total>fm?`Dépassement : ${kEur(total-fm)}`:`Reste : ${kEur(fm-total)}`); }
+  return L;
+}
+const colAText=c=>[c.note||'',feesLines(c).join('\n')].filter(Boolean).join('\n\n');
+let CUR=null;
+// année d'une campagne (champ Année du contrat ; pour les anciennes, l'année à la fin du nom)
+const campYear=c=>c.year||((c.name.match(/(20\d\d)\s*$/)||[])[1])||'Sans année';
+let OPEN_YEARS=null; try{ OPEN_YEARS=JSON.parse(localStorage.getItem('ic_years')||'null'); }catch(e){}
+function campList(){
+  campPickUI();
+  const el=document.getElementById('campList');
+  document.getElementById('campNames').innerHTML=[...new Set(CAMPS.map(c=>c.base||c.name.replace(/\s+20\d\d$/,'')))].map(n=>`<option value="${esc(n)}">`).join('');
+  if(!CAMPS.length){ el.innerHTML='<div class="empty">Les campagnes apparaissent ici dès le premier PDF généré, ou créez-en une à l’avance.</div>'; return; }
+  const years=[...new Set(CAMPS.map(campYear))].sort((a,b)=>b.localeCompare(a));
+  if(!OPEN_YEARS) OPEN_YEARS=[years[0]];
+  el.innerHTML=years.map(y=>{
+    const list=CAMPS.map((c,i)=>[c,i]).filter(([c])=>campYear(c)===y), open=OPEN_YEARS.includes(y);
+    const tot=list.reduce((t,[c])=>t+c.rows.reduce((a,r)=>a+rPrix(r),0),0);
+    return `<div class="year${open?' open':''}"><button class="yhead" data-y="${esc(y)}"><i>${open?'▾':'▸'}</i><b>${esc(y)}</b><span>${list.length} campagne${list.length>1?'s':''} · ${kEur(tot)}</span></button>
+      ${open?list.map(([c,i])=>`<button class="camp${CUR===c?' on':''}" data-i="${i}"><b>${esc(c.name)}</b><span>${c.rows.length}</span></button>`).join('')+
+        `<button class="link yexcel" data-yx="${esc(y)}">⤓ Excel ${esc(y)} (toutes les campagnes)</button>`:''}</div>`;
+  }).join('');
+}
+document.getElementById('campList').addEventListener('click',e=>{
+  const h=e.target.closest('.yhead'); if(h){ const y=h.dataset.y; OPEN_YEARS=OPEN_YEARS.includes(y)?OPEN_YEARS.filter(x=>x!==y):[...OPEN_YEARS,y];
+    try{ localStorage.setItem('ic_years',JSON.stringify(OPEN_YEARS)); }catch(_){} campList(); return; }
+  const x=e.target.closest('.yexcel'); if(x){ exportYear(x.dataset.yx); return; }
+  const b=e.target.closest('.camp'); if(!b) return; openCamp(CAMPS[+b.dataset.i]); });
+const eur=n=>'€'+(Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+function openCamp(c){
+  CUR=c; document.getElementById('campView').classList.add('on'); campList();
+  document.getElementById('cTitle').value=c.title; drawSheet();
+}
+function drawSheet(){
+  const c=CUR, n=c.rows.length, total=c.rows.reduce((a,r)=>a+rPrix(r),0);
+  const cc=document.getElementById('cCount'), fm=Number(c.feesMax)||0;
+  cc.textContent=`${n} influenceur${n>1?'s':''} · ${eur(total)} HT`+(fm?(total>fm?` · dépasse le fees MAX de ${eur(total-fm)}`:` · reste ${eur(fm-total)} sur ${eur(fm)}`):'');
+  cc.classList.toggle('miss',fm>0&&total>fm); cc.title=fm>0&&total>fm?'La somme dépasse le fees MAX':'';
+  document.getElementById('cFees').value=fm?fm:'';
+  const rows=c.rows.map((r,i)=>`<tr class="${r.cancelled?'cancel':''}${r.free?' free':''}">${i===0?`<td class="notea" rowspan="${n}"><textarea data-note rows="${Math.max(2,n)}" placeholder="Texte libre (ex. 10K budget global&#10;3K Hono / 7K fees)">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td>`:''}
+    <td><input data-r="${i}" data-f="sophie" value="${esc(r.sophie||'')}"></td>
+    <td><input data-r="${i}" data-f="colC" value="${esc(r.colC||'')}"></td>
+    <td><input data-r="${i}" data-f="deal" value="${esc(r.deal||'')}"></td>
+    <td><input data-r="${i}" data-f="handle" value="${esc(r.handle||'')}"></td>
+    <td><input data-r="${i}" data-f="periode" value="${esc(r.periode||'')}"></td>
+    <td>${r.cancelled?'<span class="tag">ANNULÉ</span>':r.free?'<span class="tag">FREE</span>':`<input data-r="${i}" data-f="prix" value="${eur(r.prix)}" inputmode="decimal">`}</td>
+    <td class="acts"><button data-edit="${i}" title="${r.snap?'Rouvrir ce contrat dans le formulaire pour le modifier':'Contrat enregistré avant cette version : à ressaisir'}" ${r.snap?'':'disabled'}>Modifier</button><button data-cancel="${i}" title="${r.cancelled?'Rétablir cet influenceur':'Annulation : la ligne reste visible, barrée, et sort de la somme'}">${r.cancelled?'Rétablir':'Annuler'}</button><button class="del" data-del="${i}" title="Retirer complètement la ligne">✕</button></td></tr>`).join('');
+  document.getElementById('cSheet').innerHTML=`<table class="sheet"><colgroup><col style="width:${Math.max(180,(c.title||'').length*9+30)}px"><col style="width:150px"><col style="width:90px"><col style="min-width:330px"><col style="width:170px"><col style="width:150px"><col style="width:135px"><col style="width:190px"></colgroup><thead><tr><th>${esc(c.title)}</th><th>Note Sophie</th><th></th><th>Note influence</th><th>Créateur contenus</th><th>Période activation</th><th>Prix HT</th><th style="background:none"></th></tr></thead>
+    <tbody>${rows||`<tr><td class="notea"><textarea data-note rows="3" placeholder="Texte libre (ex. 10K budget global&#10;3K Hono / 7K fees)">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td><td colspan="6" style="color:#999">Aucun influenceur pour l’instant : ils s’ajoutent à chaque PDF généré avec ce nom de campagne</td></tr>`}</tbody>
+    <tfoot><tr><td colspan="5"></td><td class="sum">Somme :</td><td class="sum">${Math.round(total).toLocaleString('en-US')}€</td><td></td></tr></tfoot></table>`;
+}
+document.getElementById('cSheet').addEventListener('change',e=>{
+  const el=e.target;
+  if(el.dataset.note!==undefined){ CUR.note=el.value; saveCamps(); return; }
+  if(el.dataset.r===undefined) return;
+  const r=CUR.rows[+el.dataset.r]; let v=el.value;
+  if(el.dataset.f==='prix'){ v=num(String(v).replace(/[€\s,]/g,''))||0; }
+  r[el.dataset.f]=v; saveCamps(); drawSheet(); campList();
+});
+document.getElementById('cSheet').addEventListener('click',e=>{
+  const ed=e.target.closest('[data-edit]'), ca=e.target.closest('[data-cancel]');
+  if(ca){ const r=CUR.rows[+ca.dataset.cancel]; r.cancelled=!r.cancelled; saveCamps(); drawSheet(); campList(); toast(r.cancelled?'@'+r.handle+' annulé : sorti de la somme':'@'+r.handle+' rétabli'); return; }
+  if(ed){ const r=CUR.rows[+ed.dataset.edit]; if(!r.snap) return;
+    S=Object.assign({},DEF,r.snap,{logo:CUR.logo||S.logo||'',date_sign:TODAY()}); save(); syncUI(); render();
+    document.getElementById('cClose').onclick(); toast('Contrat de @'+r.handle+' rouvert : modifiez puis regénérez le PDF, la ligne sera mise à jour'); return; }
+  const b=e.target.closest('[data-del]'); if(!b) return;
+  if(!confirm('Retirer cette ligne du tableau ?')) return; CUR.rows.splice(+b.dataset.del,1); saveCamps(); drawSheet(); campList(); });
+document.getElementById('cFees').addEventListener('change',e=>{ CUR.feesMax=num(String(e.target.value).replace(/[€\s,]/g,''))||0; saveCamps(); drawSheet(); });
+document.getElementById('cTitle').addEventListener('input',e=>{ CUR.title=e.target.value; saveCamps(); const th=document.querySelector('.sheet th'); if(th) th.textContent=e.target.value; });
+document.getElementById('campNew').onclick=()=>{
+  const nm=(prompt('Nom de la campagne (exactement comme dans les contrats) :',S.campagne||'')||'').trim(); if(!nm) return;
+  const yr=(prompt('Année :',String(S.annee||new Date().getFullYear()))||'').trim(); if(!yr) return;
+  const name=nm+' '+yr, key=name.toLowerCase();
+  let c=CAMPS.find(x=>x.key===key);
+  if(!c){ c={key,name,base:nm,year:yr,brand:{campagne:nm,annee:yr},title:name.toUpperCase(),note:'',rows:[],created:Date.now()}; CAMPS.unshift(c); saveCamps(); }
+  if(!OPEN_YEARS) OPEN_YEARS=[]; if(!OPEN_YEARS.includes(yr)) OPEN_YEARS.push(yr);
+  openCamp(c); toast('Campagne créée : remplissez la colonne A et les fees MAX');
+};
+document.getElementById('cClose').onclick=()=>{ document.getElementById('campView').classList.remove('on'); CUR=null; campList(); };
+document.getElementById('cDelete').onclick=()=>{ if(!confirm(`Supprimer la campagne « ${CUR.name} » de la liste ? (les PDF déjà générés ne sont pas touchés)`)) return;
+  CAMPS.splice(CAMPS.indexOf(CUR),1); saveCamps(); document.getElementById('cClose').onclick(); };
+// export Excel, même mise en forme que votre tableau
+const XL_FONT={name:'Poppins',size:11}, XL_ORANGE='FFF7B27C', XL_FREE='FFF29A55';
+const XL_DOT={style:'dotted',color:{argb:'FF000000'}}, XL_B={top:XL_DOT,left:XL_DOT,bottom:XL_DOT,right:XL_DOT};
+// écrit le tableau d'une campagne à partir de la ligne r0 ; renvoie la dernière ligne utilisée
+function xlBlock(ws,c,r0){
+  const n=Math.max(1,c.rows.length);
+  const aText=colAText(c);
+  const aLines=aText?aText.split('\n').length:0, rowH=Math.max(20,Math.ceil((aLines*16+14)/n));
+  const head=[c.title,'NOTE SOPHIE','','NOTE INFLUENCE','CREATEUR CONTENUS','PÉRIODE ACTIVATION','PRIX HT'];
+  const hr=ws.getRow(r0); head.forEach((h,i)=>{ const cl=hr.getCell(i+1); cl.value=(h||'').toUpperCase();
+    cl.font={...XL_FONT,bold:true,color:{argb:'FF1C1C1F'}}; cl.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL_ORANGE}}; cl.alignment={horizontal:'center',vertical:'middle'}; });
+  hr.height=22;
+  for(let i=0;i<n;i++){
+    const r=c.rows[i]||{}, row=ws.getRow(r0+1+i); row.height=rowH;
+    const vals=[null,r.sophie||'',r.colC||'',r.deal||'',r.handle||'',r.periode||'',c.rows[i]?Number(r.prix)||0:null];
+    vals.forEach((v,j)=>{ if(j===0) return; const cl=row.getCell(j+1); cl.value=v; cl.font=XL_FONT; cl.border=XL_B; cl.alignment={horizontal:'center',vertical:'middle',wrapText:j===3}; });
+    row.getCell(7).numFmt='"€"#,##0.00';
+    if(r.free&&!r.cancelled){ [4,5,6,7].forEach(j=>{ const cl=row.getCell(j); cl.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL_FREE}}; cl.font={...XL_FONT,bold:j===7}; }); row.getCell(7).numFmt='"FREE"'; }
+    if(r.cancelled){ [2,3,4,5,6].forEach(j=>{ row.getCell(j).font={...XL_FONT,strike:true,color:{argb:'FF9A98A0'}}; }); row.getCell(7).value=0; row.getCell(7).numFmt='"ANNULÉ"'; row.getCell(7).font={...XL_FONT,bold:true,color:{argb:'FF9A98A0'}}; }
+  }
+  if(n>1) ws.mergeCells(r0+1,1,r0+n,1);
+  const a=ws.getCell(r0+1,1); a.value=aText||null; a.font=XL_FONT; a.alignment={horizontal:'center',vertical:'middle',wrapText:true};
+  a.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF3F3F3'}}; a.border=XL_B;
+  const fr=ws.getRow(r0+n+1); fr.height=22;
+  const s1=fr.getCell(6), s2=fr.getCell(7);
+  s1.value='Somme :'; s2.value={formula:`SUM(G${r0+1}:G${r0+n})`,result:c.rows.reduce((t,r)=>t+rPrix(r),0)}; s2.numFmt='#,##0"€"';
+  [s1,s2].forEach(cl=>{ cl.font={...XL_FONT,bold:true,color:{argb:'FF1C1C1F'}}; cl.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL_ORANGE}}; cl.alignment={horizontal:'center',vertical:'middle'}; });
+  return r0+n+1;
+}
+function xlColumns(ws,camps){
+  const tl=Math.max(...camps.map(c=>(c.title||'').length)), dl=Math.max(0,...camps.flatMap(c=>c.rows.map(r=>(r.deal||'').length)));
+  ws.columns=[{width:Math.max(26,Math.ceil(tl*1.2)+4)},{width:22},{width:16},{width:Math.max(40,dl+4)},{width:26},{width:24},{width:18}];
+  ws.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,paperSize:9};
+}
+async function xlDownload(wb,name){
+  const buf=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob), link=document.createElement('a');
+  link.href=url; link.download=name.replace(/[\/\\:*?"<>|]/g,'-')+'.xlsx'; document.body.appendChild(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+// une campagne
+document.getElementById('cExcel').onclick=async()=>{
+  const c=CUR, wb=new ExcelJS.Workbook(), ws=wb.addWorksheet(c.name.slice(0,31).replace(/[\\\/?*\[\]:]/g,'-'));
+  xlColumns(ws,[c]); xlBlock(ws,c,1); await xlDownload(wb,c.name); toast('Tableau Excel téléchargé');
+};
+// toutes les campagnes sur une feuille, une ligne vide entre chaque
+// toutes les campagnes d'une année sur une feuille, une ligne vide entre chaque
+async function exportYear(y){
+  const list=CAMPS.filter(c=>campYear(c)===y); if(!list.length) return;
+  const wb=new ExcelJS.Workbook(), ws=wb.addWorksheet(`Campagnes ${y}`.slice(0,31));
+  xlColumns(ws,list); let r=1;
+  list.forEach(c=>{ r=xlBlock(ws,c,r)+2; });
+  await xlDownload(wb,`Campagnes ${y}`); toast(`Excel des campagnes ${y} téléchargé`);
+}
+campList();
+
+/* ================= PDF (pdfmake) — même modèle que l'aperçu ================= */
+function pdfRuns(e){
+  const out=[];
+  e.runs.forEach(r=>{
+    const s=r.s; const st={font:FONT(s.f),fontSize:s.s||11,color:colr(s.c),bold:!!s.b,italics:!!s.i};
+    if(s.u) st.decoration='underline';
+    const t=r.segs.map(x=>x[0]).join('');
+    if(!t) return;
+    const l=out[out.length-1];
+    if(l&&l.font===st.font&&l.fontSize===st.fontSize&&l.color===st.color&&l.bold===st.bold&&l.italics===st.italics&&l.decoration===st.decoration) l.text+=t;
+    else out.push(Object.assign({text:t},st));
+  });
+  return out;
+}
+function bulletGlyph(li,size){ const t=li&&li.txt||''; if(t.includes('●')) return {t:'●',s:size*0.8}; if(t.includes('▪')||t.includes('■')) return {t:'■',s:size*0.55}; return {t:'•',s:size}; }
+function pdfBlock(e){
+  if(e.k==='tbl'){
+    const body=e.rows.map(r=>r.map(c=>({stack:c.map(pdfBlock)})));
+    return {table:{widths:e.cols.length===body[0].length?e.cols.map(w=>w-10):body[0].map(()=>'*'),body},
+      layout:e.border?{hLineWidth:()=>0.75,vLineWidth:()=>0.75,paddingLeft:()=>5,paddingRight:()=>5,paddingTop:()=>5,paddingBottom:()=>5}
+                     :{hLineWidth:()=>0,vLineWidth:()=>0,paddingLeft:()=>5,paddingRight:()=>5,paddingTop:()=>5,paddingBottom:()=>5},
+      unbreakable:true};
+  }
+  const st=e.st||{}, mk=e.mk||{};
+  const al={both:'justify',center:'center',right:'right',end:'right'}[st.al]||'left';
+  const sb=e.gap!=null?e.gap:(st.sb||0);
+  const margin=[st.il||0,sb,st.ir||0,st.sa||0];
+  const lh=lineH(st,mk)*(FONT(mk.f)==='Poppins'?1.5/1.4:1); // Poppins : interligne de Google Docs
+  let node;
+  if(e.k==='logo'){
+    // zone fixe : le logo est réduit dedans, la mise en page ne bouge jamais
+    const im=document.querySelector('#doc .logo img');
+    if(S.logo&&im&&im.naturalWidth){ const r=im.naturalWidth/im.naturalHeight; let w=LOGO_BOX.w,h=LOGO_BOX.w/r; if(h>LOGO_BOX.h){h=LOGO_BOX.h;w=h*r;} const pad=(LOGO_BOX.h-h)/2;
+      node={image:S.logo,width:w,height:h,alignment:al,margin:[margin[0],margin[1]+pad,margin[2],margin[3]+pad]}; }
+    else node={text:' ',margin:[0,margin[1]+LOGO_BOX.h,0,margin[3]]};
+  } else if(e.img){
+    const src=imgSrc(e.img.img);
+    node=src?{image:src,width:e.img.w,height:e.img.h,alignment:al,margin}:{text:' ',margin:[0,margin[1]+e.img.h,0,margin[3]]};
+  } else {
+    let text=pdfRuns(e);
+    if(!text.length||!text.some(t=>t.text.trim())) text=[{text:' ',font:FONT(mk.f),fontSize:mk.s||11}];
+    if(e.li){
+      const hang=Math.max(14,-(st.fi||0)||18), s0=e.runs[0]?e.runs[0].s:mk;
+      const g=bulletGlyph(e.li,s0.s||11);
+      node={columns:[{width:hang,text:g.t,font:'Roboto',fontSize:g.s,color:colr(s0.c),lineHeight:lh*(s0.s||11)/g.s*(FONT(s0.f)==='Poppins'?1.4/1.172:1)},{width:'*',text,alignment:al,lineHeight:lh}],columnGap:0,
+            margin:[(st.il||36)-hang,sb,st.ir||0,st.sa||0]};
+    } else {
+      node={text,alignment:al,lineHeight:lh,margin};
+      if(st.fi>0) node.leadingIndent=st.fi;
+    }
+  }
+  if(e.pb) node.pageBreak='before';
+  if(st.kn&&!e.cover) node.headlineLevel=1;
+  return node;
+}
+// « Fait à Paris, le … » + exemplaires + signatures : toujours sur la même page
+function keepSignTogether(items,nodes){
+  const i=items.findIndex(e=>e.k==='p'&&/^(Fait à Paris|Executed in Paris)/.test((e.text||'').trim()));
+  if(i<0) return nodes;
+  let j=i; while(j<items.length&&items[j].k!=='tbl') j++;
+  if(j>=items.length) return nodes;
+  const grp=nodes.slice(i,j+1).map(n=>Object.assign({},n,{unbreakable:undefined}));
+  return [...nodes.slice(0,i),{stack:grp,unbreakable:true},...nodes.slice(j+1)];
+}
+function makePdf(){
+  missing=new Set();
+  const t=tpl(), items=build(t.blocks,true), p=t.page;
+  const nodes=keepSignTogether(items,items.map(pdfBlock));
+  return {
+    pageSize:{width:p.w,height:p.h}, pageMargins:[p.ml,p.mt,p.mr,p.mb],
+    info:{title:t.lang==='fr'?'Contrat':'Agreement',author:'Agence YLG'},
+    defaultStyle:{font:'Roboto',fontSize:11},
+    content:nodes,
+    pageBreakBefore:(node,next)=>node.headlineLevel===1&&next.length===0
+  };
+}
+document.getElementById('pdfBtn').onclick=()=>{
+  render();
+  if(freeOn()){
+    if(missing.size){ alert('Pour ajouter un influenceur free, il faut : '+[...missing].join(', ')+'.'); return; }
+    const cname=recordCampaign(); S.done=true; saveNow(); toast(`@${S.handle.replace(/^@/,'')} ajouté gratuitement à « ${cname} »`); return;
+  }
+  if(missing.size&&!confirm(`Il manque encore : ${[...missing].join(', ')}.\n\nGénérer quand même le PDF ?`)) return;
+  const fn=fileName();
+  if(!fn.ok){ alert('Pour nommer le PDF, il faut la mention influenceur, le nom de la campagne et l’année.'); return; }
+  pdfMake.createPdf(makePdf()).download(fn.name);
+  const cname=recordCampaign(); S.done=true; saveNow();
+  toast('PDF généré : '+fn.name+(cname?' · ajouté à « '+cname+' »':''));
+};
+
+// polices du contrat aussi dans l'aperçu (mêmes fichiers que le PDF)
+(function(){ try{
+  const map={'Roboto-regular.ttf':['Roboto','400','normal'],'Roboto-bold.ttf':['Roboto','700','normal'],'Roboto-italic.ttf':['Roboto','400','italic'],'Roboto-boldItalic.ttf':['Roboto','700','italic'],
+             'Poppins-regular.ttf':['Poppins','400','normal'],'Poppins-bold.ttf':['Poppins','700','normal'],'Poppins-italic.ttf':['Poppins','400','italic'],'Poppins-boldItalic.ttf':['Poppins','700','italic']};
+  Object.entries(map).forEach(([file,[fam,w,st]])=>{ const b64=pdfMake.vfs[file]; if(!b64) return;
+    const f=new FontFace(fam,'url(data:font/ttf;base64,'+b64+')',{weight:w,style:st}); document.fonts.add(f); f.load().then(()=>fitPreview()).catch(()=>{}); });
+}catch(e){} })();
+S.date_sign=TODAY(); // toujours la date du jour à l’ouverture
+syncUI();
+if('serviceWorker' in navigator&&location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
