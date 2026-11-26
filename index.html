@@ -469,7 +469,51 @@ const OPT_EN={nocp:['without crosspost','Paid media refused'],cp:['with crosspos
 
 function tpl(){
   if(S.type==='ugc') return TPL.tpls.find(t=>t.id==='ugc');
+  if(freeOn()) return freeTpl();
   return TPL.tpls.find(t=>t.pays===S.pays&&t.profil===S.profil&&t.opt===S.opt);
+}
+/* contrat court (2 pages) pour les influenceurs Free : parties et signatures reprises des modèles, articles allégés */
+function freeTpl(){
+  const id={FR:'9',UK:'33',ES:'57'}[S.pays]||'9', base=TPL.tpls.find(t=>t.id===id), bl=base.blocks, fr=base.lang==='fr';
+  const tx=b=>b.t==='p'?b.runs.map(r=>r[0]||'').join(''):'';
+  const iE=bl.findIndex(b=>/^\s*(ENTRE|BETWEEN)/i.test(tx(b)));
+  const iP=bl.findIndex((b,i)=>i>iE&&/^\s*Ci-après dénommés individuellement|^\s*Hereinafter individually/i.test(tx(b)));
+  const iH=bl.findIndex(b=>/^\s*ARTICLE 1\b/i.test(tx(b)));
+  const body=bl.slice(iH+1).find(b=>b.t==='p'&&tx(b).trim().length>40);
+  let iF=-1; bl.forEach((b,i)=>{ if(b.t==='p'&&tx(b).includes('{{date_sign}}')) iF=i; });
+  const iT=bl.findIndex((b,i)=>i>iF&&b.t==='tbl');
+  const clone=b=>JSON.parse(JSON.stringify(b));
+  const hs=bl[iH].runs[0][1], bs=body.runs[0][1];
+  const H=t=>({t:'p',st:Object.assign({},bl[iH].st,{pb:0,kn:1}),mk:bl[iH].mk,runs:[[t,hs]]});
+  const P=t=>({t:'p',st:Object.assign({},body.st,{pb:0}),mk:body.mk,runs:[[t,bs]]});
+  const L=t=>({t:'p',st:Object.assign({},body.st,{il:28,fi:-14,sb:2,sa:0,pb:0}),mk:body.mk,li:{fmt:'bullet',txt:'•'},runs:[[t,bs]]});
+  const title={t:'p',st:Object.assign({},bl[iH].st,{al:'center',pb:0,sb:0,sa:6}),mk:bl[iH].mk,runs:[[fr?'CONTRAT DE PARTICIPATION GRATUITE À UNE CAMPAGNE D’INFLUENCE':'FREE PARTICIPATION AGREEMENT – INFLUENCER CAMPAIGN',hs]]};
+  const sub={t:'p',st:Object.assign({},body.st,{al:'center',pb:0,sb:2,sa:4}),mk:body.mk,runs:[[(fr?'Projet : {{projet}}  ·  Influenceur : @{{handle}}  ·  Période : {{periode}}':'Project: {{projet}}  ·  Influencer: @{{handle}}  ·  Period: {{periode}}'),bs]]};
+  const parties=bl.slice(iE,iP+1).map(clone);
+  parties.forEach(b=>{ if(b.t==='p') b.runs.forEach(r=>{ if(r[0]) r[0]=r[0].replace(', {{id_phrase}}','{{id_opt}}'); }); delete b.ag; if(b.st) b.st=Object.assign({},b.st,{pb:0}); });
+  const cross=S.opt!=='nocp', med=S.opt==='cp_free'||S.opt==='cp_paid', prods=dotOn()?prodList():[];
+  const A=[];
+  if(fr){
+    A.push(H('ARTICLE 1. OBJET'),P("Le présent contrat encadre la participation de l'Influenceur, à titre gratuit, à la campagne {{projet}} organisée par l'Agence YLG pour le compte de son client {{entreprise}} (marque {{marque}}). Il est soumis à la loi n° 2023-451 du 9 juin 2023 visant à encadrer l'influence commerciale."));
+    A.push(H('ARTICLE 2. CONTENUS ATTENDUS'),P("L'Influenceur s'engage à créer et à publier sur ses réseaux sociaux les Contenus suivants : {{enum:fr:"+(cross?'en':'sans')+"}}."+(cross?" Les Reels Instagram seront co-publiés (crosspost) avec le compte officiel du Client.":'')+" Les dates de publication sont validées au préalable avec l'Agence YLG, entre le {{date_debut}} et le {{date_fin}}. Les Contenus resteront en ligne au minimum 4 mois après leur publication."));
+    A.push(H('ARTICLE 3. ABSENCE DE RÉMUNÉRATION'+(prods.length?' ET DOTATION PRODUITS':'')),P("L'Influenceur participe à la Campagne à titre gratuit : aucune rémunération ne lui sera versée et il n'émettra aucune facture."));
+    if(prods.length){ A.push(P("Le Client met à sa disposition, à titre gracieux, les produits suivants, nécessaires à la réalisation des Contenus. Cette dotation ne constitue pas une rémunération et ne pourra faire l'objet d'aucune revente :")); prods.forEach(x=>A.push(L(x))); }
+    A.push(H('ARTICLE 4. MÉDIATISATION'),P(med?"L'Influenceur autorise, à titre gratuit, l'Agence YLG et le Client à sponsoriser, booster ou amplifier les Contenus publiés (via {{med_tools}}). Supports autorisés : {{med_supports}} Territoire : {{med_terr}}. Durée : {{med_duree_long}}":"Aucune médiatisation, sponsorisation ou amplification publicitaire des Contenus n'est autorisée dans le cadre du présent Contrat."));
+    A.push(H("ARTICLE 5. OBLIGATIONS DE L'INFLUENCEUR"),P("L'Influenceur fait apparaître de manière claire et lisible la mention « Publicité » ou « Collaboration commerciale » sur chaque Contenu, pendant toute la durée de la promotion, et mentionne la marque {{marque}}. Il garantit être l'auteur des Contenus et détenir les droits nécessaires à leur publication, s'engage à ne pas dénigrer la marque et à garder confidentielles les informations non publiques reçues dans le cadre de la Campagne."));
+    A.push(H('ARTICLE 6. DROIT APPLICABLE'),P("Le présent Contrat est soumis au droit français. Tout litige qui ne pourrait être résolu à l'amiable dans un délai de soixante (60) jours sera soumis à la compétence du Tribunal de Commerce de Paris."));
+  } else {
+    const es=S.pays==='ES';
+    A.push(H('ARTICLE 1. PURPOSE'),P("This Agreement governs the Influencer's participation, free of charge, in the {{projet}} campaign organised by Agence YLG on behalf of its client {{entreprise}} (Brand {{marque}}). It is subject to French Law No. 2023-451 of June 9, 2023 regulating commercial influence"+(es?", and to the applicable Spanish advertising rules.":", and to the applicable UK advertising rules (ASA / CAP Code).")));
+    A.push(H('ARTICLE 2. EXPECTED CONTENT'),P("The Influencer undertakes to create and publish the following Content on their social media accounts: {{enum:en:"+(cross?'with':'without')+"}}."+(cross?" Instagram Reels will be co-published (crosspost) with the Client's official account.":'')+" Publication dates are approved in advance by Agence YLG, between {{date_debut}} and {{date_fin}}. The Content shall remain online for at least 4 months after publication."));
+    A.push(H('ARTICLE 3. NO REMUNERATION'+(prods.length?' AND PRODUCTS SUPPLY':'')),P("The Influencer participates in the Campaign free of charge: no fee shall be paid and no invoice shall be issued."));
+    if(prods.length){ A.push(P("The Client provides the Influencer, free of charge, with the following products, necessary for creating the Content. This supply does not constitute remuneration and may not be resold:")); prods.forEach(x=>A.push(L(x))); }
+    A.push(H('ARTICLE 4. MEDIA BOOSTING'),P(med?"The Influencer authorises Agence YLG and the Client, free of charge, to sponsor, boost or amplify the published Content (via {{med_tools}}). Authorised media: {{med_supports}} Territory: {{med_terr}}. Term: {{med_duree_long}}":"No media boosting, sponsorship or paid amplification of the Content is authorised under this Agreement."));
+    A.push(H('ARTICLE 5. OBLIGATIONS OF THE INFLUENCER'),P("The Influencer shall clearly disclose the commercial nature of each Content (e.g. \"#Ad\" / \"Paid Partnership\""+(es?" / \"#Publi\"":"")+"), throughout the promotion, and mention the Brand {{marque}}. The Influencer warrants being the author of the Content and holding the rights required for its publication, undertakes not to disparage the Brand and to keep confidential any non-public information received in connection with the Campaign."));
+    A.push(H('ARTICLE 6. GOVERNING LAW'),P("This Agreement is governed by French law. Any dispute that cannot be settled amicably within sixty (60) calendar days shall be submitted to the Commercial Court of Paris (Tribunal de Commerce de Paris)."));
+  }
+  const sig=bl.slice(iF,iT+1).map(clone); if(sig[0]&&sig[0].st) sig[0].st=Object.assign({},sig[0].st,{sb:22,pb:0});
+  const lg=bl.find(b=>b.t==='logo'), logo=lg?Object.assign(clone(lg),{st:Object.assign({},lg.st,{sb:0,sa:10,al:'center'})}):null;
+  return {id:'free',lang:base.lang,pays:base.pays,profil:'classic',opt:S.opt,page:base.page,free:true,blocks:[...(logo?[logo]:[]),title,sub,...parties,...A,...sig]};
 }
 const lang=()=>S.type==='ugc'?'fr':(S.pays==='FR'?'fr':'en');
 const num=v=>{ const n=parseFloat(String(v).replace(/\s/g,'').replace(',','.')); return isNaN(n)?null:n; };
@@ -481,7 +525,7 @@ const MP=['ig','tt','fb','yt'];
 const mpKey=()=>S.type==='ugc'?'u_mp':'mp';
 const mpOn=k=>{ const o=S[mpKey()]; if(o) return !!o[k]; return S.type==='ugc'?true:!!S['pl_'+k]; };
 function plats(fr,reel,med){ const f=k=>med?mpOn(k):!!S['pl_'+k]; const L=[]; if(f('ig')) L.push(reel?(fr?'Instagram (Reel)':'Instagram (Reels)'):'Instagram'); if(med&&S.type==='ugc'&&f('fb')) L.push('Facebook'); if(f('tt')) L.push('TikTok'); if(f('yt')) L.push(med&&S.type==='ugc'?'YouTube Shorts':'YouTube'); if(f('fb')&&!(med&&S.type==='ugc')) L.push('Facebook'); return L.length?L:['Instagram']; }
-const medBoxOn=()=>S.type!=='ugc'&&(S.opt==='cp_paid'||S.opt==='cp_free')&&S.paid!=='free';
+const medBoxOn=()=>S.type!=='ugc'&&(S.opt==='cp_paid'||S.opt==='cp_free');
 const joinOr=(L,sep)=>L.length<2?L[0]:L.slice(0,-1).join(', ')+sep+L[L.length-1];
 const dotOn=()=>S.type!=='ugc'&&!!S.dot;
 const prodList=()=>(S.prods||[]).map(x=>String(x).trim()).filter(Boolean);
@@ -613,6 +657,7 @@ function seg(key){
     case 'ttc': { if(!tvaOn()) return []; const t=TOT(); if(t==null) return [];
       return [...T(', soit '),...V(money(t*(1+tvaRate()/100))),...T(` TTC (TVA ${rateTxt()} : `),...V(money(t*tvaRate()/100)),...T(')')]; }
     case 'ag_name': return need(S.agent_nom,'Société de l’agent');
+    case 'id_opt': { if(!String(S.id_num||'').trim()&&!S.id_pending) return []; return [...T(', '),...seg('id_phrase')]; }
     case 'cur': return T(cur());
     case 'dot_t': return dotOn()?T(lang()==='fr'?' ET DOTATION PRODUITS':' AND PRODUCTS SUPPLY'):[];
     case 'med_n': { const m=num(S.med_prix); return m==null?need('','Montant médiatisation'):V(fmtNum(m)); }
@@ -887,6 +932,7 @@ function finish(out,top){
   let prev=null;
   out.forEach(e=>{ if(e.k==='tbl'){ prev=null; return; }
     const sb=(e.st&&e.st.sb)||0; e.gap=(prev&&!e.pb)?Math.max(0,sb-((prev.st&&prev.st.sa)||0)):sb; prev=e; });
+  if(top&&finish.noBreak){ trimEnd(out); return out; }
   if(top){
     trimEnd(out);
     // page de garde seule en page 1 ; annexe sur une nouvelle page
@@ -1008,16 +1054,15 @@ function renderFree(){
 }
 function render(){
   document.getElementById('pdfBtn').textContent='Générer le PDF';
-  if(freeOn()) return renderFree();
   missing=new Set();
-  const t=tpl(), items=build(t.blocks,true);
+  const t=tpl(); finish.noBreak=!!t.free; const items=build(t.blocks,true);
   if(!SIG) missing.add('Signature de May (Réglages)');
   const doc=document.getElementById('doc');
   const p=t.page;
   doc.style.width=p.w+'pt'; doc.style.padding=`${p.mt}pt ${p.mr}pt ${p.mb}pt ${p.ml}pt`;
   doc.innerHTML=items.map(htmlBlock).join('');
   fitPreview();
-  document.getElementById('used').textContent=t.id==='ugc'?'Contrat UGC rémunération':'Contrat '+t.id;
+  document.getElementById('used').textContent=t.id==='ugc'?'Contrat UGC rémunération':t.free?'Contrat court Free':'Contrat '+t.id;
   const fn=fileName();
   const fe=document.getElementById('fname'); fe.textContent=fn.name; fe.classList.toggle('miss',!fn.ok);
   const stEl=document.getElementById('status');
@@ -1047,8 +1092,8 @@ function tabDots(){
     if(b.dataset.p==='cont'&&(medBoxOn()||S.type==='ugc')) keys=[...keys,MK('mois')];
     const dotMiss=b.dataset.p==='dot'&&dotOn()&&!prodList().length;
     if(b.dataset.p==='infl'&&S.id_pending) keys=keys.filter(k=>k!=='id_num');
-    if(b.dataset.p==='infl'&&freeOn()) keys=['nom','handle'];
-    if(b.dataset.p==='marque'&&freeOn()) keys=['campagne','annee','periode'];
+    if(b.dataset.p==='infl'&&freeOn()) keys=['nom','handle','adr_rue','adr_cp','adr_ville'];
+    if(b.dataset.p==='marque'&&freeOn()) keys=['marque','entreprise','campagne','annee','periode'];
     if(S.type==='ugc'&&b.dataset.p==='cont') keys=['date_ugc'];
     const miss=dotMiss||keys.some(k=>!String(S[k]||'').trim())||(b.dataset.p==='marque'&&!S.logo);
     let d=b.querySelector('.dot'); if(!d){ d=document.createElement('span'); d.className='dot'; b.appendChild(d); }
@@ -1087,13 +1132,15 @@ function syncUI(){
   document.getElementById('dropIn').innerHTML=S.logo?`<img src="${S.logo}"><small>${S.marque?'Logo mémorisé pour '+esc(S.marque)+' · ':''}glissez un autre logo pour le remplacer</small>`:'Glissez le logo de la marque ici<small>ou cliquez pour choisir une image (PNG, JPG, SVG)</small>';
   const fr0=freeOn();
   document.getElementById('g-paid').style.display=ugc?'none':'';
-  ['remu','dates'].forEach(t=>document.querySelector(`.tab[data-p="${t}"]`).style.display=fr0?'none':'');
-  if(fr0&&document.querySelector('.tab.on')&&['remu','dates'].includes(document.querySelector('.tab.on').dataset.p)) document.querySelector('.tab[data-p="marque"]').click();
-  document.getElementById('inflOwn').style.display=fr0?'none':'';
-  document.querySelector('.tab[data-p="dot"]').style.display=(ugc||fr0)?'none':'';
-  if((ugc||fr0)&&document.querySelector('.tab.on')&&document.querySelector('.tab.on').dataset.p==='dot') document.querySelector('.tab[data-p="marque"]').click();
+  document.querySelector('.tab[data-p="remu"]').style.display=fr0?'none':''; document.querySelector('.tab[data-p="dates"]').style.display='';
+  if(fr0&&document.querySelector('.tab.on')&&document.querySelector('.tab.on').dataset.p==='remu') document.querySelector('.tab[data-p="marque"]').click();
+  document.getElementById('inflOwn').style.display='';
+  if(fr0&&S.opt==='cp_paid') S.opt='cp_free';
+  document.querySelector('#s-opt .card[data-v="cp_paid"]').style.display=fr0?'none':'';
+  document.querySelector('.tab[data-p="dot"]').style.display=ugc?'none':'';
+  if(ugc&&document.querySelector('.tab.on')&&document.querySelector('.tab.on').dataset.p==='dot') document.querySelector('.tab[data-p="marque"]').click();
   prodUI();
-  ['g-profil','g-opt'].forEach(id=>document.getElementById(id).style.display=(ugc||fr0)?'none':'');
+  document.getElementById('g-profil').style.display=(ugc||fr0)?'none':''; document.getElementById('g-opt').style.display=ugc?'none':'';
   const ag=agentOn();
   document.getElementById('agentBox').style.display=(S.type==='ugc'||fr0)?'none':'';
   document.getElementById('agentFields').style.display=ag?'':'none';
@@ -1488,7 +1535,7 @@ function keepSignTogether(items,nodes){
 }
 function makePdf(){
   missing=new Set();
-  const t=tpl(), items=build(t.blocks,true), p=t.page;
+  const t=tpl(); finish.noBreak=!!t.free; const items=build(t.blocks,true), p=t.page;
   const nodes=keepSignTogether(items,items.map(pdfBlock));
   return {
     pageSize:{width:p.w,height:p.h}, pageMargins:[p.ml,p.mt,p.mr,p.mb],
@@ -1500,10 +1547,6 @@ function makePdf(){
 }
 document.getElementById('pdfBtn').onclick=()=>{
   render();
-  if(freeOn()){
-    if(missing.size){ alert('Pour ajouter un influenceur free, il faut : '+[...missing].join(', ')+'.'); return; }
-    const cname=recordCampaign(); S.done=true; saveNow(); toast(`@${S.handle.replace(/^@/,'')} ajouté gratuitement à « ${cname} »`); return;
-  }
   if(missing.size&&!confirm(`Il manque encore : ${[...missing].join(', ')}.\n\nGénérer quand même le PDF ?`)) return;
   const fn=fileName();
   if(!fn.ok){ alert('Pour nommer le PDF, il faut la mention influenceur, le nom de la campagne et l’année.'); return; }
