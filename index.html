@@ -173,7 +173,7 @@ textarea{resize:vertical;min-height:64px}
 .sbst{font-size:11px;margin:-4px 0 8px;color:#9a98a0}.sbst.ok{color:var(--acc)}.sbst.warn{color:#e98b6d}.sbst.busy{color:#c9c7cc}
 .extdeal{margin:14px 0 8px;padding:10px 12px;border:1px dashed var(--acc);border-radius:10px;background:var(--acc-soft);font-size:12.5px}.extdeal span{display:block;color:var(--mute);font-size:11.5px;margin-bottom:2px}
 .avban{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:12px 12px 0;padding:10px 12px;border:1px solid var(--acc);background:var(--acc-soft);border-radius:10px}
-.avban{flex-wrap:wrap}.avban>div:first-child{flex:1;min-width:0}#avmRow{display:flex;align-items:center;gap:10px;flex-basis:100%;padding-top:8px;border-top:1px solid rgba(0,0,0,.06)}#avmRow>span{font-size:11.5px;color:var(--mute);white-space:nowrap}#avmRow .seg{flex:1;background:#fff}#avmRow .seg button{padding:6px 6px;font-size:11.5px}#avmRow .seg button.on{background:var(--acc);color:#111}
+.avban{flex-wrap:wrap}.avban>div:first-child{flex:1;min-width:0}#avFactRow .flab{display:block;font-size:12px;color:var(--mute);margin-bottom:5px}#avmRow{display:flex;align-items:center;gap:10px;flex-basis:100%;padding-top:8px;border-top:1px solid rgba(0,0,0,.06)}#avmRow>span{font-size:11.5px;color:var(--mute);white-space:nowrap}#avmRow .seg{flex:1;background:#fff}#avmRow .seg button{padding:6px 6px;font-size:11.5px}#avmRow .seg button.on{background:var(--acc);color:#111}
 .avban b{display:block;font-size:13px}.avban small{display:block;color:var(--mute);font-size:11.5px;margin-top:2px;line-height:1.35}.avban .btn{white-space:nowrap}
 .sheet td.acts button.av{font-size:11px!important;font-weight:700}
 .mplab{font-size:11.5px;color:var(--mute);margin:8px 0 5px}
@@ -398,6 +398,7 @@ textarea{resize:vertical;min-height:64px}
       <div id="avBox" class="medbox" style="display:none">
         <div class="medh">Rémunération complémentaire de l'avenant</div>
         <div class="row"><label class="f"><span>Montant HT en plus du contrat (€)</span><input data-k="av_prix" inputmode="decimal" placeholder="Ajouter le montant (0 si gratuit)"></label><div></div></div>
+        <div id="avFactRow" style="margin-top:8px"><span class="flab">Facturation du complément</span><div class="seg light" id="s-avf"><button data-v="2">Seconde facture</button><button data-v="1">Avec la facture du contrat</button></div></div>
         <div class="hint" id="avCalc"></div>
       </div>
       <div id="medBox" class="medbox">
@@ -539,7 +540,7 @@ function tpl(){
 /* avenant : parties et signatures reprises du modèle, articles générés à partir des différences avec le contrat d'origine */
 function docItems(){
   const t=tpl(); finish.noBreak=!!t.free; const items=build(t.blocks,true);
-  if(!S.av||S.type==='ugc') return {t,items};
+  if(!S.av) return {t,items};
   const a=avTpl(); finish.noBreak=true; const head=build(a.blocks,true); finish.noBreak=false;
   if(S.av.mode!=='complet') return {t:Object.assign({},t,{id:'avenant'}),items:head};
   // contrat initial (tel que signé), puis les avenants précédents, puis celui-ci
@@ -554,7 +555,17 @@ function docItems(){
 function withS(st,fn){ const s0=S; S=Object.assign({},DEF,st); try{ return fn(); } finally{ S=s0; } }
 const MED_KEYS=['opt','mp','med_mois','med_unit','med_start','med_terr','med_p1','med_p2','med_p3'];
 const contentsTxt=()=>{ const P=[]; ['reels','stories','tiktok','youtube','facebook'].forEach(k=>P.push(k+':'+cnt(k))); return P.join(',')+'|'+clips(); };
+const UGC_KEYS=['u_mp','u_mois','u_unit','u_start','u_terr','u_terr_txt','u_p1','u_p2','u_p3'];
+const avFact=()=>S.av&&S.av.fact?S.av.fact:'2';
+function avChangesUgc(){
+  const B=S.av.base||{}, out=[];
+  if(String(B.ugc||'')!==String(S.ugc||'')||(B.date_ugc||'')!==(S.date_ugc||'')) out.push("Les Éléments concernés sont désormais les suivants : {{n:ugc}} {{pl:ugc:contenu vidéo UGC créé:contenus vidéo UGC créés}} en {{date_ugc}} pour {{entreprise}} – {{marque}}.");
+  if(UGC_KEYS.some(k=>JSON.stringify(B[k]??DEF[k])!==JSON.stringify(S[k]??DEF[k]))) out.push("L'autorisation d'exploitation est désormais accordée dans les conditions suivantes. Supports autorisés : réseaux sociaux officiels de la marque {{marque}} ({{mplats:fr:virg}}). Territoire : {{med_terr}}. Durée : une durée {{med_de_duree}} {{med_start}}.");
+  if((B.date_debut||'')!==(S.date_debut||'')||(B.date_fin||'')!==(S.date_fin||'')) out.push("La période d'exécution du Contrat est désormais fixée du {{date_debut}} au {{date_fin}}.");
+  return out;
+}
 function avChanges(fr){
+  if(S.type==='ugc') return avChangesUgc();
   const B=S.av.base||{}, out=[]; const isMed=o=>o==='cp_free'||o==='cp_paid';
   const bC=withS(B,contentsTxt), cC=contentsTxt(); const cross=S.opt!=='nocp';
   if(bC!==cC) out.push(fr?"Les Contenus attendus de l'Influenceur sont désormais les suivants : {{enum:fr:"+(cross?'en':'sans')+"}}.":"The Content expected from the Influencer is now as follows: {{enum:en:"+(cross?'with':'without')+"}}.");
@@ -572,44 +583,46 @@ function avChanges(fr){
   return out;
 }
 function avTpl(){
-  const id={FR:'9',UK:'33',ES:'57'}[S.pays]||'9', base=TPL.tpls.find(t=>t.id===id), bl=base.blocks, fr=base.lang==='fr';
+  const ugc=S.type==='ugc', id=ugc?'ugc':({FR:'9',UK:'33',ES:'57'}[S.pays]||'9'), base=TPL.tpls.find(t=>t.id===id), bl=base.blocks, fr=base.lang==='fr';
   const tx=b=>b.t==='p'?b.runs.map(r=>r[0]||'').join(''):'';
   const iE=bl.findIndex(b=>/^\s*(ENTRE|BETWEEN)/i.test(tx(b)));
-  const iP=bl.findIndex((b,i)=>i>iE&&/^\s*Ci-après dénommés individuellement|^\s*Hereinafter individually/i.test(tx(b)));
+  const iP=ugc?bl.findIndex((b,i)=>i>iE&&/^\s*\{\{nom\}\}/.test(tx(b))):bl.findIndex((b,i)=>i>iE&&/^\s*Ci-après dénommés individuellement|^\s*Hereinafter individually/i.test(tx(b)));
   const iH=bl.findIndex(b=>/^\s*ARTICLE 1\b/i.test(tx(b)));
   const body=bl.slice(iH+1).find(b=>b.t==='p'&&tx(b).trim().length>40);
   let iF=-1; bl.forEach((b,i)=>{ if(b.t==='p'&&tx(b).includes('{{date_sign}}')) iF=i; });
   const iT=bl.findIndex((b,i)=>i>iF&&b.t==='tbl');
   const clone=b=>JSON.parse(JSON.stringify(b));
+  const sty=(k,o)=>{ const st=Object.assign({},TPL.styles[k],o); let x=TPL.styles.findIndex(y=>JSON.stringify(y)===JSON.stringify(st)); if(x<0){ TPL.styles.push(st); x=TPL.styles.length-1; } return x; };
   const hs=bl[iH].runs[0][1], bs=body.runs[0][1];
   const bsB=(()=>{ const st=Object.assign({},TPL.styles[bs],{b:true,c:'000000'}); let i=TPL.styles.findIndex(x=>JSON.stringify(x)===JSON.stringify(st)); if(i<0){ TPL.styles.push(st); i=TPL.styles.length-1; } return i; })();
-  const H=t=>({t:'p',st:Object.assign({},bl[iH].st,{pb:0,kn:1}),mk:bl[iH].mk,runs:[[t,hs]]});
-  const P=t=>({t:'p',st:Object.assign({},body.st,{pb:0}),mk:body.mk,runs:[[t,bs]]});
+  const CH=ugc?{sb:7,sa:2}:{}, CP=ugc?{sb:0,sa:4}:{};
+  const H=t=>({t:'p',st:Object.assign({},bl[iH].st,{pb:0,kn:1},CH),mk:bl[iH].mk,runs:[[t,hs]]});
+  const P=t=>({t:'p',st:Object.assign({},body.st,{pb:0},CP),mk:body.mk,runs:[[t,bs]]});
   const L=t=>({t:'p',st:Object.assign({},body.st,{il:28,fi:-14,sb:4,sa:0,pb:0}),mk:body.mk,li:{fmt:'bullet',txt:'•'},runs:[[t,bs]]});
   const n=S.av.n||1;
-  const title={t:'p',st:Object.assign({},bl[iH].st,{al:'center',pb:0,sb:0,sa:6}),mk:bl[iH].mk,runs:[[fr?`AVENANT N°${n} AU CONTRAT DE COLLABORATION D’INFLUENCE`:`AMENDMENT No. ${n} TO THE INFLUENCER COLLABORATION AGREEMENT`,hs]]};
-  const lab=fr?['Projet : ','  ·  Influenceur : ','  ·  Contrat du : ']:['Project: ','  ·  Influencer: ','  ·  Agreement dated: '];
+  const title={t:'p',st:Object.assign({},bl[iH].st,{al:'center',pb:0,sb:0,sa:6}),mk:bl[iH].mk,runs:[[ugc?`AVENANT N°${n} AU CONTRAT DE CESSION DE DROITS (CONTENUS UGC)`:fr?`AVENANT N°${n} AU CONTRAT DE COLLABORATION D’INFLUENCE`:`AMENDMENT No. ${n} TO THE INFLUENCER COLLABORATION AGREEMENT`,hs]]};
+  const lab=ugc?['Projet : ','  ·  Créateur : ','  ·  Contrat du : ']:fr?['Projet : ','  ·  Influenceur : ','  ·  Contrat du : ']:['Project: ','  ·  Influencer: ','  ·  Agreement dated: '];
   const sub={t:'p',st:Object.assign({},body.st,{al:'center',pb:0,sb:2,sa:4}),mk:body.mk,runs:[[lab[0],bsB],['{{projet}}',bs],[lab[1],bsB],['@{{handle}}',bs],[lab[2],bsB],['{{av_date}}',bs]]};
   const parties=bl.slice(iE,iP+1).map(clone); parties.forEach(b=>{ if(b.st) b.st=Object.assign({},b.st,{pb:0}); });
   const ch=avChanges(fr), extra=num(S.av_prix)||0, A=[];
-  const intro=fr?"Entre l'Agence YLG et {{nom}} (@{{handle}}), ci-après « l'Influenceur ».":"Between Agence YLG and {{nom}} (@{{handle}}), hereinafter the \"Influencer\".";
+  const intro=ugc?"Entre la SARL YLG et {{nom}} (@{{handle}}), ci-après « le Créateur ».":fr?"Entre l'Agence YLG et {{nom}} (@{{handle}}), ci-après « l'Influenceur ».":"Between Agence YLG and {{nom}} (@{{handle}}), hereinafter the \"Influencer\".";
   if(fr){
-    A.push(H('PRÉAMBULE'),P("Les Parties ont conclu le {{av_date}} un contrat de collaboration d'influence portant sur la campagne {{projet}} (ci-après le « Contrat »). Elles ont souhaité en modifier certaines conditions, ce qu'elles font par le présent avenant."));
+    A.push(H('PRÉAMBULE'),P("Les Parties ont conclu le {{av_date}} "+(ugc?"un contrat d'autorisation d'exploitation de l'image et de cession de droits sur des contenus UGC pour le projet":"un contrat de collaboration d'influence portant sur la campagne")+" {{projet}} (ci-après le « Contrat »). Elles ont souhaité en modifier certaines conditions, ce qu'elles font par le présent avenant."));
     A.push(H('ARTICLE 1. OBJET'),P("Le présent avenant a pour objet de modifier le Contrat dans les conditions décrites ci-après. Il fait partie intégrante du Contrat."));
     A.push(H('ARTICLE 2. MODIFICATIONS'));
     if(ch.length){ A.push(P("À compter de la signature du présent avenant, le Contrat est modifié comme suit :")); ch.forEach(x=>A.push(L(x))); } else A.push(P("[Aucune modification sélectionnée : modifiez les contenus, la médiatisation, les dates ou la dotation dans le formulaire.]"));
-    A.push(H('ARTICLE 3. RÉMUNÉRATION COMPLÉMENTAIRE'),P(extra?"En contrepartie des modifications prévues à l'article 2, l'Influenceur percevra une rémunération complémentaire de ({{av_w}} euros) {{av_n}},00€ HT, qui s'ajoute à la rémunération prévue au Contrat. Elle sera facturée selon les modalités prévues au Contrat.":"Les modifications prévues à l'article 2 n'entraînent aucune rémunération complémentaire."));
+    A.push(H('ARTICLE 3. RÉMUNÉRATION COMPLÉMENTAIRE'),P(extra?"En contrepartie des modifications prévues à l'article 2, "+(ugc?"le Créateur":"l'Influenceur")+" percevra une rémunération complémentaire de ({{av_w}} euros) {{av_n}},00€ HT, qui s'ajoute à la rémunération prévue au Contrat. "+(avFact()==='2'?"Elle fera l'objet d'une seconde facture, distincte de celle prévue au Contrat, émise par "+(ugc?"le Créateur":"l'Influenceur")+" après signature du présent avenant. Cette facture sera réglée dans un délai de 30 (trente) jours à compter de sa réception et devra comporter les mêmes éléments de facturation que ceux prévus au Contrat.":"Elle sera facturée selon les modalités prévues au Contrat."):"Les modifications prévues à l'article 2 n'entraînent aucune rémunération complémentaire."));
     A.push(H('ARTICLE 4. AUTRES DISPOSITIONS'),P((S.av.mode==='complet'?"Le Contrat initial figure avant le présent avenant. ":"")+"Toutes les autres clauses du Contrat demeurent inchangées et continuent de s'appliquer. En cas de contradiction entre le Contrat et le présent avenant, les stipulations du présent avenant prévalent."));
   } else {
     A.push(H('RECITALS'),P("The Parties entered into an influencer collaboration agreement on {{av_date}} relating to the {{projet}} campaign (the \"Agreement\"). They wish to amend some of its terms, which they do by this amendment."));
     A.push(H('ARTICLE 1. PURPOSE'),P("The purpose of this amendment is to amend the Agreement as set out below. It forms an integral part of the Agreement."));
     A.push(H('ARTICLE 2. AMENDMENTS'));
     if(ch.length){ A.push(P("With effect from the signature of this amendment, the Agreement is amended as follows:")); ch.forEach(x=>A.push(L(x))); } else A.push(P("[No change selected: update the content, paid media, dates or products supply in the form.]"));
-    A.push(H('ARTICLE 3. ADDITIONAL FEE'),P(extra?"In consideration of the amendments set out in Article 2, the Influencer shall receive an additional fee of {{av_w}} {{cur_word}} ({{cur}}{{av_n}}.00) excluding VAT, in addition to the fee set out in the Agreement. It shall be invoiced in accordance with the terms of the Agreement.":"The amendments set out in Article 2 do not give rise to any additional fee."));
+    A.push(H('ARTICLE 3. ADDITIONAL FEE'),P(extra?"In consideration of the amendments set out in Article 2, the Influencer shall receive an additional fee of {{av_w}} {{cur_word}} ({{cur}}{{av_n}}.00) excluding VAT, in addition to the fee set out in the Agreement. "+(avFact()==='2'?"It shall be invoiced by the Influencer on a second invoice, separate from the one provided for in the Agreement, issued after signature of this amendment. This invoice shall be paid within thirty (30) days of receipt and shall include the same invoicing details as those required under the Agreement.":"It shall be invoiced in accordance with the terms of the Agreement."):"The amendments set out in Article 2 do not give rise to any additional fee."));
     A.push(H('ARTICLE 4. OTHER PROVISIONS'),P((S.av.mode==='complet'?"The original Agreement precedes this amendment. ":"")+"All other provisions of the Agreement remain unchanged and continue to apply. In the event of any conflict between the Agreement and this amendment, the provisions of this amendment shall prevail."));
   }
-  const sig=bl.slice(iF,iT+1).map(clone); if(sig[0]&&sig[0].st) sig[0].st=Object.assign({},sig[0].st,{sb:22,pb:0});
-  const lg=bl.find(b=>b.t==='logo'), logo=lg?Object.assign(clone(lg),{small:true,st:Object.assign({},lg.st,{sb:0,sa:8,al:'center'})}):null;
+  const sig=bl.slice(iF,iT+1).map(clone).filter(b=>!ugc||b.t!=='p'||tx(b).trim()); if(sig[0]&&sig[0].st) sig[0].st=Object.assign({},sig[0].st,{sb:ugc?12:22,pb:0});
+  const lg=bl.find(b=>b.t==='logo'), logo=lg?Object.assign(clone(lg),{small:true,tiny:ugc,st:Object.assign({},lg.st,{sb:0,sa:8,al:'center'})}):null;
   return {id:'avenant',lang:base.lang,pays:base.pays,profil:S.profil,opt:S.opt,page:base.page,free:true,blocks:[...(logo?[logo]:[]),title,sub,P(intro),...A,...sig]};
 }
 /* contrat court (2 pages) pour les influenceurs Free : parties et signatures reprises des modèles, articles allégés */
@@ -868,7 +881,7 @@ function avUI(){ const on=!!S.av, ex=on&&S.type==='ext';
   document.getElementById('avBox').style.display=on?'':'none';
   if(on){ document.getElementById('avTitle').textContent=`Avenant n°${S.av.n||1} au contrat ${ex?'externe ':''}de @${String(S.handle||'').replace(/^@/,'')}${S.av.date&&!ex?' du '+fmtDate(S.av.date):''}`;
     document.getElementById('medBox').style.display='none';
-    document.getElementById('avmRow').style.display=ex?'none':''; setSeg('s-avm',S.av.mode==='complet'?'complet':'seul');
+    document.getElementById('avmRow').style.display=ex?'none':''; setSeg('s-avm',S.av.mode==='complet'?'complet':'seul'); document.getElementById('avFactRow').style.display=(num(S.av_prix)||0)>0?'':'none'; setSeg('s-avf',avFact());
     const n=avChanges(lang()==='fr').length, x=num(S.av_prix)||0;
     if(ex) document.querySelector('#avBanner small').textContent='Glissez le PDF de l’avenant reçu, modifiez ce qui change (contenus, médiatisation…) et indiquez le montant de l’avenant.';
     else document.querySelector('#avBanner small').textContent='Modifiez seulement ce qui change (contenus, médiatisation, dates…) et indiquez la rémunération complémentaire dans l’onglet Rémunération.';
@@ -1181,7 +1194,7 @@ const NAT={Roboto:1.172,Poppins:1.5};
 const colr=c=>'#'+(c||'000000');
 function lineH(st,mk){ const f=FONT(mk.f), s=mk.s||11; return st.lh<0?(-st.lh)/(s*NAT[f]):(st.lh||1.15); }
 const LOGO_BOX={w:180,h:80};
-const LB=e=>(e&&e.small)?{w:150,h:52}:LOGO_BOX;
+const LB=e=>(e&&e.tiny)?{w:110,h:36}:(e&&e.small)?{w:150,h:52}:LOGO_BOX;
 const COVER_TITLE=24; // taille des grands titres de la page 1
 const COVER_LINES=18; // taille des lignes Projet / Influenceur / Date
 
@@ -1459,10 +1472,11 @@ function invHintOnly(){ const ivs=invoices(),tot=TOT(),h=document.getElementById
   if(tot!=null&&ivs.length>1&&Math.abs(sum-tot)>0.001){ h.className='hint warn'; h.textContent=`Attention : la somme des factures (${fmtNum(sum)}) ne correspond pas au total (${fmtNum(tot)}).`; } else { h.className='hint'; h.textContent=tot!=null?`En lettres : ${words(tot)}.`:''; } }
 document.addEventListener('change',e=>{ if(e.target.tagName==='SELECT'||e.target.type==='date'){ e.target.dispatchEvent(new Event('input',{bubbles:true})); } });
 
-document.querySelectorAll('.seg:not(#s-inv):not(#s-avm)').forEach(seg=>seg.addEventListener('click',e=>{
+document.querySelectorAll('.seg:not(#s-inv):not(#s-avm):not(#s-avf)').forEach(seg=>seg.addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return;
   S[{ 's-type':'type','s-pays':'pays','s-profil':'profil','s-paid':'paid'}[seg.id]]=b.dataset.v; S.inv=S.inv.map(i=>({amount:i.amount})); save(); syncUI();
 }));
+document.getElementById('s-avf').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||!S.av) return; S.av.fact=b.dataset.v; save(); syncUI(); });
 document.getElementById('s-avm').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||!S.av) return; S.av.mode=b.dataset.v; save(); syncUI(); });
 document.getElementById('s-inv').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; S.nb_inv=b.dataset.v; S.inv=[]; save(); syncUI(); });
 document.getElementById('s-opt').addEventListener('click',e=>{ const b=e.target.closest('.card'); if(!b) return; S.opt=b.dataset.v; save(); syncUI(); });
@@ -1925,12 +1939,17 @@ function pdfBlock(e){
 }
 // « Fait à Paris, le … » + exemplaires + signatures : toujours sur la même page
 function keepSignTogether(items,nodes){
-  const i=items.findIndex(e=>e.k==='p'&&/^(Fait à Paris|Executed in Paris)/.test((e.text||'').trim()));
-  if(i<0) return nodes;
-  let j=i; while(j<items.length&&items[j].k!=='tbl') j++;
-  if(j>=items.length) return nodes;
-  const grp=nodes.slice(i,j+1).map(n=>Object.assign({},n,{unbreakable:undefined}));
-  return [...nodes.slice(0,i),{stack:grp,unbreakable:true},...nodes.slice(j+1)];
+  const T=e=>(e&&e.text||'').trim();
+  const groups=[];
+  items.forEach((e,i)=>{ if(e.k!=='p'||!/^(Fait à Paris|Executed in Paris)/.test(T(e))) return;
+    let j=i; while(j<items.length&&items[j].k!=='tbl') j++; if(j>=items.length) return;
+    let st=i; // avenant : le dernier article reste avec les signatures
+    for(let k=i-1;k>=0&&k>i-6;k--){ if(/^ARTICLE 4\. (AUTRES DISPOSITIONS|OTHER PROVISIONS)/.test(T(items[k]))){ st=k; break; } }
+    if(!groups.length||st>groups[groups.length-1][1]) groups.push([st,j]); });
+  if(!groups.length) return nodes;
+  const out=[]; let p=0;
+  groups.forEach(([a,b])=>{ out.push(...nodes.slice(p,a)); const grp=nodes.slice(a,b+1).map(n=>Object.assign({},n,{unbreakable:undefined})); out.push({stack:grp,unbreakable:true}); p=b+1; });
+  out.push(...nodes.slice(p)); return out;
 }
 function makePdf(){
   missing=new Set();
