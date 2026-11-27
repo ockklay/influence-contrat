@@ -28,6 +28,7 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
 .grp h4{margin:0 0 8px;font-size:10.5px;letter-spacing:1.1px;text-transform:uppercase;color:#8d8b90;font-weight:600}
 .seg{display:flex;background:#25252a;border-radius:9px;padding:3px;gap:3px}
 .seg button{flex:1;border:0;background:transparent;color:#cfcdd0;padding:7px 4px;border-radius:7px;font:inherit;font-size:12px;cursor:pointer}
+#s-type{flex-wrap:wrap;background:none;padding:0;gap:6px}#s-type button{flex:1 1 40%;border:1px solid #34343a;background:#222227;border-radius:9px;padding:9px 4px;font-size:12.5px;color:#d6d4d9}#s-type button[data-v="ext"]{flex-basis:100%}#s-type button.on{border-color:var(--acc);background:#2b241f;color:var(--acc);box-shadow:none;font-weight:600}
 .seg button.on{background:#3a3a41;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3)}
 .seg.light{background:#efeeec}
 .seg.light button{color:#55535a;padding:9px 4px}
@@ -168,6 +169,13 @@ textarea{resize:vertical;min-height:64px}
 .vetochk input{width:16px;height:16px;accent-color:var(--acc);margin:1px 0 0;flex:none}
 .vetochk small{display:block;color:#9a98a0;font-size:11.5px;margin-top:3px}
 .vetochk:has(input:checked){border-color:var(--acc)}
+.sbgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:10px}
+.sbst{font-size:11px;margin:-4px 0 8px;color:#9a98a0}.sbst.ok{color:var(--acc)}.sbst.warn{color:#e98b6d}.sbst.busy{color:#c9c7cc}
+.extdeal{margin:14px 0 8px;padding:10px 12px;border:1px dashed var(--acc);border-radius:10px;background:var(--acc-soft);font-size:12.5px}.extdeal span{display:block;color:var(--mute);font-size:11.5px;margin-bottom:2px}
+.avban{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:12px 12px 0;padding:10px 12px;border:1px solid var(--acc);background:var(--acc-soft);border-radius:10px}
+.avban{flex-wrap:wrap}.avban>div:first-child{flex:1;min-width:0}#avmRow{display:flex;align-items:center;gap:10px;flex-basis:100%;padding-top:8px;border-top:1px solid rgba(0,0,0,.06)}#avmRow>span{font-size:11.5px;color:var(--mute);white-space:nowrap}#avmRow .seg{flex:1;background:#fff}#avmRow .seg button{padding:6px 6px;font-size:11.5px}#avmRow .seg button.on{background:var(--acc);color:#111}
+.avban b{display:block;font-size:13px}.avban small{display:block;color:var(--mute);font-size:11.5px;margin-top:2px;line-height:1.35}.avban .btn{white-space:nowrap}
+.sheet td.acts button.av{font-size:11px!important;font-weight:700}
 .mplab{font-size:11.5px;color:var(--mute);margin:8px 0 5px}
 .mpchips{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}.mpchips .chk{margin:0}
 .prodrow{display:flex;align-items:center;gap:8px;margin-top:8px}.prodrow span{width:18px;color:var(--mute);font-size:12px;text-align:right}
@@ -203,7 +211,7 @@ textarea{resize:vertical;min-height:64px}
     <div class="brand"><img src="icon-512.png" alt=""><div><b>Influence Contrat</b><small>Agence YLG</small></div></div>
 
     <div class="grp"><h4>Type de contrat</h4>
-      <div class="seg" id="s-type"><button data-v="infl" class="on">Influence</button><button data-v="ugc">UGC</button></div></div>
+      <div class="seg" id="s-type"><button data-v="infl" class="on">Influence</button><button data-v="ugc">UGC</button><button data-v="ext" title="Contrat déjà rédigé par l’influenceur ou son agent">Contrat externe</button></div></div>
 
     <div class="grp" id="g-paid"><h4>Influenceur</h4>
       <div class="seg" id="s-paid"><button data-v="paid" class="on">Paid</button><button data-v="free">Free</button></div></div>
@@ -223,7 +231,7 @@ textarea{resize:vertical;min-height:64px}
         <button class="card" data-v="cp_paid"><b>Crosspost + médiatisation payante</b>Ads autorisées contre rétribution</button>
       </div></div>
 
-    <div class="grp" id="g-camp"><h4>Campagnes</h4><div id="campList" class="camplist"></div><button class="link" id="campNew">＋ Créer une campagne à l'avance</button><datalist id="campNames"></datalist>
+    <div class="grp" id="g-camp"><h4>Campagnes</h4><div class="sbst off" id="sbStatus" hidden></div><div id="campList" class="camplist"></div><button class="link" id="campNew">＋ Créer une campagne à l'avance</button><datalist id="campNames"></datalist>
 </div>
 
     <div class="used">Modèle utilisé : <b id="used">Contrat 9</b>
@@ -234,6 +242,7 @@ textarea{resize:vertical;min-height:64px}
 
   <!-- ===== Colonne 2 : onglets à remplir ===== -->
   <section class="form">
+    <div class="avban" id="avBanner" style="display:none"><div><b id="avTitle">Avenant</b><small>Modifiez seulement ce qui change (contenus, médiatisation, dates…) et indiquez la rémunération complémentaire dans l'onglet Rémunération.</small></div><button class="btn sec" id="avQuit">Quitter l'avenant</button><div id="avmRow"><span>PDF à générer</span><div class="seg light" id="s-avm"><button data-v="seul">Avenant seul</button><button data-v="complet">Contrat initial + avenant</button></div></div></div>
     <nav class="tabs" id="tabs">
       <button class="tab on" data-p="marque">Marque</button>
       <button class="tab" data-p="infl">Influenceur</button>
@@ -243,6 +252,30 @@ textarea{resize:vertical;min-height:64px}
       <button class="tab" data-p="dates">Dates</button>
     </nav>
 
+    <div class="pane" id="p-ext">
+      <div class="sect" style="margin-top:0">Contrat externe (rédigé par l'influenceur ou son agent)</div>
+      <div class="drop" id="extDrop"><div id="extIn">Glissez ici le contrat PDF reçu<small>il s’affiche à droite pendant que vous remplissez les cases</small></div></div>
+      <input type="file" id="extFile" accept="application/pdf" hidden>
+      <div class="row">
+        <label class="f"><span>Campagne</span><input class="req" data-k="campagne" list="campNames" autocomplete="off" placeholder="Ajouter la campagne"></label>
+        <label class="f"><span>Année</span><input class="req" data-k="annee" inputmode="numeric" placeholder="Ajouter l'année"></label>
+      </div>
+      <div class="row">
+        <label class="f"><span>Pseudo de l'influenceur (sans @)</span><input class="req" data-k="handle" placeholder="Ajouter le pseudo"></label>
+        <label class="f"><span>Prénom et NOM <em>(facultatif)</em></span><input data-k="nom" placeholder="Ajouter le prénom et le NOM"></label>
+      </div>
+      <div class="row" id="extAvRow" style="display:none">
+        <label class="f"><span>Montant de l'avenant HT (€), en plus du contrat</span><input data-k="av_prix" inputmode="decimal" placeholder="Ajouter le montant (0 si gratuit)"></label><div></div>
+      </div>
+      <div class="row" id="extPrixRow">
+        <label class="f"><span>Prix HT (€)</span><input class="req" data-k="ext_prix" inputmode="decimal" placeholder="Ajouter le montant HT"></label>
+        <label class="f"><span>Prix TTC (€) <em>(si TVA)</em></span><input data-k="ext_ttc" inputmode="decimal" placeholder="Facultatif"></label>
+      </div>
+      <label class="f"><span>Période d'activation</span><input class="req" data-k="periode" placeholder="Ajouter la période (ex. Janvier – Mars 2027)"></label>
+      <div id="extCont"></div>
+      <div class="extdeal"><span>Livrable dans le tableau</span><b id="extDeal">—</b></div>
+      <div class="hint">Dans le tableau et l'Excel, la colonne Note influence indiquera « Contrat externe reçu ». Le profil (classique ou vétérinaire), le crosspost et la médiatisation se choisissent à gauche.</div>
+    </div>
     <div class="pane on" id="p-marque">
       <label class="f" id="campPickWrap" style="display:none"><span>Reprendre une campagne déjà enregistrée</span><select id="campPick" style="color:#a3a1a8"></select></label>
       <div class="drop" id="drop"><div id="dropIn">Glissez le logo de la marque ici<small>ou cliquez pour choisir une image (PNG, JPG, SVG)</small></div></div>
@@ -362,6 +395,11 @@ textarea{resize:vertical;min-height:64px}
         <div class="f" id="nbInvWrap"><span style="display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px;font-weight:500">Nombre de factures</span>
           <div class="seg light" id="s-inv"><button data-v="1">1 facture</button><button data-v="2">2 factures</button></div></div>
       </div>
+      <div id="avBox" class="medbox" style="display:none">
+        <div class="medh">Rémunération complémentaire de l'avenant</div>
+        <div class="row"><label class="f"><span>Montant HT en plus du contrat (€)</span><input data-k="av_prix" inputmode="decimal" placeholder="Ajouter le montant (0 si gratuit)"></label><div></div></div>
+        <div class="hint" id="avCalc"></div>
+      </div>
       <div id="medBox" class="medbox">
         <div class="medh">Médiatisation payante <small>(s'ajoute à la prestation, avec le détail dans le contrat ; réseaux et durée dans l'onglet Contenus)</small></div>
         <div class="row">
@@ -418,7 +456,17 @@ textarea{resize:vertical;min-height:64px}
   <p class="hint" style="margin-top:8px">La signature de l'agence est gardée uniquement sur ce Mac (elle n'est pas publiée avec l'appli).</p>
   <div class="drop" id="sigDrop"><div id="sigIn">Glissez l'image de signature ici<small>ou cliquez pour choisir</small></div></div>
   <input type="file" id="sigFile" accept="image/*" hidden>
-  <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn sec" id="sigDel">Retirer</button><button class="btn pri" id="setClose">Fermer</button></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn sec" id="sigDel">Retirer la signature</button></div>
+  <div hidden><h3 style="margin-top:22px">Espace partagé (Supabase)</h3>
+  <p class="hint" style="margin-top:6px">Pour partager les campagnes avec l'équipe. Laissez vide pour travailler seule sur ce Mac.</p>
+  <div class="sbgrid">
+    <label class="f"><span>URL du projet</span><input id="sbUrl" placeholder="Ajouter l'URL (https://xxxx.supabase.co)" autocomplete="off"></label>
+    <label class="f"><span>Clé publique (anon / publishable)</span><input id="sbKey" placeholder="Ajouter la clé publique" autocomplete="off"></label>
+    <label class="f"><span>Votre e-mail</span><input id="sbMail" type="email" placeholder="Ajouter votre e-mail" autocomplete="username"></label>
+    <label class="f"><span>Mot de passe</span><input id="sbPass" type="password" placeholder="Ajouter votre mot de passe" autocomplete="current-password"></label>
+  </div>
+  <p class="hint" id="sbMsg" style="margin-top:8px"></p>
+  <button class="btn sec" id="sbOut">Se déconnecter</button><button class="btn sec" id="sbIn">Se connecter</button></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="btn pri" id="setClose">Fermer</button></div>
 </div></div>
 <div class="toast" id="toast"></div>
 
@@ -426,6 +474,7 @@ textarea{resize:vertical;min-height:64px}
 <script src="pdfmake.min.js"></script>
 <script src="vfs_fonts.js"></script>
 <script src="exceljs.min.js"></script>
+<script src="pdfjs.min.js"></script>
 <script>
 'use strict';
 /* ================= Nombres en lettres ================= */
@@ -469,7 +518,7 @@ const DEF={type:'infl',pays:'FR',profil:'classic',opt:'nocp',
   marque:'',entreprise:'',marque_desc_txt:'',campagne:'',annee:'',periode:'',
   nom:'',handle:'',adresse:'',id_type:'',id_num:'',
   reels:1,stories:1,clips:3,tiktok:1,youtube:1,facebook:1,pl_ig:true,pl_tt:true,pl_yt:false,pl_fb:false,paid:'paid',ugc:1,date_ugc:'',id_pending:false,tva:false,tva_rate:'20',adr_rue:'',adr_cp:'',adr_ville:'',adr_reg:'',adr_pays:'',ag_rue:'',ag_cp:'',ag_ville:'',ag_reg:'',ag_pays:'',agent:false,agent_nom:'',agent_court:'',agent_id_type:'',agent_id_num:'',agent_adresse:'',agent_civ:'M',agent_rep:'',agent_rep_id:'',produits:'',dot:false,prods:[],
-  total:'',med_prix:'',med_mois:'3',mp:null,med_brand:false,med_unit:'mois',med_terr:'monde',med_terr_txt:'',med_p1:'',med_p2:'',med_p3:'',med_start:'pub',med_where:'infl',u_mois:'2',u_unit:'ans',u_terr:'monde',u_terr_txt:'',u_p1:'',u_p2:'',u_p3:'',u_start:'sign',u_mp:null,nb_inv:'1',inv:[],date_debut:'',date_fin:'',date_sign:TODAY(),logo:''};
+  total:'',med_prix:'',med_mois:'3',ext_prix:'',ext_ttc:'',ext_livrable:'',ext_file:'',av:null,av_prix:'',mp:null,med_brand:false,med_unit:'mois',med_terr:'monde',med_terr_txt:'',med_p1:'',med_p2:'',med_p3:'',med_start:'pub',med_where:'infl',u_mois:'2',u_unit:'ans',u_terr:'monde',u_terr_txt:'',u_p1:'',u_p2:'',u_p3:'',u_start:'sign',u_mp:null,nb_inv:'1',inv:[],date_debut:'',date_fin:'',date_sign:TODAY(),logo:''};
 let S=load();
 ['id_type','agent_id_type'].forEach(k=>{ if(S[k]==='CIF') S[k]='NIFS'; });
 function load(){ try{ const s=JSON.parse(localStorage.getItem('ic_state')||'null');
@@ -486,6 +535,82 @@ function tpl(){
   if(S.type==='ugc') return TPL.tpls.find(t=>t.id==='ugc');
   if(freeOn()) return freeTpl();
   return TPL.tpls.find(t=>t.pays===S.pays&&t.profil===S.profil&&t.opt===S.opt);
+}
+/* avenant : parties et signatures reprises du modèle, articles générés à partir des différences avec le contrat d'origine */
+function docItems(){
+  const t=tpl(); finish.noBreak=!!t.free; const items=build(t.blocks,true);
+  if(!S.av||S.type==='ugc') return {t,items};
+  const a=avTpl(); finish.noBreak=true; const head=build(a.blocks,true); finish.noBreak=false;
+  if(S.av.mode!=='complet') return {t:Object.assign({},t,{id:'avenant'}),items:head};
+  // contrat initial (tel que signé), puis les avenants précédents, puis celui-ci
+  const logo=S.logo, cur=S, out=[];
+  const orig=S.av.orig||S.av.base;
+  const t0=withS(Object.assign({},orig,{logo,av:null}),()=>tpl());
+  out.push(...withS(Object.assign({},orig,{logo,av:null}),()=>{ finish.noBreak=!!t0.free; const it=build(t0.blocks,true); finish.noBreak=false; return it; }));
+  (S.av.prev||[]).forEach(st=>{ const it=withS(Object.assign({},st,{logo,av:Object.assign({},st.av,{mode:'complet'})}),()=>{ finish.noBreak=true; const x=build(avTpl().blocks,true); finish.noBreak=false; return x; }); if(it[0]) it[0].pb=1; out.push(...it); });
+  if(head[0]) head[0].pb=1; out.push(...head);
+  return {t:Object.assign({},t0,{id:'avenant'}),items:out};
+}
+function withS(st,fn){ const s0=S; S=Object.assign({},DEF,st); try{ return fn(); } finally{ S=s0; } }
+const MED_KEYS=['opt','mp','med_mois','med_unit','med_start','med_terr','med_p1','med_p2','med_p3'];
+const contentsTxt=()=>{ const P=[]; ['reels','stories','tiktok','youtube','facebook'].forEach(k=>P.push(k+':'+cnt(k))); return P.join(',')+'|'+clips(); };
+function avChanges(fr){
+  const B=S.av.base||{}, out=[]; const isMed=o=>o==='cp_free'||o==='cp_paid';
+  const bC=withS(B,contentsTxt), cC=contentsTxt(); const cross=S.opt!=='nocp';
+  if(bC!==cC) out.push(fr?"Les Contenus attendus de l'Influenceur sont désormais les suivants : {{enum:fr:"+(cross?'en':'sans')+"}}.":"The Content expected from the Influencer is now as follows: {{enum:en:"+(cross?'with':'without')+"}}.");
+  if(B.opt==='nocp'&&cross) out.push(fr?"L'Influenceur s'engage à co-publier (crosspost) les Reels Instagram avec le compte officiel du Client.":"The Influencer undertakes to co-publish (crosspost) the Instagram Reels with the Client's official account.");
+  if(B.opt!=='nocp'&&!cross) out.push(fr?"Le crosspost prévu au Contrat est supprimé.":"The crossposting provided for in the Agreement is removed.");
+  const medChanged=MED_KEYS.some(k=>JSON.stringify(B[k]??DEF[k])!==JSON.stringify(S[k]??DEF[k]));
+  if(isMed(S.opt)&&(!isMed(B.opt)||medChanged)){
+    const paid=S.opt==='cp_paid';
+    out.push(fr?"L'Influenceur autorise l'Agence YLG et le Client à sponsoriser, booster ou amplifier les Contenus publiés (via {{med_tools}}), "+(paid?"en contrepartie de la rémunération complémentaire prévue à l'article 3":"à titre gracieux")+". Supports autorisés : {{med_supports}} Territoire : {{med_terr}}. Durée : {{med_duree_long}}"
+      :"The Influencer authorises Agence YLG and the Client to sponsor, boost or amplify the published Content (via {{med_tools}}), "+(paid?"in consideration of the additional fee set out in Article 3":"free of charge")+". Authorised media: {{med_supports}} Territory: {{med_terr}}. Term: {{med_duree_long}}"); }
+  if(isMed(B.opt)&&!isMed(S.opt)) out.push(fr?"L'autorisation de médiatisation prévue au Contrat est retirée.":"The paid media authorisation provided for in the Agreement is withdrawn.");
+  if((B.date_debut||'')!==(S.date_debut||'')||(B.date_fin||'')!==(S.date_fin||'')) out.push(fr?"La période d'exécution du Contrat est désormais fixée du {{date_debut}} au {{date_fin}}.":"The term of the Agreement is now set from {{date_debut}} to {{date_fin}}.");
+  const bP=JSON.stringify(B.dot?(B.prods||[]).filter(Boolean):[]), cP=JSON.stringify(dotOn()?prodList():[]);
+  if(bP!==cP) out.push(dotOn()&&prodList().length?(fr?"La dotation produits comprend désormais : "+joinOr(prodList(),' et ')+".":"The products supply now includes: "+joinOr(prodList(),' and ')+"."):(fr?"La dotation produits prévue au Contrat est supprimée.":"The products supply provided for in the Agreement is removed."));
+  return out;
+}
+function avTpl(){
+  const id={FR:'9',UK:'33',ES:'57'}[S.pays]||'9', base=TPL.tpls.find(t=>t.id===id), bl=base.blocks, fr=base.lang==='fr';
+  const tx=b=>b.t==='p'?b.runs.map(r=>r[0]||'').join(''):'';
+  const iE=bl.findIndex(b=>/^\s*(ENTRE|BETWEEN)/i.test(tx(b)));
+  const iP=bl.findIndex((b,i)=>i>iE&&/^\s*Ci-après dénommés individuellement|^\s*Hereinafter individually/i.test(tx(b)));
+  const iH=bl.findIndex(b=>/^\s*ARTICLE 1\b/i.test(tx(b)));
+  const body=bl.slice(iH+1).find(b=>b.t==='p'&&tx(b).trim().length>40);
+  let iF=-1; bl.forEach((b,i)=>{ if(b.t==='p'&&tx(b).includes('{{date_sign}}')) iF=i; });
+  const iT=bl.findIndex((b,i)=>i>iF&&b.t==='tbl');
+  const clone=b=>JSON.parse(JSON.stringify(b));
+  const hs=bl[iH].runs[0][1], bs=body.runs[0][1];
+  const bsB=(()=>{ const st=Object.assign({},TPL.styles[bs],{b:true,c:'000000'}); let i=TPL.styles.findIndex(x=>JSON.stringify(x)===JSON.stringify(st)); if(i<0){ TPL.styles.push(st); i=TPL.styles.length-1; } return i; })();
+  const H=t=>({t:'p',st:Object.assign({},bl[iH].st,{pb:0,kn:1}),mk:bl[iH].mk,runs:[[t,hs]]});
+  const P=t=>({t:'p',st:Object.assign({},body.st,{pb:0}),mk:body.mk,runs:[[t,bs]]});
+  const L=t=>({t:'p',st:Object.assign({},body.st,{il:28,fi:-14,sb:4,sa:0,pb:0}),mk:body.mk,li:{fmt:'bullet',txt:'•'},runs:[[t,bs]]});
+  const n=S.av.n||1;
+  const title={t:'p',st:Object.assign({},bl[iH].st,{al:'center',pb:0,sb:0,sa:6}),mk:bl[iH].mk,runs:[[fr?`AVENANT N°${n} AU CONTRAT DE COLLABORATION D’INFLUENCE`:`AMENDMENT No. ${n} TO THE INFLUENCER COLLABORATION AGREEMENT`,hs]]};
+  const lab=fr?['Projet : ','  ·  Influenceur : ','  ·  Contrat du : ']:['Project: ','  ·  Influencer: ','  ·  Agreement dated: '];
+  const sub={t:'p',st:Object.assign({},body.st,{al:'center',pb:0,sb:2,sa:4}),mk:body.mk,runs:[[lab[0],bsB],['{{projet}}',bs],[lab[1],bsB],['@{{handle}}',bs],[lab[2],bsB],['{{av_date}}',bs]]};
+  const parties=bl.slice(iE,iP+1).map(clone); parties.forEach(b=>{ if(b.st) b.st=Object.assign({},b.st,{pb:0}); });
+  const ch=avChanges(fr), extra=num(S.av_prix)||0, A=[];
+  const intro=fr?"Entre l'Agence YLG et {{nom}} (@{{handle}}), ci-après « l'Influenceur ».":"Between Agence YLG and {{nom}} (@{{handle}}), hereinafter the \"Influencer\".";
+  if(fr){
+    A.push(H('PRÉAMBULE'),P("Les Parties ont conclu le {{av_date}} un contrat de collaboration d'influence portant sur la campagne {{projet}} (ci-après le « Contrat »). Elles ont souhaité en modifier certaines conditions, ce qu'elles font par le présent avenant."));
+    A.push(H('ARTICLE 1. OBJET'),P("Le présent avenant a pour objet de modifier le Contrat dans les conditions décrites ci-après. Il fait partie intégrante du Contrat."));
+    A.push(H('ARTICLE 2. MODIFICATIONS'));
+    if(ch.length){ A.push(P("À compter de la signature du présent avenant, le Contrat est modifié comme suit :")); ch.forEach(x=>A.push(L(x))); } else A.push(P("[Aucune modification sélectionnée : modifiez les contenus, la médiatisation, les dates ou la dotation dans le formulaire.]"));
+    A.push(H('ARTICLE 3. RÉMUNÉRATION COMPLÉMENTAIRE'),P(extra?"En contrepartie des modifications prévues à l'article 2, l'Influenceur percevra une rémunération complémentaire de ({{av_w}} euros) {{av_n}},00€ HT, qui s'ajoute à la rémunération prévue au Contrat. Elle sera facturée selon les modalités prévues au Contrat.":"Les modifications prévues à l'article 2 n'entraînent aucune rémunération complémentaire."));
+    A.push(H('ARTICLE 4. AUTRES DISPOSITIONS'),P((S.av.mode==='complet'?"Le Contrat initial figure avant le présent avenant. ":"")+"Toutes les autres clauses du Contrat demeurent inchangées et continuent de s'appliquer. En cas de contradiction entre le Contrat et le présent avenant, les stipulations du présent avenant prévalent."));
+  } else {
+    A.push(H('RECITALS'),P("The Parties entered into an influencer collaboration agreement on {{av_date}} relating to the {{projet}} campaign (the \"Agreement\"). They wish to amend some of its terms, which they do by this amendment."));
+    A.push(H('ARTICLE 1. PURPOSE'),P("The purpose of this amendment is to amend the Agreement as set out below. It forms an integral part of the Agreement."));
+    A.push(H('ARTICLE 2. AMENDMENTS'));
+    if(ch.length){ A.push(P("With effect from the signature of this amendment, the Agreement is amended as follows:")); ch.forEach(x=>A.push(L(x))); } else A.push(P("[No change selected: update the content, paid media, dates or products supply in the form.]"));
+    A.push(H('ARTICLE 3. ADDITIONAL FEE'),P(extra?"In consideration of the amendments set out in Article 2, the Influencer shall receive an additional fee of {{av_w}} {{cur_word}} ({{cur}}{{av_n}}.00) excluding VAT, in addition to the fee set out in the Agreement. It shall be invoiced in accordance with the terms of the Agreement.":"The amendments set out in Article 2 do not give rise to any additional fee."));
+    A.push(H('ARTICLE 4. OTHER PROVISIONS'),P((S.av.mode==='complet'?"The original Agreement precedes this amendment. ":"")+"All other provisions of the Agreement remain unchanged and continue to apply. In the event of any conflict between the Agreement and this amendment, the provisions of this amendment shall prevail."));
+  }
+  const sig=bl.slice(iF,iT+1).map(clone); if(sig[0]&&sig[0].st) sig[0].st=Object.assign({},sig[0].st,{sb:22,pb:0});
+  const lg=bl.find(b=>b.t==='logo'), logo=lg?Object.assign(clone(lg),{small:true,st:Object.assign({},lg.st,{sb:0,sa:8,al:'center'})}):null;
+  return {id:'avenant',lang:base.lang,pays:base.pays,profil:S.profil,opt:S.opt,page:base.page,free:true,blocks:[...(logo?[logo]:[]),title,sub,P(intro),...A,...sig]};
 }
 /* contrat court (2 pages) pour les influenceurs Free : parties et signatures reprises des modèles, articles allégés */
 function freeTpl(){
@@ -571,7 +696,11 @@ const terrList=()=>[...new Set(['p1','p2','p3'].map(k=>S[MK(k)]).filter(k=>k&&PA
 function terrTxt(fr){ if((S[MK('terr')]||'monde')!=='pays') return fr?'Monde entier':'Worldwide';
   const L=terrList().map(k=>PAYS[k][fr?0:1]); if(!L.length) return ''; return L.length===1?L[0]:L.slice(0,-1).join(', ')+(fr?' et ':' and ')+L[L.length-1]; }
 // total du contrat = prestation contenus + médiatisation payante
-function TOT(){ const t=num(S.total); if(t==null) return null; return t+(medOn()?(num(S.med_prix)||0):0); }
+function avMedIsNew(){ return !!S.av&&S.opt==='cp_paid'&&(S.av.base||{}).opt!=='cp_paid'; }
+function TOT(){ const t=num(S.total); if(t==null) return null;
+  const med=medOn()?(avMedIsNew()?(num(S.av_prix)||0):(num(S.med_prix)||0)):0;
+  const add=S.av&&!avMedIsNew()?(num(S.av_prix)||0):0;
+  return t+med+add; }
 function fmtNum(n){ const L=lang(); const s=Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,L==='fr'?'\u00a0':','); return s; }
 function fmtDate(d){ if(!d) return ''; const [y,m,j]=d.split('-'); return `${j}/${m}/${y}`; }
 const words=n=>lang()==='fr'?frWords(n):enWords(n);
@@ -683,10 +812,13 @@ function seg(key){
       return [...T(', soit '),...V(money(t*(1+tvaRate()/100))),...T(` TTC (TVA ${rateTxt()} : `),...V(money(t*tvaRate()/100)),...T(')')]; }
     case 'ag_name': return need(S.agent_nom,'Société de l’agent');
     case 'id_opt': { if(!String(S.id_num||'').trim()&&!S.id_pending) return []; return [...T(', '),...seg('id_phrase')]; }
+    case 'av_n': return V(fmtNum(num(S.av_prix)||0));
+    case 'av_w': return V(words(num(S.av_prix)||0));
+    case 'av_date': return need(fmtDate(S.av&&S.av.date||''),'Date du contrat d’origine');
     case 'cur': return T(cur());
     case 'dot_t': return dotOn()?T(lang()==='fr'?' ET DOTATION PRODUITS':' AND PRODUCTS SUPPLY'):[];
-    case 'med_n': { const m=num(S.med_prix); return m==null?need('','Montant médiatisation'):V(fmtNum(m)); }
-    case 'med_w': { const m=num(S.med_prix); return m==null?need('','Montant médiatisation'):V(words(m)); }
+    case 'med_n': { const m=avMedIsNew()?num(S.av_prix):num(S.med_prix); return m==null?need('','Montant médiatisation'):V(fmtNum(m)); }
+    case 'med_w': { const m=avMedIsNew()?num(S.av_prix):num(S.med_prix); return m==null?need('','Montant médiatisation'):V(words(m)); }
     case 'med_duree': return V(durTxt(lang()==='fr'));
     case 'med_resume': { const fr=lang()==='fr', paid=S.opt==='cp_paid', t=terrTxt(fr);
       return [...T(fr?(paid?'contre rétribution, ':'à titre gracieux, ')+'pour une durée de ':(paid?'for a fee, ':'free of charge, ')+'for a term of '),...V(durTxt(fr)),
@@ -706,7 +838,7 @@ function seg(key){
       const brand=fr?[...T('réseaux sociaux officiels de la Marque '),...need(S.marque,'Marque'),...T(' ('),...V(pc),...T(')')]:[...T('official social media accounts of the Brand '),...need(S.marque,'Marque'),...T(' ('),...V(pc),...T(')')];
       const out=w==='infl'?infl:w==='brand'?brand:[...infl,...T(fr?' ; ':'; and '),...brand];
       return [...out,...T('.')]; }
-    case 'med_detail': { const p=num(S.total), m=num(S.med_prix), n=medN();
+    case 'med_detail': { const p=avMedIsNew()?num(S.total):(num(S.total)==null?null:num(S.total)+(S.av?(num(S.av_prix)||0):0)), m=avMedIsNew()?num(S.av_prix):num(S.med_prix), n=medN();
       if(p==null||m==null) return need('','Montant médiatisation');
       return T(lang()==='fr'
         ?`Ce montant comprend ${fmtNum(p)},00€ HT au titre de la création et de la publication des Contenus, et ${fmtNum(m)},00€ HT au titre de la médiatisation des Contenus pendant ${durTxt(true)}.`
@@ -729,6 +861,36 @@ const tvaOn=()=>!!S.tva&&lang()==='fr';
 const tvaRate=()=>20; // TVA française : toujours 20 %
 const money=n=>(Math.round(n*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/\u202f/g,'\u00a0')+'€';
 const rateTxt=()=>String(tvaRate()).replace('.',',')+' %';
+const EXT_HOME={};
+function avUI(){ const on=!!S.av, ex=on&&S.type==='ext';
+  document.getElementById('extAvRow').style.display=ex?'':'none'; document.getElementById('extPrixRow').style.display=ex?'none':'';
+  document.getElementById('avBanner').style.display=on?'':'none';
+  document.getElementById('avBox').style.display=on?'':'none';
+  if(on){ document.getElementById('avTitle').textContent=`Avenant n°${S.av.n||1} au contrat ${ex?'externe ':''}de @${String(S.handle||'').replace(/^@/,'')}${S.av.date&&!ex?' du '+fmtDate(S.av.date):''}`;
+    document.getElementById('medBox').style.display='none';
+    document.getElementById('avmRow').style.display=ex?'none':''; setSeg('s-avm',S.av.mode==='complet'?'complet':'seul');
+    const n=avChanges(lang()==='fr').length, x=num(S.av_prix)||0;
+    if(ex) document.querySelector('#avBanner small').textContent='Glissez le PDF de l’avenant reçu, modifiez ce qui change (contenus, médiatisation…) et indiquez le montant de l’avenant.';
+    else document.querySelector('#avBanner small').textContent='Modifiez seulement ce qui change (contenus, médiatisation, dates…) et indiquez la rémunération complémentaire dans l’onglet Rémunération.';
+    document.getElementById('avCalc').textContent=`${n} modification${n>1?'s':''} détectée${n>1?'s':''} par rapport au contrat d'origine · rémunération complémentaire : ${x?Math.round(x).toLocaleString('fr-FR')+' € HT':'aucune'}`; }
+}
+document.getElementById('avQuit').onclick=()=>{ if(!confirm('Quitter l’avenant ? Le formulaire sera vidé (le contrat d’origine ne change pas).')) return; S=Object.assign({},DEF,{type:S.type,date_sign:TODAY()}); save(); syncUI(); render(); };
+const EXT_HOME_FAKE=0;
+function extUI(){ const ext=S.type==='ext';
+  ['c-infl','mpBox'].forEach(id=>{ const el=document.getElementById(id); if(!EXT_HOME[id]) EXT_HOME[id]={p:el.parentNode,n:el.nextSibling};
+    if(ext&&el.parentNode.id!=='extCont') document.getElementById('extCont').appendChild(el);
+    if(!ext&&el.parentNode.id==='extCont') EXT_HOME[id].p.insertBefore(el,EXT_HOME[id].n); });
+  if(ext){ document.getElementById('c-infl').style.display=''; document.getElementById('extDeal').textContent=dealText()||'—'; }
+  document.getElementById('tabs').style.display=ext?'none':'';
+  document.getElementById('p-ext').classList.toggle('on',ext);
+  document.querySelectorAll('.form .pane:not(#p-ext)').forEach(p=>{ if(ext) p.classList.remove('on'); });
+  if(!ext&&!document.querySelector('.form .pane.on')){ const t=document.querySelector('.tab.on')||document.querySelector('.tab[data-p="marque"]'); document.getElementById('p-'+t.dataset.p).classList.add('on'); }
+  ['g-paid','g-pays'].forEach(id=>{ const el=document.getElementById(id); if(ext&&el) el.style.display='none'; });
+  if(ext) document.getElementById('g-profil').style.display='';
+  if(ext){ document.getElementById('g-opt').style.display=''; document.querySelector('#s-opt .card[data-v="cp_paid"]').style.display=''; }
+  document.getElementById('extIn').innerHTML=S.ext_file?`<b>${esc(S.ext_file)}</b><small>glissez un autre PDF pour le remplacer</small>`:'Glissez ici le contrat PDF reçu<small>il s’affiche à droite pendant que vous remplissez les cases</small>';
+  document.getElementById('cleanBtn').style.display=ext?'none':'';
+}
 function clipsUI(){ const on=(parseInt(S.stories,10)||0)>0; ['clipsBox'].concat([...document.querySelectorAll('.clipsp')]).forEach(x=>{ const el=typeof x==='string'?document.getElementById(x):x; el.style.display=on?'':'none'; }); }
 function mpUI(){
   const ugc=S.type==='ugc', box=document.getElementById('mpBox');
@@ -1061,6 +1223,67 @@ function htmlBlock(e){
 function imgSrc(k){ const d=TPL.images[k]; if(!d) return ''; if(d==='SIG') return SIG||''; return 'data:image/jpeg;base64,'+d; }
 
 const freeOn=()=>S.type!=='ugc'&&S.paid==='free';
+let EXT_URL='';
+function renderExt(){
+  missing=new Set();
+  const doc=document.getElementById('doc');
+  const lack=[[!String(S.campagne||'').trim(),'Campagne'],[!String(S.annee||'').trim(),'Année'],[!String(S.handle||'').trim(),'Pseudo'],[!S.av&&num(S.ext_prix)==null,'Prix HT'],[!String(S.periode||'').trim(),'Période'],[!dealText(),'Contenus']];
+  lack.forEach(([b,l])=>{ if(b) missing.add(l); });
+  doc.style.width='auto'; doc.style.padding='0'; doc.style.zoom=1;
+  const keep=EXT_URL&&doc.dataset.extf===EXT_URL&&doc.querySelector('#extPages');
+  if(!keep){ doc.dataset.extf=EXT_URL||'';
+  doc.innerHTML=EXT_URL?`<div id="extPages" style="display:flex;flex-direction:column;gap:14px;padding:8px 0"></div>`
+    :`<div style="padding:60px 44px;font:14px/1.5 -apple-system,Inter,sans-serif;color:#55535a;text-align:center;width:520px">${S.ext_file?`Contrat reçu : <b>${esc(S.ext_file)}</b><br><small>(glissez-le à nouveau pour le revoir ici)</small>`:'Glissez le contrat PDF reçu dans la colonne de gauche :<br>il s’affichera ici.'}</div>`;
+    if(EXT_URL) extPaint(); }
+  document.getElementById('used').textContent='Contrat externe';
+  const fe=document.getElementById('fname'); fe.textContent=S.ext_file||'Aucun PDF à générer'; fe.classList.remove('miss');
+  const stEl=document.getElementById('status'); stEl.textContent=missing.size?`${missing.size} info${missing.size>1?'s':''} manquante${missing.size>1?'s':''}`:'✓ Prêt'; stEl.classList.toggle('miss',!!missing.size); stEl.title=[...missing].join(', ');
+  document.getElementById('pdfBtn').textContent=S.av?'Ajouter l’avenant au tableau':'Ajouter à la campagne';
+}
+// lecture du PDF reçu : on cherche pseudo, montant, période et contenus
+let EXT_PDF=null, EXT_PAINT=0;
+async function extPaint(){ // pages du PDF reçu dessinées dans l'aperçu (fonctionne dans tous les navigateurs)
+  const box=document.getElementById('extPages'); if(!box||!EXT_PDF) return; const id=++EXT_PAINT;
+  const W=Math.min(760,(document.querySelector('.prev .scroll')||{clientWidth:700}).clientWidth-60);
+  for(let i=1;i<=Math.min(EXT_PDF.numPages,20);i++){ const pg=await EXT_PDF.getPage(i); if(id!==EXT_PAINT) return;
+    const v0=pg.getViewport({scale:1}), sc=W/v0.width, vp=pg.getViewport({scale:sc*2});
+    const cv=document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height; cv.style.cssText=`width:${W}px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.12)`;
+    box.appendChild(cv); await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise; }
+}
+async function extRead(file){ // on garde le PDF pour l'aperçu : les cases se remplissent à la main
+  if(EXT_URL) URL.revokeObjectURL(EXT_URL); EXT_URL=URL.createObjectURL(file); S.ext_file=file.name;
+  try{ pdfjsLib.GlobalWorkerOptions.workerSrc='pdfjs.worker.min.js'; EXT_PDF=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise; }catch(e){ EXT_PDF=null; }
+  save(); syncUI(); render(); toast('Contrat ajouté : remplissez les cases');
+}
+function extParse(t){
+  const T=t.replace(/\s+/g,' '), out={};
+  const h=[...T.matchAll(/@([A-Za-z0-9_.]{2,40})/g)].map(m=>m[1].replace(/\.$/,'')).filter(x=>!/ylg|agence|gmail|hotmail|yahoo|outlook|icloud/i.test(x));
+  if(h.length) out.handle=h[0];
+  const money=[]; const re=/(?:€|EUR|£)\s?(\d{1,3}(?:[\s.,\u00a0\u202f]\d{3})*(?:[.,]\d{2})?)|(\d{1,3}(?:[\s.,\u00a0\u202f]\d{3})*(?:[.,]\d{2})?)\s?(?:€|euros?|EUR|£)/gi; let m;
+  while((m=re.exec(T))){ const raw=(m[1]||m[2]); let v=raw.replace(/[\s\u00a0\u202f]/g,''); if(/[.,]\d{2}$/.test(v)) v=v.slice(0,-3).replace(/[.,]/g,'')+'.'+v.slice(-2); else v=v.replace(/[.,]/g,'');
+    const n=parseFloat(v), ctx=T.slice(Math.max(0,m.index-160),m.index).toLowerCase(); if(!isFinite(n)||n<=0) continue;
+    money.push({n,score:(/capital/.test(ctx.slice(-80))?-10:0)+(/rémunération|remuneration|fee|honoraires|prix|montant|amount|forfait|total/.test(ctx)?3:0)+(/\bht\b|hors taxes|excluding vat/.test(T.slice(m.index,m.index+60).toLowerCase())?2:0)}); }
+  money.sort((a,b)=>b.score-a.score||b.n-a.n); if(money.length&&money[0].score>-10) out.prix=money[0].n;
+  const d=[...T.matchAll(/\b(\d{1,2})[\/.](\d{1,2})[\/.](20\d{2})\b/g)].map(x=>x[0].replace(/\./g,'/'));
+  const mo=T.match(/\b(janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre|january|february|march|april|may|june|july|august|september|october|november|december)\s+(20\d{2})\b/i);
+  if(d.length>=2) out.periode=`Du ${d[0]} au ${d[1]}`; else if(mo) out.periode=mo[1][0].toUpperCase()+mo[1].slice(1).toLowerCase()+' '+mo[2];
+  const yr=T.match(/\b(20\d{2})\b/); if(yr) out.annee=yr[1];
+  const W={un:1,une:1,one:1,deux:2,two:2,trois:3,three:3,quatre:4,four:4,cinq:5,five:5,six:6,sept:7,seven:7,huit:8,eight:8,dix:10,ten:10};
+  const num=s=>/^\d+$/.test(s)?+s:(W[s.toLowerCase()]||null), parts=[], seen=new Set();
+  const kinds=[[/reels?/i,n=>`${n} Reel${n>1?'s':''}`,'r'],[/sets? (?:de|of) (?:\d+ )?stories|stories sets?/i,n=>`${n} set${n>1?'s':''} de Stories`,'s'],[/(?:publications?|posts?|vid[ée]os?) tiktok|tiktoks?/i,n=>`${n} TikTok`,'t'],[/(?:vid[ée]os?|shorts?) youtube|youtube (?:shorts?|vid[ée]os?)/i,n=>`${n} vidéo${n>1?'s':''} YouTube`,'y'],[/contenus? (?:vid[ée]o )?ugc|ugc (?:videos?|contents?)/i,n=>`${n} contenu${n>1?'s':''} UGC`,'u']];
+  const rx=/\b(\d{1,2}|un|une|one|deux|two|trois|three|quatre|four|cinq|five|six|sept|seven|huit|eight|dix|ten)\b(?:\s*\(\d+\))?\s+((?:[a-zéèêûô0-9]+\s+){0,3}[a-zéèêûô]+)/gi;
+  while((m=rx.exec(T))){ const n=num(m[1]); if(!n||n>50) continue; const tail=m[2];
+    for(const [k,f,id] of kinds) if(k.test(tail)&&!seen.has(id)){ seen.add(id); parts.push(f(n)); break; } }
+  if(parts.length) out.livrable=parts.join(' + ');
+  const C={}; const kk={r:'reels',s:'stories',t:'tiktok',y:'youtube'};
+  rx.lastIndex=0; while((m=rx.exec(T))){ const n=num(m[1]); if(!n||n>50) continue; for(const [k,,id] of kinds) if(k.test(m[2])&&kk[id]&&C[kk[id]]==null){ C[kk[id]]=n; break; } }
+  const cl=T.match(/minimum\s+(\d{1,2})\s+clips|(\d{1,2})\s+clips\s+(?:chacun|each)|\((\d{1,2})\s+clips/i); if(cl) C.clips=+(cl[1]||cl[2]||cl[3]);
+  if(Object.keys(C).length) out.counts=C;
+  if(/sans crosspost|without crosspost|no crosspost/i.test(T)) out.opt='nocp'; else if(/crosspost|co-publication|cross-post/i.test(T)) out.opt='cp';
+  const low=T.toLowerCase(); const c=CAMPS.find(c=>low.includes(String(c.base||c.name.replace(/\s+20\d\d$/,'')).toLowerCase()));
+  if(c) out.camp={base:c.base||c.name.replace(/\s+20\d\d$/,''),year:c.year||campYear(c)};
+  return out;
+}
 function renderFree(){
   missing=new Set();
   const doc=document.getElementById('doc'); doc.style.width='560px'; doc.style.padding='40px 44px'; doc.style.zoom=1;
@@ -1080,16 +1303,18 @@ function renderFree(){
   tabDots();
 }
 function render(){
+  if(S.type==='ext') return renderExt();
   document.getElementById('pdfBtn').textContent='Générer le PDF';
   missing=new Set();
-  const t=tpl(); finish.noBreak=!!t.free; const items=build(t.blocks,true);
+  const {t,items}=docItems();
   if(!SIG) missing.add('Signature de May (Réglages)');
   const doc=document.getElementById('doc');
   const p=t.page;
   doc.style.width=p.w+'pt'; doc.style.padding=`${p.mt}pt ${p.mr}pt ${p.mb}pt ${p.ml}pt`;
   doc.innerHTML=items.map(htmlBlock).join('');
   fitPreview();
-  document.getElementById('used').textContent=t.id==='ugc'?'Contrat UGC rémunération':t.free?'Contrat court Free':'Contrat '+t.id;
+  document.getElementById('used').textContent=t.id==='ugc'?'Contrat UGC rémunération':t.id==='avenant'?'Avenant n°'+(S.av.n||1):t.free?'Contrat court Free':'Contrat '+t.id;
+  if(S.av) document.getElementById('pdfBtn').textContent='Générer l’avenant';
   const fn=fileName();
   const fe=document.getElementById('fname'); fe.textContent=fn.name; fe.classList.toggle('miss',!fn.ok);
   const stEl=document.getElementById('status');
@@ -1108,7 +1333,7 @@ function fileName(){
   const h=S.handle.replace(/^@/,'').trim(), c=campagne().trim(), y=String(S.annee).trim();
   const ok=!!(h&&c&&y);
   const clean=s=>s.replace(/[\/\\:*?"<>|]/g,'-');
-  return {ok,name:`@${clean(h||'pseudo')} - ${clean(c||'campagne')} - ${clean(y||'année')}.pdf`};
+  return {ok,name:`@${clean(h||'pseudo')} - ${clean(c||'campagne')} - ${clean(y||'année')}${S.av?(S.av.mode==='complet'?' - Contrat + Avenant ':' - Avenant ')+(S.av.n||1):''}.pdf`};
 }
 const TAB_KEYS={marque:['marque','entreprise','marque_desc_txt','campagne','annee','periode'],infl:['nom','handle','adr_rue','adr_cp','adr_ville','id_num'],infl_ag:['nom','handle','agent_nom','agent_id_num','ag_rue','ag_cp','ag_ville','agent_rep'],cont:[],dot:[],remu:['total'],dates:['date_debut','date_fin','date_sign']};
 function tabDots(){
@@ -1116,7 +1341,7 @@ function tabDots(){
     let keys=TAB_KEYS[b.dataset.p]; if(S.type==='ugc'&&b.dataset.p==='dates') keys=['date_sign'];
     if(S.type==='ugc'&&b.dataset.p==='marque') keys=keys.filter(k=>k!=='marque_desc_txt');
     if(b.dataset.p==='infl'&&agentOn()) keys=TAB_KEYS.infl_ag;
-    if(b.dataset.p==='remu'&&medOn()) keys=[...keys,'med_prix'];
+    if(b.dataset.p==='remu'&&medOn()&&!S.av) keys=[...keys,'med_prix'];
     if(b.dataset.p==='cont'&&(medBoxOn()||S.type==='ugc')) keys=[...keys,MK('mois')];
     const dotMiss=b.dataset.p==='dot'&&dotOn()&&!prodList().length;
     if(b.dataset.p==='infl'&&S.id_pending) keys=keys.filter(k=>k!=='id_num');
@@ -1136,7 +1361,7 @@ function syncUI(){
   setSeg('s-type',S.type); setSeg('s-pays',S.pays); document.getElementById('vetoChk').checked=S.profil==='veto'; document.getElementById('profClassic').checked=S.profil!=='veto'; setSeg('s-paid',S.paid||'paid');
   if(!['1','2'].includes(String(S.nb_inv))) S.nb_inv='1'; setSeg('s-inv',String(S.nb_inv));
   document.querySelectorAll('#s-opt .card').forEach(b=>b.classList.toggle('on',b.dataset.v===S.opt));
-  const ugc=S.type==='ugc';
+  const ugc=S.type==='ugc', ext=S.type==='ext';
   ['g-pays','g-profil','g-opt'].forEach(id=>document.getElementById(id).style.display=ugc?'none':'');
   document.getElementById('c-infl').style.display=ugc?'none':'';
   document.getElementById('c-ugc').style.display=ugc?'':'none';
@@ -1182,10 +1407,12 @@ function syncUI(){
   idHelp(S.agent_id_type,S.agent_id_num,document.getElementById('agIdHelp'));
   { const inp=document.querySelector('[data-k="id_num"]'); inp.disabled=!!S.id_pending; inp.style.opacity=S.id_pending?.4:1; inp.placeholder=S.id_pending?'Numéro à venir':'Ajouter le numéro'; if(S.id_pending) document.getElementById('idHelp').style.display='none'; }
   addrUI(); tvaUI(); contHint(); invUI(); render();
+  extUI();
+  avUI();
 }
 function setSeg(id,v){ document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on',b.dataset.v===v)); }
 function contHint(){
-  document.getElementById('contHint').textContent='Cochez chaque réseau où l’influenceur publie et indiquez le nombre de contenus : le contrat et l’annexe se mettent à jour tout seuls.';
+  document.getElementById('contHint').textContent=S.type==='ext'?'Cochez les réseaux et le nombre de contenus prévus dans le contrat reçu : le livrable du tableau se remplit tout seul.':'Cochez chaque réseau où l’influenceur publie et indiquez le nombre de contenus : le contrat et l’annexe se mettent à jour tout seuls.';
 }
 function invUI(){
   const box=document.getElementById('invs'); const ivs=invoices();
@@ -1200,7 +1427,7 @@ function invUI(){
   else { h.className='hint'; h.textContent=tot!=null?`En lettres : ${words(tot)} ${S.type!=='ugc'&&S.pays!=='FR'?curWord().toLowerCase():'euros'}.`:'Le montant s’écrit automatiquement en lettres dans le contrat.'; }
 }
 
-document.querySelectorAll('input[name="profil"]').forEach(x=>x.addEventListener('change',e=>{ S.profil=e.target.value; save(); syncUI(); toast(S.profil==='veto'?'Paragraphe vétérinaire ajouté au contrat':'Contrat classique'); }));
+document.querySelectorAll('input[name="profil"]').forEach(x=>x.addEventListener('change',e=>{ S.profil=e.target.value; save(); syncUI(); toast(S.type==='ext'?(S.profil==='veto'?'Profil vétérinaire noté':'Profil classique noté'):(S.profil==='veto'?'Paragraphe vétérinaire ajouté au contrat':'Contrat classique')); }));
 document.addEventListener('input',e=>{
   const el=e.target;
   if(el.dataset.mp!==undefined){ const K=mpKey(); if(!S[K]) S[K]=Object.fromEntries(MP.map(k=>[k,mpOn(k)])); S[K][el.dataset.mp]=el.checked;
@@ -1214,12 +1441,13 @@ document.addEventListener('input',e=>{
     save(); syncUI(); return;
   }
   S[k]=el.value;
-  if(k==='total'||k==='nb_inv'||k==='med_prix') S.inv=[];
+  if(k==='total'||k==='nb_inv'||k==='med_prix'||k==='av_prix') S.inv=[];
   save();
-  if(k==='nb_inv'||k==='total'||k==='med_prix') invUI();
+  if(k==='nb_inv'||k==='total'||k==='med_prix'||k==='av_prix') invUI();
   if(k==='stories') clipsUI();
   if(k==='total'||k==='tva_rate'||k==='med_prix') tvaUI();
   if(k==='total'||k==='med_prix'||k==='med_mois') medCalc();
+  if(k==='av_prix') avUI();
   if(/^(adr|ag)_(cp|pays)$/.test(k)) addrUI();
   if(k==='id_num'||k==='id_type') idHelp(S.id_type,S.id_num,document.getElementById('idHelp'));
   if(k==='id_num') autoIdType('id_type','id_num','idType','idHelp');
@@ -1231,10 +1459,11 @@ function invHintOnly(){ const ivs=invoices(),tot=TOT(),h=document.getElementById
   if(tot!=null&&ivs.length>1&&Math.abs(sum-tot)>0.001){ h.className='hint warn'; h.textContent=`Attention : la somme des factures (${fmtNum(sum)}) ne correspond pas au total (${fmtNum(tot)}).`; } else { h.className='hint'; h.textContent=tot!=null?`En lettres : ${words(tot)}.`:''; } }
 document.addEventListener('change',e=>{ if(e.target.tagName==='SELECT'||e.target.type==='date'){ e.target.dispatchEvent(new Event('input',{bubbles:true})); } });
 
-document.querySelectorAll('.seg:not(#s-inv)').forEach(seg=>seg.addEventListener('click',e=>{
+document.querySelectorAll('.seg:not(#s-inv):not(#s-avm)').forEach(seg=>seg.addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return;
   S[{ 's-type':'type','s-pays':'pays','s-profil':'profil','s-paid':'paid'}[seg.id]]=b.dataset.v; S.inv=S.inv.map(i=>({amount:i.amount})); save(); syncUI();
 }));
+document.getElementById('s-avm').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||!S.av) return; S.av.mode=b.dataset.v; save(); syncUI(); });
 document.getElementById('s-inv').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; S.nb_inv=b.dataset.v; S.inv=[]; save(); syncUI(); });
 document.getElementById('s-opt').addEventListener('click',e=>{ const b=e.target.closest('.card'); if(!b) return; S.opt=b.dataset.v; save(); syncUI(); });
 document.getElementById('tabs').addEventListener('click',e=>{
@@ -1273,6 +1502,12 @@ function dropZone(zone,input,cb){
   zone.addEventListener('dragleave',()=>zone.classList.remove('over'));
   zone.addEventListener('drop',e=>{ e.preventDefault(); zone.classList.remove('over'); const f=[...e.dataTransfer.files].find(f=>f.type.startsWith('image/')); if(f) toPNG(f,cb); });
 }
+(function(){ const z=document.getElementById('extDrop'), inp=document.getElementById('extFile');
+  z.addEventListener('click',()=>inp.click());
+  z.addEventListener('dragover',e=>{ e.preventDefault(); z.classList.add('over'); }); z.addEventListener('dragleave',()=>z.classList.remove('over'));
+  z.addEventListener('drop',e=>{ e.preventDefault(); z.classList.remove('over'); const f=e.dataTransfer.files[0]; if(f&&/pdf/i.test(f.type||f.name)) extRead(f); else toast('Glissez un fichier PDF'); });
+  inp.addEventListener('change',()=>{ if(inp.files[0]) extRead(inp.files[0]); inp.value=''; });
+})();
 dropZone(document.getElementById('drop'),document.getElementById('logoFile'),d=>{ S.logo=d; const b=brandKey(); S.logo_for=b; if(b){ LOGOS[b]=d; saveLogos(); } const cp=CAMPS.find(x=>x.key===campKey()); if(cp){ cp.logo=d; saveCamps(); } save(); syncUI(); toast('Logo ajouté'); });
 ['dragover','drop'].forEach(ev=>window.addEventListener(ev,e=>e.preventDefault()));
 
@@ -1291,6 +1526,7 @@ document.getElementById('prodAdd').onclick=()=>{ S.prods=[...(S.prods||[]),'']; 
 const sigUI=()=>{ document.getElementById('sigIn').innerHTML=SIG?`<img src="${SIG}"><small>Glissez une autre image pour la remplacer</small>`:'Glissez l’image de signature ici<small>ou cliquez pour choisir</small>'; };
 dropZone(document.getElementById('sigDrop'),document.getElementById('sigFile'),d=>{ SIG=d; try{localStorage.setItem('ic_sig',d);}catch(e){} sigUI(); render(); });
 document.getElementById('setBtn').onclick=()=>{ sigUI(); document.getElementById('settings').classList.add('on'); };
+document.getElementById('setBtn').addEventListener('click',()=>sbFillForm());
 document.getElementById('setClose').onclick=()=>document.getElementById('settings').classList.remove('on');
 document.getElementById('sigDel').onclick=()=>{ SIG=''; try{localStorage.removeItem('ic_sig');}catch(e){} sigUI(); render(); };
 
@@ -1320,7 +1556,105 @@ function logoSync(){
 }
 if(S.logo&&S.logo_for===undefined){ S.logo_for=brandKey(); if(S.logo_for){ LOGOS[S.logo_for]=S.logo; saveLogos(); } save(); }
 document.addEventListener('change',e=>{ const k=e.target.dataset&&e.target.dataset.k; if(k==='marque'||k==='campagne'||k==='annee') logoSync(); });
-const saveCamps=()=>{ try{ localStorage.setItem('ic_camps',JSON.stringify(CAMPS)); }catch(e){} };
+const localSaveCamps=()=>{ try{ localStorage.setItem('ic_camps',JSON.stringify(CAMPS)); }catch(e){} };
+const saveCamps=()=>{ localSaveCamps(); sbQueue(); };
+
+/* ================= Espace partagé (Supabase) : les campagnes de toute l'équipe ================= */
+const SB={client:null,user:null,snapC:{},snapL:{},ready:false,t:null,retry:null,redraw:false};
+const canon=o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((a,x)=>(a[x]=v[x],a),{}):v);
+const rowId=(c,r)=>c.key+'|'+String(r.handle||'').trim().toLowerCase();
+const campData=c=>{ const o=Object.assign({},c); delete o.rows; return o; };
+function sbCfg(){ try{ return JSON.parse(localStorage.getItem('ic_sb')||'null'); }catch(e){ return null; } }
+function sbStatus(t,cls){ const el=document.getElementById('sbStatus'); if(el){ el.textContent=t; el.className='sbst '+cls; } const m=document.getElementById('sbMsg'); if(m) m.textContent=t; }
+function sbClient(){ return null; const c=sbCfg(); if(!c||!c.url||!c.key||!window.supabase) return null;
+  if(!SB.client||SB.client.__u!==c.url+c.key){ SB.client=window.supabase.createClient(c.url,c.key,{auth:{persistSession:true,storageKey:'ic_sb_auth',autoRefreshToken:true}}); SB.client.__u=c.url+c.key; }
+  return SB.client; }
+async function sbInit(){
+  const cl=sbClient(); if(!cl){ sbStatus('Local : campagnes gardées sur ce Mac','off'); return; }
+  try{ const {data}=await cl.auth.getSession(); if(!data||!data.session){ sbStatus('Espace partagé : connectez-vous dans Réglages','warn'); return; }
+    SB.user=data.session.user; await sbPull(true); sbListen(); }catch(e){ sbStatus('Espace partagé injoignable : travail sur ce Mac','warn'); }
+}
+function sbSnap(){ SB.snapC={}; SB.snapL={}; CAMPS.forEach(c=>{ SB.snapC[c.key]=canon(campData(c)); c.rows.forEach(r=>SB.snapL[rowId(c,r)]=canon(r)); }); }
+async function sbPull(first){
+  const cl=SB.client; sbStatus('Synchronisation…','busy');
+  const [a,b]=await Promise.all([cl.from('campagnes').select('key,data'),cl.from('lignes').select('id,campagne_key,data')]);
+  if(a.error||b.error){ sbStatus('Espace partagé : '+((a.error||b.error).message||'erreur'),'warn'); return; }
+  const remote=a.data.map(x=>Object.assign({},x.data,{key:x.key,rows:[]})), by=Object.fromEntries(remote.map(c=>[c.key,c]));
+  b.data.forEach(l=>{ if(by[l.campagne_key]) by[l.campagne_key].rows.push(l.data); });
+  remote.forEach(c=>c.rows.sort((x,y)=>(x.created||x.updated||0)-(y.created||y.updated||0)));
+  // ce qui n'existe que sur ce Mac (premier branchement)
+  let extraC=0, extraL=0; const local=CAMPS;
+  local.forEach(c=>{ const rc=by[c.key]; if(!rc) extraC++; else c.rows.forEach(r=>{ if(!rc.rows.some(x=>rowId(rc,x)===rowId(c,r))) extraL++; }); });
+  if(first&&local.length){ try{ localStorage.setItem('ic_camps_backup',JSON.stringify(local)); }catch(e){} } // copie de sécurité des campagnes de ce Mac
+  const remoteSnapOnly=()=>{ CAMPS=remote; sbSnap(); };
+  remoteSnapOnly();
+  if(first&&(extraC||extraL)&&confirm(`Ce Mac contient ${extraC} campagne(s) et ${extraL} ligne(s) qui ne sont pas encore dans l'espace partagé.\n\nLes ajouter à l'espace partagé de l'équipe ?`)){
+    local.forEach(c=>{ const rc=by[c.key]; if(!rc){ CAMPS.push(c); return; } c.rows.forEach(r=>{ if(!rc.rows.some(x=>rowId(rc,x)===rowId(c,r))) rc.rows.push(r); }); });
+  }
+  CAMPS.sort((x,y)=>(y.updated||0)-(x.updated||0));
+  SB.ready=true; localSaveCamps(); campList();
+  if(CUR){ CUR=CAMPS.find(c=>c.key===CUR.key)||null; if(CUR) drawSheet(); else document.getElementById('campView').classList.remove('on'); }
+  await sbPush();
+}
+function sbQueue(){ if(!SB.ready) return; clearTimeout(SB.t); SB.t=setTimeout(sbPush,500); }
+async function sbPush(){
+  if(!SB.ready||!SB.client) return;
+  const now=new Date().toISOString(), who=SB.user&&SB.user.email||'';
+  const curC={}, curL={}, owner={};
+  CAMPS.forEach(c=>{ curC[c.key]=canon(campData(c)); c.rows.forEach(r=>{ const id=rowId(c,r); curL[id]=canon(r); owner[id]=c.key; }); });
+  const upC=Object.keys(curC).filter(k=>curC[k]!==SB.snapC[k]).map(k=>({key:k,data:JSON.parse(curC[k]),updated_at:now,updated_by:who}));
+  const upL=Object.keys(curL).filter(k=>curL[k]!==SB.snapL[k]).map(k=>({id:k,campagne_key:owner[k],data:JSON.parse(curL[k]),updated_at:now,updated_by:who}));
+  const delC=Object.keys(SB.snapC).filter(k=>!(k in curC)), delL=Object.keys(SB.snapL).filter(k=>!(k in curL));
+  if(!upC.length&&!upL.length&&!delC.length&&!delL.length){ sbStatus('● Partagé · '+who,'ok'); return; }
+  sbStatus('Envoi…','busy');
+  try{
+    const ck=r=>{ if(r&&r.error) throw r.error; };
+    if(upC.length) ck(await SB.client.from('campagnes').upsert(upC));
+    if(upL.length) ck(await SB.client.from('lignes').upsert(upL));
+    if(delL.length) ck(await SB.client.from('lignes').delete().in('id',delL));
+    if(delC.length) ck(await SB.client.from('campagnes').delete().in('key',delC));
+    upC.forEach(x=>SB.snapC[x.key]=curC[x.key]); upL.forEach(x=>SB.snapL[x.id]=curL[x.id]);
+    delC.forEach(k=>delete SB.snapC[k]); delL.forEach(k=>delete SB.snapL[k]);
+    sbStatus('● Partagé · '+who,'ok'); clearTimeout(SB.retry);
+  }catch(e){ sbStatus('Hors ligne : modifications gardées sur ce Mac, nouvel essai…','warn'); clearTimeout(SB.retry); SB.retry=setTimeout(sbPush,20000); }
+}
+function sbRefresh(key){
+  localSaveCamps(); campList();
+  if(CUR&&(!key||CUR.key===key)){ const same=CAMPS.find(c=>c.key===CUR.key);
+    if(!same){ document.getElementById('campView').classList.remove('on'); CUR=null; return; }
+    CUR=same; if(document.activeElement&&document.getElementById('cSheet').contains(document.activeElement)) SB.redraw=true; else drawSheet(); }
+}
+function sbListen(){
+  SB.client.channel('ic-campagnes')
+    .on('postgres_changes',{event:'*',schema:'public',table:'campagnes'},p=>{
+      if(p.eventType==='DELETE'){ const k=p.old&&p.old.key; if(!k) return; CAMPS=CAMPS.filter(c=>c.key!==k); delete SB.snapC[k]; Object.keys(SB.snapL).forEach(id=>{ if(id.startsWith(k+'|')) delete SB.snapL[id]; }); sbRefresh(k); return; }
+      const d=p.new, cs=canon(Object.assign({},d.data,{key:d.key})); if(SB.snapC[d.key]===cs) return;
+      let c=CAMPS.find(x=>x.key===d.key);
+      if(c){ const rows=c.rows; Object.keys(c).forEach(k=>delete c[k]); Object.assign(c,d.data,{key:d.key,rows}); } else { c=Object.assign({},d.data,{key:d.key,rows:[]}); CAMPS.unshift(c); }
+      SB.snapC[d.key]=canon(campData(c)); sbRefresh(d.key); })
+    .on('postgres_changes',{event:'*',schema:'public',table:'lignes'},p=>{
+      if(p.eventType==='DELETE'){ const id=p.old&&p.old.id; if(!id) return; delete SB.snapL[id];
+        let key=null; CAMPS.forEach(c=>{ const i=c.rows.findIndex(r=>rowId(c,r)===id); if(i>=0){ c.rows.splice(i,1); key=c.key; } }); sbRefresh(key); return; }
+      const d=p.new, ls=canon(d.data); if(SB.snapL[d.id]===ls) return;
+      let c=CAMPS.find(x=>x.key===d.campagne_key); if(!c){ c={key:d.campagne_key,name:d.campagne_key,title:d.campagne_key.toUpperCase(),rows:[]}; CAMPS.unshift(c); }
+      const i=c.rows.findIndex(r=>rowId(c,r)===d.id); if(i>=0) c.rows[i]=d.data; else c.rows.push(d.data);
+      SB.snapL[d.id]=ls; sbRefresh(c.key); })
+    .subscribe();
+}
+document.addEventListener('focusout',e=>{ if(SB.redraw&&CUR&&e.target.closest&&e.target.closest('#cSheet')){ setTimeout(()=>{ if(!document.getElementById('cSheet').contains(document.activeElement)){ SB.redraw=false; drawSheet(); } },50); } });
+function sbFillForm(){ const c=sbCfg()||{}; document.getElementById('sbUrl').value=c.url||''; document.getElementById('sbKey').value=c.key||''; document.getElementById('sbMail').value=(SB.user&&SB.user.email)||c.mail||''; document.getElementById('sbPass').value=''; }
+document.getElementById('sbIn').onclick=async()=>{
+  const url=document.getElementById('sbUrl').value.trim().replace(/\/+$/,''), key=document.getElementById('sbKey').value.trim(), mail=document.getElementById('sbMail').value.trim(), pass=document.getElementById('sbPass').value;
+  if(!url||!key||!mail||!pass){ sbStatus('Remplissez l’URL, la clé, l’e-mail et le mot de passe','warn'); return; }
+  try{ localStorage.setItem('ic_sb',JSON.stringify({url,key,mail})); }catch(e){}
+  const cl=sbClient(); if(!cl){ sbStatus('Bibliothèque Supabase non chargée','warn'); return; }
+  sbStatus('Connexion…','busy');
+  const {data,error}=await cl.auth.signInWithPassword({email:mail,password:pass});
+  if(error){ sbStatus('Connexion refusée : '+error.message,'warn'); return; }
+  SB.user=data.user; document.getElementById('sbPass').value=''; await sbPull(true); sbListen(); toast('Espace partagé connecté');
+};
+document.getElementById('sbOut').onclick=async()=>{ try{ if(SB.client) await SB.client.auth.signOut(); }catch(e){}
+  SB.ready=false; SB.user=null; try{ SB.client&&SB.client.removeAllChannels(); }catch(e){} sbStatus('Déconnecté : campagnes gardées sur ce Mac','off'); toast('Déconnecté'); };
 const campKey=()=>(campagne()+' '+S.annee).trim().toLowerCase();
 // deal contenus en version courte pour le tableau
 function dealText(){
@@ -1331,10 +1665,10 @@ function dealText(){
   if(t) P.push(`${t} TikTok`);
   if(y) P.push(`${y} vidéo${y>1?'s':''} YouTube`);
   if(f) P.push(`${f} post${f>1?'s':''} Facebook`);
-  const opt=freeOn()&&S.opt==='cp_paid'?' · crosspost':{nocp:'',cp:' · crosspost',cp_free:` · crosspost + médiatisation offerte ${durCourt(true)} (${plats(true,false,true).join(', ')})`+({brand:' sur comptes marque',both:' + comptes marque'}[medWhere()]||''),cp_paid:' · crosspost + médiatisation payante'+(num(S.med_prix)!=null?` ${Math.round(num(S.med_prix))}€ / ${durCourt(true)}`:'')+` (${plats(true,false,true).join(', ')})`+({brand:' sur comptes marque',both:' + comptes marque'}[medWhere()]||'')}[S.opt]||'';
-  return P.join(' + ')+opt;
+  const opt=freeOn()&&S.opt==='cp_paid'?' · crosspost':{nocp:'',cp:' · crosspost',cp_free:` · crosspost + médiatisation offerte ${durCourt(true)} (${plats(true,false,true).join(', ')})`+({brand:' sur comptes marque',both:' + comptes marque'}[medWhere()]||''),cp_paid:' · crosspost + médiatisation payante'+((avMedIsNew()?num(S.av_prix):num(S.med_prix))!=null?` ${Math.round(avMedIsNew()?num(S.av_prix):num(S.med_prix))}€ / ${durCourt(true)}`:'')+` (${plats(true,false,true).join(', ')})`+({brand:' sur comptes marque',both:' + comptes marque'}[medWhere()]||'')}[S.opt]||'';
+  return P.join(' + ')+opt+(S.type!=='ugc'&&S.profil==='veto'?' · influenceur vétérinaire':'');
 }
-const snapS=()=>{ const o=Object.assign({},S); delete o.logo; return o; };
+const snapS=()=>{ const o=Object.assign({},S); delete o.logo; delete o.av; delete o.av_prix; delete o.done; return o; };
 const BRAND_KEYS=['type','pays','profil','opt','marque','entreprise','marque_desc_txt','campagne','annee','periode','date_debut','date_fin','dot','prods','pl_ig','pl_tt','pl_yt','pl_fb','mp','med_mois','med_unit','med_start','med_terr','med_p1','med_p2','med_p3','u_mp','u_mois','u_unit','u_start','u_terr','u_p1','u_p2','u_p3'];
 function campPickUI(){ const w=document.getElementById('campPickWrap'), sel=document.getElementById('campPick'); if(!w) return;
   w.style.display=CAMPS.length?'':'none';
@@ -1350,9 +1684,22 @@ function recordCampaign(){
   if(!c){ c={key:campKey(),name,base:campagne(),year:String(S.annee).trim(),title:name.toUpperCase(),note:'',rows:[],created:Date.now()}; CAMPS.unshift(c); }
   const handle=S.handle.replace(/^@/,'').trim();
   let r=c.rows.find(x=>x.handle.toLowerCase()===handle.toLowerCase());
-  if(!r){ r={handle,sophie:'',colC:''}; c.rows.push(r); }
+  if(!r){ r={handle,sophie:'',colC:'',created:Date.now()}; c.rows.push(r); }
+  if(S.av){ const add=num(S.av_prix)||0, nn=S.av.n||1, prev=Number(r.prix)||0, tv=!!r.tva||(!freeOn()&&tvaOn());
+    const avSt=(()=>{ const o=Object.assign({},S); delete o.logo; delete o.done; o.av=Object.assign({},S.av,{prev:undefined,orig:undefined}); return JSON.parse(JSON.stringify(o)); })();
+    if(!r.orig) r.orig=S.av.orig||S.av.base;
+    const hist=(r.avenants||[]).filter(a=>a.n!==nn).concat([{n:nn,date:S.date_sign,prix:add,deal:dealText(),fichier:S.av.ext?S.ext_file:'',st:S.av.ext?undefined:avSt}]);
+    const base=Number(S.av.basePrix)||prev;
+    const st=snapS(); if(S.av.ext){ st.ext_prix=String(base+(r.avenants||[]).filter(a=>a.n!==nn).reduce((t,a)=>t+(Number(a.prix)||0),0)+add); } else if(avMedIsNew()) st.med_prix=String(add); else st.total=String((num(S.total)||0)+add); // le contrat consolidé devient la nouvelle base
+    Object.assign(r,{ninf:(S.av.ext?'Contrat externe reçu + avenant':'Contrat envoyé + avenant')+(hist.length>1?'s n°1 à '+hist.length:' n°'+nn),deal:(freeOn()?'FREE · ':'')+dealText(),periode:S.periode,prix:base+hist.reduce((t,a)=>t+(Number(a.prix)||0),0),avenants:hist,cancelled:false,snap:st,updated:Date.now()});
+    if(tv) r.ttc=Math.round(r.prix*(1+tvaRate()/100)*100)/100;
+    c.updated=Date.now(); CAMPS.splice(CAMPS.indexOf(c),1); CAMPS.unshift(c); saveCamps(); campList(); return name; }
+  if(S.type==='ext'){ const ht=num(S.ext_prix)||0, tt=num(S.ext_ttc);
+    Object.assign(r,{handle,nom:S.nom,ninf:'Contrat externe reçu',deal:dealText(),periode:S.periode,prix:ht,tva:tt!=null,ttc:tt!=null?tt:'',free:false,external:true,fichier:S.ext_file||'',cancelled:false,snap:snapS(),updated:Date.now()});
+    if(!c.brand) c.brand={campagne:campagne(),annee:S.annee};
+    c.updated=Date.now(); CAMPS.splice(CAMPS.indexOf(c),1); CAMPS.unshift(c); saveCamps(); campList(); return name; }
   const ht=freeOn()?0:(TOT()||0), tv=!freeOn()&&tvaOn();
-  Object.assign(r,{handle,nom:S.nom,ninf:freeOn()?'-':((r.ninf&&r.ninf!=='-')?r.ninf:'Contrat envoyé'),deal:(freeOn()?'FREE · ':'')+dealText(),periode:S.periode,prix:ht,tva:tv,ttc:tv?Math.round(ht*(1+tvaRate()/100)*100)/100:'',free:freeOn(),cancelled:false,snap:snapS(),updated:Date.now()});
+  Object.assign(r,{handle,nom:S.nom,ninf:freeOn()?'-':((r.ninf&&r.ninf!=='-')?r.ninf:'Contrat envoyé'),deal:(freeOn()?'FREE · ':'')+dealText(),periode:S.periode,prix:ht,tva:tv,ttc:tv?Math.round(ht*(1+tvaRate()/100)*100)/100:'',free:freeOn(),cancelled:false,snap:snapS(),orig:snapS(),origDate:S.date_sign,updated:Date.now()});
   c.brand=Object.fromEntries(BRAND_KEYS.map(k=>[k,S[k]]));
   if(S.logo){ c.logo=S.logo; const b=brandKey(); if(b){ LOGOS[b]=S.logo; saveLogos(); } }
   c.updated=Date.now(); CAMPS.splice(CAMPS.indexOf(c),1); CAMPS.unshift(c); // la campagne utilisée remonte en haut
@@ -1416,7 +1763,7 @@ function drawSheet(){
     <td>${r.cancelled||r.free?'':`<input data-r="${i}" data-f="ttc" value="${r.ttc!==''&&r.ttc!=null?eur(r.ttc):''}" placeholder="—" inputmode="decimal">`}</td>
     <td class="livr"><textarea class="cell" data-r="${i}" data-f="deal" rows="1">${esc(r.deal||'')}</textarea></td>
     <td><textarea class="cell" data-r="${i}" data-f="facture" rows="1" placeholder="à remplir">${esc(r.facture||'')}</textarea></td>
-    <td class="acts"><button data-edit="${i}" title="${r.snap?'Rouvrir ce contrat dans le formulaire pour le modifier':'Contrat enregistré avant cette version : à ressaisir'}" ${r.snap?'':'disabled'}>✎</button><button data-cancel="${i}" title="${r.cancelled?'Rétablir cet influenceur':'Annulation : la ligne reste visible, barrée, et sort de la somme'}">${r.cancelled?'↺':'⊘'}</button><button class="del" data-del="${i}" title="Retirer complètement la ligne">✕</button></td></tr>`).join('');
+    <td class="acts"><button data-edit="${i}" title="${r.snap?'Rouvrir ce contrat dans le formulaire pour le modifier':'Contrat enregistré avant cette version : à ressaisir'}" ${r.snap?'':'disabled'}>✎</button>${r.snap?`<button class="av" data-av="${i}" title="Faire un avenant à ce contrat${(r.avenants||[]).length?' (déjà '+r.avenants.length+' avenant'+(r.avenants.length>1?'s':'')+')':''}">A+</button>`:''}<button data-cancel="${i}" title="${r.cancelled?'Rétablir cet influenceur':'Annulation : la ligne reste visible, barrée, et sort de la somme'}">${r.cancelled?'↺':'⊘'}</button><button class="del" data-del="${i}" title="Retirer complètement la ligne">✕</button></td></tr>`).join('');
   document.getElementById('cSheet').innerHTML=`<table class="sheet"><colgroup><col style="width:12%"><col style="width:8%"><col style="width:3%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:17%"><col style="width:8%"><col style="width:9%"></colgroup><thead><tr><th>${esc(c.title)}</th><th>Note Sophie</th><th></th><th>Note<br>influence</th><th>Créateur<br>contenus</th><th>Période<br>activation</th><th>Prix HT</th><th>Prix TTC</th><th>Livrable</th><th>Facture</th><th style="background:none"></th></tr></thead>
     <tbody>${rows||`<tr><td class="notea"><textarea data-note rows="3" placeholder="Texte libre (ex. 10K budget global&#10;3K Hono / 7K fees)">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td><td colspan="9" style="color:#999">Aucun influenceur pour l’instant : ils s’ajoutent à chaque PDF généré avec ce nom de campagne</td></tr>`}</tbody>
     <tfoot><tr><td colspan="5"></td><td class="sum">Somme :</td><td class="sum">${Math.round(total).toLocaleString('en-US')}€</td><td class="sum">${ttcTot(c)?Math.round(ttcTot(c)).toLocaleString('en-US')+'€':''}</td><td colspan="2"></td><td></td></tr></tfoot></table>`;
@@ -1435,6 +1782,14 @@ document.getElementById('cSheet').addEventListener('change',e=>{
 document.getElementById('cSheet').addEventListener('click',e=>{
   const ed=e.target.closest('[data-edit]'), ca=e.target.closest('[data-cancel]');
   if(ca){ const r=CUR.rows[+ca.dataset.cancel]; r.cancelled=!r.cancelled; saveCamps(); drawSheet(); campList(); toast(r.cancelled?'@'+r.handle+' annulé : sorti de la somme':'@'+r.handle+' rétabli'); return; }
+  const av=e.target.closest('[data-av]');
+  if(av){ const r=CUR.rows[+av.dataset.av]; if(!r.snap) return;
+    const n=(r.avenants||[]).length+1, base=r.snap;
+    const basePrix=(Number(r.prix)||0)-(r.avenants||[]).reduce((t,a)=>t+(Number(a.prix)||0),0);
+    S=Object.assign({},DEF,base,{logo:CUR.logo||S.logo||'',date_sign:TODAY(),av:{n,base:JSON.parse(JSON.stringify(base)),date:r.origDate||base.date_sign||'',basePrix,ext:!!r.external,mode:'seul',orig:JSON.parse(JSON.stringify(Object.assign({},r.orig||base,{date_sign:r.origDate||(r.orig||base).date_sign}))),prev:(r.avenants||[]).filter(a=>a.st).map(a=>a.st)},av_prix:''});
+    if(r.external){ S.ext_file=''; EXT_URL=''; EXT_PDF=null; }
+    save(); syncUI(); render(); document.getElementById('cClose').onclick();
+    toast(`Avenant n°${n} pour @${r.handle} : modifiez ce qui change, puis « Générer l’avenant »`); return; }
   if(ed){ const r=CUR.rows[+ed.dataset.edit]; if(!r.snap) return;
     S=Object.assign({},DEF,r.snap,{logo:CUR.logo||S.logo||'',date_sign:TODAY()}); save(); syncUI(); render();
     document.getElementById('cClose').onclick(); toast('Contrat de @'+r.handle+' rouvert : modifiez puis regénérez le PDF, la ligne sera mise à jour'); return; }
@@ -1511,6 +1866,7 @@ async function exportYear(y){
   await xlDownload(wb,`Campagnes ${y}`); toast(`Excel des campagnes ${y} téléchargé`);
 }
 campList();
+sbInit();
 
 /* ================= PDF (pdfmake) — même modèle que l'aperçu ================= */
 function pdfRuns(e){
@@ -1578,7 +1934,7 @@ function keepSignTogether(items,nodes){
 }
 function makePdf(){
   missing=new Set();
-  const t=tpl(); finish.noBreak=!!t.free; const items=build(t.blocks,true), p=t.page;
+  const {t,items}=docItems(), p=t.page;
   const nodes=keepSignTogether(items,items.map(pdfBlock));
   return {
     pageSize:{width:p.w,height:p.h}, pageMargins:[p.ml,p.mt,p.mr,p.mb],
@@ -1590,6 +1946,11 @@ function makePdf(){
 }
 document.getElementById('pdfBtn').onclick=()=>{
   render();
+  if(S.type==='ext'){
+    const need=['Campagne','Année','Pseudo'].filter(x=>missing.has(x)); if(need.length){ alert('Pour ajouter ce contrat à une campagne, il faut : '+need.join(', ')+'.'); return; }
+    if(missing.size&&!confirm(`Il manque encore : ${[...missing].join(', ')}.\n\nAjouter quand même à la campagne ?`)) return;
+    const cname=recordCampaign(); S.done=true; saveNow(); toast(`@${S.handle.replace(/^@/,'')} ajouté à « ${cname} » (contrat externe reçu)`); return;
+  }
   if(missing.size&&!confirm(`Il manque encore : ${[...missing].join(', ')}.\n\nGénérer quand même le PDF ?`)) return;
   const fn=fileName();
   if(!fn.ok){ alert('Pour nommer le PDF, il faut la mention influenceur, le nom de la campagne et l’année.'); return; }
