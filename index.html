@@ -25,6 +25,8 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
 .brand{cursor:pointer;border-radius:10px;margin:-4px -6px 4px;padding:4px 6px}.brand:hover{background:#222228}
 #sideForm{display:flex;flex-direction:column;gap:18px}
 body.v-home #sideForm,body.v-camp #sideForm,body.v-form #g-camp,body:not(.v-form) .usedline{display:none}
+.retbar button{font-weight:600}.campview .bar #cBack{white-space:nowrap}
+.retbar{display:flex;align-items:center;gap:10px;margin:12px 12px 0}.retbar button{border:0;background:var(--acc);color:#111;font:inherit;font-size:12.5px;padding:7px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}.retbar button b{font-weight:700}.retbar small{color:var(--mute);font-size:11.5px;line-height:1.3}
 .homebox{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:1px solid #34343a;background:#1d1d22;color:#e9e8e6;border-radius:10px;padding:10px;font:inherit;font-size:13px;cursor:pointer;margin-top:-6px}.homebox:hover{border-color:var(--acc)}.homebox.on{border-color:var(--acc);color:var(--acc);background:#2a2018}
 .home{position:fixed;left:260px;right:0;top:0;bottom:0;background:var(--bg);display:none;z-index:6;overflow:auto}
 .home.on{display:block}
@@ -188,7 +190,7 @@ textarea{resize:vertical;min-height:64px}
 .sheet textarea.cell{border:0;background:transparent;width:100%;resize:none;overflow:hidden;text-align:center;font:inherit;font-size:12px;padding:8px 4px;border-radius:0;display:block;min-height:34px;line-height:1.3}
 .sheet textarea.cell:focus{background:var(--acc-soft);box-shadow:none}
 .sheet tr.cancel textarea.cell{text-decoration:line-through;color:#9a98a0}
-.sheet td.acts button{padding:4px 7px!important;margin-right:2px!important;font-size:13px!important}
+.sheet td.acts button{padding:4px 5px!important;margin-right:2px!important;font-size:13px!important}
 .sheet td.livr textarea{border:0;background:transparent;width:100%;resize:none;overflow:hidden;text-align:center;font:inherit;padding:8px;border-radius:0;display:block;min-height:34px;line-height:1.35}
 .sheet td.livr textarea:focus{background:var(--acc-soft);box-shadow:none}
 .sheet tr.cancel td.livr textarea{text-decoration:line-through;color:#9a98a0}
@@ -238,7 +240,7 @@ textarea{resize:vertical;min-height:64px}
 <div class="app">
   <!-- ===== Colonne 1 : choix du modèle ===== -->
   <aside class="side">
-    <div class="brand" id="homeBtn" title="Accueil"><img src="icon-512.png" alt=""><div><b>Influence Contrat</b><small>Agence YLG</small></div></div>
+    <div class="brand" id="homeBtn" title="Accueil"><img src="icon-512.png" alt=""><div><b>Influence Contrat</b><small id="brandWho">Agence YLG</small></div></div>
     <button class="homebox on" id="homeBox"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg>Accueil</button>
 
     <div id="sideForm">
@@ -275,6 +277,7 @@ textarea{resize:vertical;min-height:64px}
 
   <!-- ===== Colonne 2 : onglets à remplir ===== -->
   <section class="form">
+    <div class="retbar" id="retBar" style="display:none"><button id="retBtn">← Retour <b id="retName"></b></button><small id="retHint"></small></div>
     <div class="avban" id="avBanner" style="display:none"><div><b id="avTitle">Avenant</b><small>Modifiez seulement ce qui change (contenus, médiatisation, dates…) et indiquez la rémunération complémentaire dans l'onglet Rémunération.</small></div><button class="btn sec" id="avQuit">Quitter l'avenant</button><div id="avmRow"><span>PDF à générer</span><div class="seg light" id="s-avm"><button data-v="seul">Avenant seul</button><button data-v="complet">Contrat initial + avenant</button></div></div></div>
     <nav class="tabs" id="tabs">
       <button class="tab on" data-p="marque">Marque</button>
@@ -474,7 +477,7 @@ textarea{resize:vertical;min-height:64px}
 </div>
 
 <section class="home on" id="homeView"><div class="hin">
-  <h1>Bonjour !</h1>
+  <h1 id="homeHello">Bonjour !</h1>
   <div class="q">Que veux-tu faire aujourd’hui ?</div>
   <div class="hgrid">
     <button class="hcard" data-h="new"><i>＋</i><div><b>Créer une nouvelle campagne</b><small>Nom et année, puis le tableau de suivi s’ouvre</small></div></button>
@@ -486,6 +489,7 @@ textarea{resize:vertical;min-height:64px}
 </div></section>
 <section class="campview" id="campView">
   <div class="bar">
+    <button class="btn sec" id="cBack" style="display:none">← Retour</button>
     <input class="ctitle" id="cTitle" title="Titre de la colonne A (nom de la campagne)">
     <label class="fees">Fees MAX <input id="cFees" inputmode="decimal" placeholder="€ HT"></label>
     <span class="status" id="cCount"></span>
@@ -498,6 +502,7 @@ textarea{resize:vertical;min-height:64px}
 </section>
 <div class="modal" id="settings"><div class="box">
   <h3>Réglages</h3>
+  <label class="f" style="margin-top:10px"><span>Ton prénom (pour l’accueil)</span><input id="meName" placeholder="Ajouter ton prénom" autocomplete="given-name"></label>
   <p class="hint" style="margin-top:8px">La signature de l'agence est gardée uniquement sur ce Mac (elle n'est pas publiée avec l'appli).</p>
   <div class="drop" id="sigDrop"><div id="sigIn">Glissez l'image de signature ici<small>ou cliquez pour choisir</small></div></div>
   <input type="file" id="sigFile" accept="image/*" hidden>
@@ -1588,7 +1593,7 @@ document.getElementById('setBtn').addEventListener('click',()=>sbFillForm());
 document.getElementById('setClose').onclick=()=>document.getElementById('settings').classList.remove('on');
 document.getElementById('sigDel').onclick=()=>{ SIG=''; try{localStorage.removeItem('ic_sig');}catch(e){} sigUI(); render(); };
 
-document.getElementById('newBtn').onclick=()=>{
+document.getElementById('newBtn').onclick=()=>{ retSet('');
   if(!confirm('Nouveau contrat : tous les champs sont vidés. Pour reprendre une campagne déjà enregistrée, choisissez-la ensuite en haut de l’onglet Marque.')) return;
   const n0=Object.assign({},DEF,{type:S.type,date_sign:TODAY()}); S=n0; save(); syncUI(); render(); document.querySelector('.tab[data-p="marque"]').click(); toast('Nouveau contrat prêt'); return;
   const keep=['type','pays','profil','opt','marque','entreprise','marque_desc_txt','campagne','annee','periode','logo','logo_for','date_debut','date_fin','dot','prods','mp','med_brand','med_mois','med_unit','med_terr','med_terr_txt','med_start','med_where','med_p1','med_p2','med_p3','u_p1','u_p2','u_p3','u_mois','u_unit','u_terr','u_terr_txt','u_start','u_mp'];
@@ -1727,7 +1732,7 @@ function dealText(){
   return P.join(' + ')+opt+(S.type!=='ugc'&&S.profil==='veto'?' · influenceur vétérinaire':'');
 }
 const snapS=()=>{ const o=Object.assign({},S); delete o.logo; delete o.av; delete o.av_prix; delete o.done; return o; };
-const BRAND_KEYS=['type','pays','profil','opt','marque','entreprise','marque_desc_txt','campagne','annee','periode','date_debut','date_fin','dot','prods','pl_ig','pl_tt','pl_yt','pl_fb','mp','med_mois','med_unit','med_start','med_terr','med_p1','med_p2','med_p3','u_mp','u_mois','u_unit','u_start','u_terr','u_p1','u_p2','u_p3'];
+const BRAND_KEYS=['pays','opt','marque','entreprise','marque_desc_txt','campagne','annee','periode','date_debut','date_fin','dot','prods','pl_ig','pl_tt','pl_yt','pl_fb','mp','med_mois','med_unit','med_start','med_terr','med_p1','med_p2','med_p3','u_mp','u_mois','u_unit','u_start','u_terr','u_p1','u_p2','u_p3'];
 function campPickUI(){ const w=document.getElementById('campPickWrap'), sel=document.getElementById('campPick'); if(!w) return;
   w.style.display=CAMPS.length?'':'none';
   sel.innerHTML='<option value="">Choisir une campagne…</option>'+CAMPS.map((c,i)=>`<option value="${i}">${esc(c.name)}</option>`).join(''); }
@@ -1801,7 +1806,7 @@ document.getElementById('campList').addEventListener('click',e=>{
   const b=e.target.closest('.camp'); if(!b) return; openCamp(CAMPS[+b.dataset.i]); });
 const eur=n=>'€'+(Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 function openCamp(c){
-  homeHide(); CUR=c; document.getElementById('campView').classList.add('on'); campList();
+  clearTimeout(RET_T); homeHide(); CUR=c; document.getElementById('campView').classList.add('on'); campList(); navNote();
   document.getElementById('cTitle').value=c.title; drawSheet();
 }
 function fitLivr(){ document.querySelectorAll('#cSheet textarea.cell').forEach(t=>{ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }); }
@@ -1821,8 +1826,8 @@ function drawSheet(){
     <td>${r.cancelled||r.free?'':`<input data-r="${i}" data-f="ttc" value="${r.ttc!==''&&r.ttc!=null?eur(r.ttc):''}" placeholder="—" inputmode="decimal">`}</td>
     <td class="livr"><textarea class="cell" data-r="${i}" data-f="deal" rows="1">${esc(r.deal||'')}</textarea></td>
     <td><textarea class="cell" data-r="${i}" data-f="facture" rows="1" placeholder="à remplir">${esc(r.facture||'')}</textarea></td>
-    <td class="acts"><button data-edit="${i}" title="${r.snap?'Rouvrir ce contrat dans le formulaire pour le modifier':'Contrat enregistré avant cette version : à ressaisir'}" ${r.snap?'':'disabled'}>✎</button>${r.snap?`<button class="av" data-av="${i}" title="Faire un avenant à ce contrat${(r.avenants||[]).length?' (déjà '+r.avenants.length+' avenant'+(r.avenants.length>1?'s':'')+')':''}">A+</button>`:''}<button data-cancel="${i}" title="${r.cancelled?'Rétablir cet influenceur':'Annulation : la ligne reste visible, barrée, et sort de la somme'}">${r.cancelled?'↺':'⊘'}</button><button class="del" data-del="${i}" title="Retirer complètement la ligne">✕</button></td></tr>`).join('');
-  document.getElementById('cSheet').innerHTML=`<table class="sheet"><colgroup><col style="width:12%"><col style="width:8%"><col style="width:3%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:17%"><col style="width:8%"><col style="width:9%"></colgroup><thead><tr><th>${esc(c.title)}</th><th>Note Sophie</th><th></th><th>Note<br>influence</th><th>Créateur<br>contenus</th><th>Période<br>activation</th><th>Prix HT</th><th>Prix TTC</th><th>Livrable</th><th>Facture</th><th style="background:none"></th></tr></thead>
+    <td class="acts">${r.snap&&!r.external?`<button data-pdf="${i}" title="Retélécharger le contrat (PDF), sans quitter le tableau">⤓</button>`:''}<button data-edit="${i}" title="${r.snap?'Rouvrir ce contrat dans le formulaire pour le modifier':'Contrat enregistré avant cette version : à ressaisir'}" ${r.snap?'':'disabled'}>✎</button>${r.snap?`<button class="av" data-av="${i}" title="Faire un avenant à ce contrat${(r.avenants||[]).length?' (déjà '+r.avenants.length+' avenant'+(r.avenants.length>1?'s':'')+')':''}">A+</button>`:''}<button data-cancel="${i}" title="${r.cancelled?'Rétablir cet influenceur':'Annulation : la ligne reste visible, barrée, et sort de la somme'}">${r.cancelled?'↺':'⊘'}</button><button class="del" data-del="${i}" title="Retirer complètement la ligne">✕</button></td></tr>`).join('');
+  document.getElementById('cSheet').innerHTML=`<table class="sheet"><colgroup><col style="width:12%"><col style="width:7%"><col style="width:3%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:7%"><col style="width:15%"><col style="width:8%"><col style="width:14%"></colgroup><thead><tr><th>${esc(c.title)}</th><th>Note Sophie</th><th></th><th>Note<br>influence</th><th>Créateur<br>contenus</th><th>Période<br>activation</th><th>Prix HT</th><th>Prix TTC</th><th>Livrable</th><th>Facture</th><th style="background:none"></th></tr></thead>
     <tbody>${rows||`<tr><td class="notea"><textarea data-note rows="3" placeholder="Texte libre (ex. 10K budget global&#10;3K Hono / 7K fees)">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td><td colspan="9" style="color:#999">Aucun influenceur pour l’instant : ils s’ajoutent à chaque PDF généré avec ce nom de campagne</td></tr>`}</tbody>
     <tfoot><tr><td colspan="5"></td><td class="sum">Somme :</td><td class="sum">${Math.round(total).toLocaleString('en-US')}€</td><td class="sum">${ttcTot(c)?Math.round(ttcTot(c)).toLocaleString('en-US')+'€':''}</td><td colspan="2"></td><td></td></tr></tfoot></table>`;
   fitLivr();
@@ -1841,16 +1846,17 @@ document.getElementById('cSheet').addEventListener('click',e=>{
   const ed=e.target.closest('[data-edit]'), ca=e.target.closest('[data-cancel]');
   if(ca){ const r=CUR.rows[+ca.dataset.cancel]; r.cancelled=!r.cancelled; saveCamps(); drawSheet(); campList(); toast(r.cancelled?'@'+r.handle+' annulé : sorti de la somme':'@'+r.handle+' rétabli'); return; }
   const av=e.target.closest('[data-av]');
-  if(av){ const r=CUR.rows[+av.dataset.av]; if(!r.snap) return;
+  if(av){ const r=CUR.rows[+av.dataset.av]; if(!r.snap) return; const rk=CUR.key;
     const n=(r.avenants||[]).length+1, base=r.snap;
     const basePrix=(Number(r.prix)||0)-(r.avenants||[]).reduce((t,a)=>t+(Number(a.prix)||0),0);
     S=Object.assign({},DEF,base,{logo:CUR.logo||S.logo||'',date_sign:TODAY(),av:{n,base:JSON.parse(JSON.stringify(base)),date:r.origDate||base.date_sign||'',basePrix,ext:!!r.external,mode:'seul',orig:JSON.parse(JSON.stringify(Object.assign({},r.orig||base,{date_sign:r.origDate||(r.orig||base).date_sign}))),prev:(r.avenants||[]).filter(a=>a.st).map(a=>a.st)},av_prix:''});
     if(r.external){ S.ext_file=''; EXT_URL=''; EXT_PDF=null; }
-    save(); syncUI(); render(); document.getElementById('cClose').onclick();
+    save(); syncUI(); render(); document.getElementById('cClose').onclick(); retSet(rk);
     toast(`Avenant n°${n} pour @${r.handle} : modifiez ce qui change, puis « Générer l’avenant »`); return; }
-  if(ed){ const r=CUR.rows[+ed.dataset.edit]; if(!r.snap) return;
+  const pd=e.target.closest('[data-pdf]'); if(pd){ rowPdf(CUR.rows[+pd.dataset.pdf]); return; }
+  if(ed){ const r=CUR.rows[+ed.dataset.edit]; if(!r.snap) return; const rk=CUR.key;
     S=Object.assign({},DEF,r.snap,{logo:CUR.logo||S.logo||'',date_sign:TODAY()}); save(); syncUI(); render();
-    document.getElementById('cClose').onclick(); toast('Contrat de @'+r.handle+' rouvert : modifiez puis regénérez le PDF, la ligne sera mise à jour'); return; }
+    document.getElementById('cClose').onclick(); retSet(rk); toast('Contrat de @'+r.handle+' rouvert : modifiez puis regénérez le PDF, la ligne sera mise à jour'); return; }
   const b=e.target.closest('[data-del]'); if(!b) return;
   if(!confirm('Retirer cette ligne du tableau ?')) return; CUR.rows.splice(+b.dataset.del,1); saveCamps(); drawSheet(); campList(); });
 document.getElementById('cFees').addEventListener('change',e=>{ CUR.feesMax=num(String(e.target.value).replace(/[€\s,]/g,''))||0; saveCamps(); drawSheet(); });
@@ -2015,7 +2021,7 @@ document.getElementById('pdfBtn').onclick=()=>{
   if(S.type==='ext'){
     const need=['Campagne','Année','Pseudo'].filter(x=>missing.has(x)); if(need.length){ alert('Pour ajouter ce contrat à une campagne, il faut : '+need.join(', ')+'.'); return; }
     if(missing.size&&!confirm(`Il manque encore : ${[...missing].join(', ')}.\n\nAjouter quand même à la campagne ?`)) return;
-    const cname=recordCampaign(); S.done=true; saveNow(); toast(`@${S.handle.replace(/^@/,'')} ajouté à « ${cname} » (contrat externe reçu)`); return;
+    const cname=recordCampaign(); S.done=true; saveNow(); toast(`@${S.handle.replace(/^@/,'')} ajouté à « ${cname} » (contrat externe reçu)`); if(RET_CAMP){ clearTimeout(RET_T); RET_T=setTimeout(backToCamp,700); }; return;
   }
   if(missing.size&&!confirm(`Il manque encore : ${[...missing].join(', ')}.\n\nGénérer quand même le PDF ?`)) return;
   const fn=fileName();
@@ -2023,6 +2029,7 @@ document.getElementById('pdfBtn').onclick=()=>{
   pdfMake.createPdf(makePdf()).download(fn.name);
   const cname=recordCampaign(); S.done=true; saveNow();
   toast('PDF généré : '+fn.name+(cname?' · ajouté à « '+cname+' »':''));
+  if(RET_CAMP){ clearTimeout(RET_T); RET_T=setTimeout(backToCamp,700); };
 };
 
 // polices du contrat aussi dans l'aperçu (mêmes fichiers que le PDF)
@@ -2033,12 +2040,49 @@ document.getElementById('pdfBtn').onclick=()=>{
     const f=new FontFace(fam,'url(data:font/ttf;base64,'+b64+')',{weight:w,style:st}); document.fonts.add(f); f.load().then(()=>fitPreview()).catch(()=>{}); });
 }catch(e){} })();
 
+// ---------- retour au tableau ----------
+let RET_CAMP='', RET_T=0;
+let NAV=[], NAV_LAST=null, NAV_BACK=false;
+const navCur=()=>{ const h=document.getElementById('homeView').classList.contains('on'), c=document.getElementById('campView').classList.contains('on'); return h?{v:'home'}:c?{v:'camp',key:CUR&&CUR.key}:{v:'form'}; };
+function navNote(){ const cur=navCur(); const same=a=>a&&a.v===cur.v&&(a.key||'')===(cur.key||'');
+  if(NAV_LAST&&!same(NAV_LAST)&&!NAV_BACK){ NAV.push(NAV_LAST); if(NAV.length>30) NAV.shift(); }
+  if(cur.v==='home') NAV=[];
+  NAV_LAST=cur; retUI(); }
+const navLabel=x=>x.v==='home'?'à l’accueil':x.v==='form'?'au formulaire':'au tableau '+(((CAMPS.find(c=>c.key===x.key)||{}).name)||'');
+function navBack(){ let t=NAV.pop(); while(t&&t.v==='camp'&&!CAMPS.find(c=>c.key===t.key)) t=NAV.pop(); if(!t) t={v:'home'};
+  NAV_BACK=true; try{
+    if(t.v==='home'){ document.getElementById('campView').classList.remove('on'); CUR=null; campList(); homeShow(); }
+    else if(t.v==='camp'){ openCamp(CAMPS.find(c=>c.key===t.key)); }
+    else { document.getElementById('campView').classList.remove('on'); CUR=null; campList(); homeHide(); }
+  } finally { NAV_BACK=false; } NAV_LAST=navCur(); retUI(); }
+function retUI(){ const t=NAV[NAV.length-1], cur=navCur();
+  document.getElementById('retBar').style.display=(cur.v==='form'&&t)?'':'none';
+  document.getElementById('cBack').style.display=(cur.v==='camp'&&t)?'':'none';
+  document.getElementById('retName').textContent=''; document.getElementById('cBack').textContent='← Retour';
+  const c=RET_CAMP&&CAMPS.find(x=>x.key===RET_CAMP); document.getElementById('retHint').textContent=''; }
+function retSet(key){ clearTimeout(RET_T); RET_CAMP=key||''; retUI(); }
+function backToCamp(){ const k=RET_CAMP; retSet(''); const t=NAV[NAV.length-1]; if(t&&t.v==='camp'&&t.key===k) navBack(); else { const c=CAMPS.find(x=>x.key===k); if(c) openCamp(c); } }
+document.getElementById('retBtn').onclick=()=>navBack();
+document.getElementById('cBack').onclick=()=>navBack();
+// retélécharger le PDF d'un contrat depuis le tableau, sans quitter le tableau
+function rowPdf(r){
+  const s0=S, st=r.orig||r.snap; if(!st) return;
+  try{ S=Object.assign({},DEF,st,{logo:(CUR&&CUR.logo)||s0.logo||'',av:null}); if(!S.date_sign) S.date_sign=r.origDate||TODAY();
+    const fn=fileName(); pdfMake.createPdf(makePdf()).download(fn.name); toast('PDF retéléchargé : '+fn.name); }
+  catch(e){ toast('PDF impossible à recréer pour cette ligne'); }
+  finally{ S=s0; render(); }
+}
 // ---------- page d'accueil ----------
+function meName(){ let n=''; try{ n=(localStorage.getItem('ic_name')||'').trim(); }catch(e){}
+  if(!n&&typeof SB!=='undefined'&&SB.user&&SB.user.email){ const p=SB.user.email.split('@')[0].replace(/[._-]+/g,' ').trim(); n=p.replace(/\b\w/g,c=>c.toUpperCase()); }
+  return n; }
+function helloUI(){ const n=meName(); document.getElementById('homeHello').textContent=n?`Bonjour ${n} !`:'Bonjour !'; document.getElementById('brandWho').textContent='Agence YLG'+(n?' · '+n:''); const f=document.getElementById('meName'); if(f&&document.activeElement!==f) f.value=(()=>{ try{ return localStorage.getItem('ic_name')||''; }catch(e){ return ''; } })(); }
+document.getElementById('meName').addEventListener('input',e=>{ try{ localStorage.setItem('ic_name',e.target.value.trim()); }catch(_){} helloUI(); });
 let HOME_MODE='', HOME_YEAR='';
 function homeSee(){ const p=document.getElementById('homePanel');
   const years=[...new Set(CAMPS.map(campYear))].sort((a,b)=>b.localeCompare(a));
   p.innerHTML=`<h3>Quelle campagne veux-tu voir ?</h3>`+(CAMPS.length?`<div class="seg light hyears" id="hYears"><button data-hy="" class="${HOME_YEAR?'':'on'}">Toutes les campagnes</button>${years.map(y=>`<button data-hy="${esc(y)}" class="${HOME_YEAR===y?'on':''}">${esc(y)}</button>`).join('')}</div>`:'')+homeCampChips(HOME_YEAR); }
-function homeShow(){ HOME_MODE=''; document.querySelectorAll('.hcard').forEach(b=>b.classList.remove('on')); document.getElementById('homePanel').classList.remove('on'); document.getElementById('homeView').classList.add('on'); document.getElementById('homeBox').classList.add('on'); }
+function homeShow(){ helloUI(); HOME_MODE=''; document.querySelectorAll('.hcard').forEach(b=>b.classList.remove('on')); document.getElementById('homePanel').classList.remove('on'); document.getElementById('homeView').classList.add('on'); document.getElementById('homeBox').classList.add('on'); }
 function homeHide(){ document.getElementById('homeView').classList.remove('on'); document.getElementById('homeBox').classList.remove('on'); }
 function homeCampChips(fy){
   if(!CAMPS.length) return '<div class="empty">Aucune campagne pour l’instant. Commence par « Créer une nouvelle campagne ».</div>';
@@ -2070,11 +2114,12 @@ document.getElementById('homePanel').addEventListener('click',e=>{
 });
 document.getElementById('homePanel').addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.target.id==='hName'||e.target.id==='hYear')) document.getElementById('hCreate').click(); });
 document.getElementById('homeBox').onclick=()=>document.getElementById('homeBtn').onclick();
-document.getElementById('homeBtn').onclick=()=>{ document.getElementById('campView').classList.remove('on'); CUR=null; campList(); homeShow(); };
+document.getElementById('homeBtn').onclick=()=>{ retSet(''); document.getElementById('campView').classList.remove('on'); CUR=null; campList(); homeShow(); };
 document.querySelector('.side').addEventListener('click',e=>{ if(!e.target.closest('#homeBtn')&&!e.target.closest('#homeBox')&&!e.target.closest('#campList')&&!e.target.closest('#campNew')) homeHide(); });
 function syncView(){ const h=document.getElementById('homeView').classList.contains('on'), c=document.getElementById('campView').classList.contains('on');
-  document.body.classList.toggle('v-home',h); document.body.classList.toggle('v-camp',!h&&c); document.body.classList.toggle('v-form',!h&&!c); }
+  document.body.classList.toggle('v-home',h); document.body.classList.toggle('v-camp',!h&&c); document.body.classList.toggle('v-form',!h&&!c); if(typeof navNote==='function') navNote(); }
 { const mo=new MutationObserver(syncView); ['homeView','campView'].forEach(id=>mo.observe(document.getElementById(id),{attributes:true,attributeFilter:['class']})); syncView(); }
+helloUI();
 if(/nohome/.test(location.search)) homeHide();
 S.date_sign=TODAY(); // toujours la date du jour à l’ouverture
 syncUI();
