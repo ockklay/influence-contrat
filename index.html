@@ -1254,6 +1254,9 @@ const NAT={Roboto:1.172,Poppins:1.5};
 const colr=c=>'#'+(c||'000000');
 function lineH(st,mk){ const f=FONT(mk.f), s=mk.s||11; return st.lh<0?(-st.lh)/(s*NAT[f]):(st.lh||1.15); }
 const LOGO_BOX={w:180,h:80};
+const LOGO_R={}; // proportions des logos, mesurées sur l'image elle-même
+function logoRatio(src){ return new Promise(res=>{ if(!src) return res(null); if(LOGO_R[src]) return res(LOGO_R[src]);
+  const i=new Image(); i.onload=()=>{ LOGO_R[src]=i.naturalWidth/i.naturalHeight; res(LOGO_R[src]); }; i.onerror=()=>res(null); i.src=src; }); }
 const LB=e=>(e&&e.tiny)?{w:110,h:36}:(e&&e.small)?{w:150,h:52}:LOGO_BOX;
 const COVER_TITLE=24; // taille des grands titres de la page 1
 const COVER_LINES=18; // taille des lignes Projet / Influenceur / Date
@@ -1385,6 +1388,7 @@ function render(){
   const p=t.page;
   doc.style.width=p.w+'pt'; doc.style.padding=`${p.mt}pt ${p.mr}pt ${p.mb}pt ${p.ml}pt`;
   doc.innerHTML=items.map(htmlBlock).join('');
+  if(S.logo&&!LOGO_R[S.logo]) logoRatio(S.logo);
   fitPreview();
   document.getElementById('used').textContent=t.id==='ugc'?'Contrat UGC rémunération':t.id==='avenant'?'Avenant n°'+(S.av.n||1):t.free?'Contrat court Free':'Contrat '+t.id;
   if(S.av) document.getElementById('pdfBtn').textContent='Générer l’avenant';
@@ -1993,7 +1997,8 @@ function pdfBlock(e){
   if(e.k==='logo'){
     // zone fixe : le logo est réduit dedans, la mise en page ne bouge jamais
     const im=document.querySelector('#doc .logo img');
-    if(S.logo&&im&&im.naturalWidth){ const r=im.naturalWidth/im.naturalHeight; const LBX=LB(e); let w=LBX.w,h=LBX.w/r; if(h>LBX.h){h=LBX.h;w=h*r;} const pad=(LBX.h-h)/2;
+    const rr=S.logo&&(LOGO_R[S.logo]||(im&&im.naturalWidth&&im.getAttribute('src')===S.logo?im.naturalWidth/im.naturalHeight:0));
+    if(S.logo&&rr){ const r=rr; const LBX=LB(e); let w=LBX.w,h=LBX.w/r; if(h>LBX.h){h=LBX.h;w=h*r;} const pad=(LBX.h-h)/2;
       node={image:S.logo,width:w,height:h,alignment:al,margin:[margin[0],margin[1]+pad,margin[2],margin[3]+pad]}; }
     else node={text:' ',margin:[0,margin[1]+LB(e).h,0,margin[3]]};
   } else if(e.img){
@@ -2091,8 +2096,9 @@ function backToCamp(){ const k=RET_CAMP; retSet(''); const t=NAV[NAV.length-1]; 
 document.getElementById('retBtn').onclick=()=>navBack();
 document.getElementById('cBack').onclick=()=>navBack();
 // retélécharger le PDF d'un contrat depuis le tableau, sans quitter le tableau
-function rowPdf(r){
+async function rowPdf(r){
   const s0=S, st=r.orig||r.snap; if(!st) return;
+  await logoRatio((CUR&&CUR.logo)||s0.logo||'');
   try{ S=Object.assign({},DEF,st,{logo:(CUR&&CUR.logo)||s0.logo||'',av:null}); if(!S.date_sign) S.date_sign=r.origDate||TODAY();
     const fn=fileName(); pdfMake.createPdf(makePdf()).download(fn.name); toast('PDF retéléchargé : '+fn.name); }
   catch(e){ toast('PDF impossible à recréer pour cette ligne'); }
