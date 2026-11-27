@@ -23,6 +23,8 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
 .side{background:var(--side);color:#e9e8e6;padding:22px 18px;overflow:auto;display:flex;flex-direction:column;gap:18px}
 .brand{display:flex;align-items:center;gap:10px;margin-bottom:4px}
 .brand{cursor:pointer;border-radius:10px;margin:-4px -6px 4px;padding:4px 6px}.brand:hover{background:#222228}
+#sideForm{display:flex;flex-direction:column;gap:18px}
+body.v-home #sideForm,body.v-camp #sideForm,body.v-form #g-camp,body:not(.v-form) .usedline{display:none}
 .homebox{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:1px solid #34343a;background:#1d1d22;color:#e9e8e6;border-radius:10px;padding:10px;font:inherit;font-size:13px;cursor:pointer;margin-top:-6px}.homebox:hover{border-color:var(--acc)}.homebox.on{border-color:var(--acc);color:var(--acc);background:#2a2018}
 .home{position:fixed;left:260px;right:0;top:0;bottom:0;background:var(--bg);display:none;z-index:6;overflow:auto}
 .home.on{display:block}
@@ -45,6 +47,7 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
 .hpanel .chip:hover{border-color:var(--acc);background:var(--acc-soft)}
 .hpanel .chip span{display:block;font-size:11px;color:var(--mute);margin-top:2px}
 .hpanel .newrow{display:flex;gap:10px;align-items:flex-end}.hpanel .newrow .f{flex:1}
+.hpanel .hyears{margin:0 0 6px;max-width:520px}.hpanel .seg.hyears button.on{background:var(--acc);color:#111;box-shadow:none}.hpanel button.hxl{display:block;margin-top:8px;font:inherit;font-size:12.5px;color:var(--acc-ink);border:0;background:none;padding:0;cursor:pointer}.hpanel button.hxl:hover{text-decoration:underline}
 .hpanel .empty{color:var(--mute);font-size:13px}
 .acts button.av.pulse{animation:avp 1s ease-in-out 3;}
 @keyframes avp{50%{background:var(--acc);color:#111;box-shadow:0 0 0 4px rgba(247,178,124,.35)}}
@@ -238,6 +241,7 @@ textarea{resize:vertical;min-height:64px}
     <div class="brand" id="homeBtn" title="Accueil"><img src="icon-512.png" alt=""><div><b>Influence Contrat</b><small>Agence YLG</small></div></div>
     <button class="homebox on" id="homeBox"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg>Accueil</button>
 
+    <div id="sideForm">
     <div class="grp"><h4>Type de contrat</h4>
       <div class="seg" id="s-type"><button data-v="infl" class="on">Influence</button><button data-v="ugc">UGC</button><button data-v="ext" title="Contrat déjà rédigé par l’influenceur ou son agent">Contrat externe</button></div></div>
 
@@ -258,11 +262,12 @@ textarea{resize:vertical;min-height:64px}
         <button class="card" data-v="cp_free"><b>Crosspost + médiatisation offerte</b>Ads autorisées sans rétribution</button>
         <button class="card" data-v="cp_paid"><b>Crosspost + médiatisation payante</b>Ads autorisées contre rétribution</button>
       </div></div>
+    </div>
 
     <div class="grp" id="g-camp"><h4>Campagnes</h4><div class="sbst off" id="sbStatus" hidden></div><div id="campList" class="camplist"></div><button class="link" id="campNew">＋ Créer une campagne à l'avance</button><datalist id="campNames"></datalist>
 </div>
 
-    <div class="used">Modèle utilisé : <b id="used">Contrat 9</b>
+    <div class="used"><span class="usedline">Modèle utilisé : <b id="used">Contrat 9</b></span>
       <button class="link" id="newBtn">＋ Nouveau contrat (formulaire vide)</button>
       <button class="link" id="setBtn">⚙︎ Réglages (signature)</button>
     </div>
@@ -2029,25 +2034,31 @@ document.getElementById('pdfBtn').onclick=()=>{
 }catch(e){} })();
 
 // ---------- page d'accueil ----------
-let HOME_MODE='';
+let HOME_MODE='', HOME_YEAR='';
+function homeSee(){ const p=document.getElementById('homePanel');
+  const years=[...new Set(CAMPS.map(campYear))].sort((a,b)=>b.localeCompare(a));
+  p.innerHTML=`<h3>Quelle campagne veux-tu voir ?</h3>`+(CAMPS.length?`<div class="seg light hyears" id="hYears"><button data-hy="" class="${HOME_YEAR?'':'on'}">Toutes les campagnes</button>${years.map(y=>`<button data-hy="${esc(y)}" class="${HOME_YEAR===y?'on':''}">${esc(y)}</button>`).join('')}</div>`:'')+homeCampChips(HOME_YEAR); }
 function homeShow(){ HOME_MODE=''; document.querySelectorAll('.hcard').forEach(b=>b.classList.remove('on')); document.getElementById('homePanel').classList.remove('on'); document.getElementById('homeView').classList.add('on'); document.getElementById('homeBox').classList.add('on'); }
 function homeHide(){ document.getElementById('homeView').classList.remove('on'); document.getElementById('homeBox').classList.remove('on'); }
-function homeCampChips(){
+function homeCampChips(fy){
   if(!CAMPS.length) return '<div class="empty">Aucune campagne pour l’instant. Commence par « Créer une nouvelle campagne ».</div>';
   const years=[...new Set(CAMPS.map(campYear))].sort((a,b)=>b.localeCompare(a));
-  return years.map(y=>`<div class="yr">${esc(y)}</div><div class="chips">`+CAMPS.map((c,i)=>[c,i]).filter(([c])=>campYear(c)===y).map(([c,i])=>{ const n=c.rows.filter(r=>!r.cancelled).length;
+  return years.filter(y=>!fy||y===fy).map(y=>`<div class="yr">${esc(y)}</div><div class="chips">`+CAMPS.map((c,i)=>[c,i]).filter(([c])=>campYear(c)===y).map(([c,i])=>{ const n=c.rows.filter(r=>!r.cancelled).length;
     return `<button class="chip" data-ci="${i}">${esc(c.name)}<span>${n} influenceur${n>1?'s':''} · ${kEur(c.rows.reduce((a,r)=>a+rPrix(r),0))}</span></button>`; }).join('')+'</div>').join('');
 }
 document.querySelector('.hgrid').addEventListener('click',e=>{ const b=e.target.closest('.hcard'); if(!b) return;
   HOME_MODE=b.dataset.h; document.querySelectorAll('.hcard').forEach(x=>x.classList.toggle('on',x===b));
   const p=document.getElementById('homePanel'); p.classList.add('on');
   if(HOME_MODE==='new') p.innerHTML=`<h3>Nouvelle campagne</h3><div class="newrow"><label class="f"><span>Nom de la campagne</span><input id="hName" placeholder="Ajouter le nom (comme dans les contrats)" list="campNames"></label><label class="f" style="flex:0 0 110px"><span>Année</span><input id="hYear" inputmode="numeric" value="${new Date().getFullYear()}"></label><button class="btn pri" id="hCreate">Créer</button></div>`;
+  else if(HOME_MODE==='see'){ HOME_YEAR=''; homeSee(); }
   else p.innerHTML=`<h3>${{add:'À quelle campagne ajouter l’influenceur ?',av:'Dans quelle campagne est l’influenceur ?',see:'Quelle campagne veux-tu voir ?'}[HOME_MODE]}</h3>`+homeCampChips();
   if(HOME_MODE==='new') setTimeout(()=>document.getElementById('hName').focus(),30);
   p.scrollIntoView({behavior:'smooth',block:'nearest'}); });
 document.getElementById('homePanel').addEventListener('click',e=>{
   if(e.target.id==='hCreate'){ const nm=document.getElementById('hName').value.trim(), yr=document.getElementById('hYear').value.trim();
     if(!nm||!yr){ toast('Ajoute le nom et l’année'); return; } createCamp(nm,yr); return; }
+  const hy=e.target.closest('#hYears button'); if(hy){ HOME_YEAR=hy.dataset.hy; homeSee(); return; }
+  const hx=e.target.closest('.hxl'); if(hx){ exportYear(hx.dataset.hy); return; }
   const ch=e.target.closest('.chip'); if(!ch) return; const c=CAMPS[+ch.dataset.ci]; if(!c) return;
   if(HOME_MODE==='add'){
     const ty=S.type==='ugc'?'ugc':'infl';
@@ -2061,6 +2072,9 @@ document.getElementById('homePanel').addEventListener('keydown',e=>{ if(e.key===
 document.getElementById('homeBox').onclick=()=>document.getElementById('homeBtn').onclick();
 document.getElementById('homeBtn').onclick=()=>{ document.getElementById('campView').classList.remove('on'); CUR=null; campList(); homeShow(); };
 document.querySelector('.side').addEventListener('click',e=>{ if(!e.target.closest('#homeBtn')&&!e.target.closest('#homeBox')&&!e.target.closest('#campList')&&!e.target.closest('#campNew')) homeHide(); });
+function syncView(){ const h=document.getElementById('homeView').classList.contains('on'), c=document.getElementById('campView').classList.contains('on');
+  document.body.classList.toggle('v-home',h); document.body.classList.toggle('v-camp',!h&&c); document.body.classList.toggle('v-form',!h&&!c); }
+{ const mo=new MutationObserver(syncView); ['homeView','campView'].forEach(id=>mo.observe(document.getElementById(id),{attributes:true,attributeFilter:['class']})); syncView(); }
 if(/nohome/.test(location.search)) homeHide();
 S.date_sign=TODAY(); // toujours la date du jour à l’ouverture
 syncUI();
