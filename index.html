@@ -22,6 +22,33 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
 /* ---------- colonne modèle ---------- */
 .side{background:var(--side);color:#e9e8e6;padding:22px 18px;overflow:auto;display:flex;flex-direction:column;gap:18px}
 .brand{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand{cursor:pointer;border-radius:10px;margin:-4px -6px 4px;padding:4px 6px}.brand:hover{background:#222228}
+.homebox{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:1px solid #34343a;background:#1d1d22;color:#e9e8e6;border-radius:10px;padding:10px;font:inherit;font-size:13px;cursor:pointer;margin-top:-6px}.homebox:hover{border-color:var(--acc)}.homebox.on{border-color:var(--acc);color:var(--acc);background:#2a2018}
+.home{position:fixed;left:260px;right:0;top:0;bottom:0;background:var(--bg);display:none;z-index:6;overflow:auto}
+.home.on{display:block}
+.home .hin{max-width:760px;margin:0 auto;padding:9vh 40px 60px}
+.home h1{font-size:44px;line-height:1.1;margin:0;font-weight:700;letter-spacing:-.5px}
+.home .q{font-size:22px;color:var(--mute);margin:42px 0 22px}
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hcard{display:flex;gap:14px;align-items:flex-start;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;font:inherit;cursor:pointer;color:var(--ink);transition:border-color .15s,box-shadow .15s}
+.hcard:hover{border-color:var(--acc);box-shadow:0 6px 18px rgba(0,0,0,.06)}
+.hcard.on{border-color:var(--acc);background:var(--acc-soft)}
+.hcard i{font-style:normal;flex:none;width:38px;height:38px;border-radius:10px;background:var(--acc-soft);color:var(--acc-ink);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700}
+.hcard.on i{background:var(--acc);color:#111}
+.hcard b{display:block;font-size:15px;margin-bottom:3px}.hcard small{color:var(--mute);font-size:12.5px;line-height:1.4}
+.hpanel{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;display:none}
+.hpanel.on{display:block}
+.hpanel h3{margin:0 0 12px;font-size:14px}
+.hpanel .yr{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--mute);margin:12px 0 6px}
+.hpanel .chips{display:flex;flex-wrap:wrap;gap:8px}
+.hpanel .chip{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink);text-align:left}
+.hpanel .chip:hover{border-color:var(--acc);background:var(--acc-soft)}
+.hpanel .chip span{display:block;font-size:11px;color:var(--mute);margin-top:2px}
+.hpanel .newrow{display:flex;gap:10px;align-items:flex-end}.hpanel .newrow .f{flex:1}
+.hpanel .empty{color:var(--mute);font-size:13px}
+.acts button.av.pulse{animation:avp 1s ease-in-out 3;}
+@keyframes avp{50%{background:var(--acc);color:#111;box-shadow:0 0 0 4px rgba(247,178,124,.35)}}
+
 .brand img{width:34px;height:34px;border-radius:8px}
 .brand b{font-size:15px;letter-spacing:.2px}
 .brand small{display:block;color:#8d8b90;font-size:11px;font-weight:400}
@@ -208,7 +235,8 @@ textarea{resize:vertical;min-height:64px}
 <div class="app">
   <!-- ===== Colonne 1 : choix du modèle ===== -->
   <aside class="side">
-    <div class="brand"><img src="icon-512.png" alt=""><div><b>Influence Contrat</b><small>Agence YLG</small></div></div>
+    <div class="brand" id="homeBtn" title="Accueil"><img src="icon-512.png" alt=""><div><b>Influence Contrat</b><small>Agence YLG</small></div></div>
+    <button class="homebox on" id="homeBox"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg>Accueil</button>
 
     <div class="grp"><h4>Type de contrat</h4>
       <div class="seg" id="s-type"><button data-v="infl" class="on">Influence</button><button data-v="ugc">UGC</button><button data-v="ext" title="Contrat déjà rédigé par l’influenceur ou son agent">Contrat externe</button></div></div>
@@ -440,6 +468,17 @@ textarea{resize:vertical;min-height:64px}
   </section>
 </div>
 
+<section class="home on" id="homeView"><div class="hin">
+  <h1>Bonjour !</h1>
+  <div class="q">Que veux-tu faire aujourd’hui ?</div>
+  <div class="hgrid">
+    <button class="hcard" data-h="new"><i>＋</i><div><b>Créer une nouvelle campagne</b><small>Nom et année, puis le tableau de suivi s’ouvre</small></div></button>
+    <button class="hcard" data-h="add"><i>@</i><div><b>Ajouter un influenceur à une campagne existante</b><small>Les infos de la marque sont reprises, il reste l’influenceur</small></div></button>
+    <button class="hcard" data-h="av"><i>A+</i><div><b>Générer un avenant</b><small>Choisis la campagne, puis A+ sur la ligne de l’influenceur</small></div></button>
+    <button class="hcard" data-h="see"><i><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></i><div><b>Voir tes campagnes en cours</b><small>Le tableau de suivi de chaque campagne</small></div></button>
+  </div>
+  <div class="hpanel" id="homePanel"></div>
+</div></section>
 <section class="campview" id="campView">
   <div class="bar">
     <input class="ctitle" id="cTitle" title="Titre de la colonne A (nom de la campagne)">
@@ -1757,7 +1796,7 @@ document.getElementById('campList').addEventListener('click',e=>{
   const b=e.target.closest('.camp'); if(!b) return; openCamp(CAMPS[+b.dataset.i]); });
 const eur=n=>'€'+(Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 function openCamp(c){
-  CUR=c; document.getElementById('campView').classList.add('on'); campList();
+  homeHide(); CUR=c; document.getElementById('campView').classList.add('on'); campList();
   document.getElementById('cTitle').value=c.title; drawSheet();
 }
 function fitLivr(){ document.querySelectorAll('#cSheet textarea.cell').forEach(t=>{ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }); }
@@ -1814,12 +1853,15 @@ document.getElementById('cTitle').addEventListener('input',e=>{ CUR.title=e.targ
 document.getElementById('campNew').onclick=()=>{
   const nm=(prompt('Nom de la campagne (exactement comme dans les contrats) :',S.campagne||'')||'').trim(); if(!nm) return;
   const yr=(prompt('Année :',String(S.annee||new Date().getFullYear()))||'').trim(); if(!yr) return;
+  createCamp(nm,yr);
+};
+function createCamp(nm,yr){
   const name=nm+' '+yr, key=name.toLowerCase();
   let c=CAMPS.find(x=>x.key===key);
   if(!c){ c={key,name,base:nm,year:yr,brand:{campagne:nm,annee:yr},title:name.toUpperCase(),note:'',rows:[],created:Date.now()}; CAMPS.unshift(c); saveCamps(); }
   if(!OPEN_YEARS) OPEN_YEARS=[]; if(!OPEN_YEARS.includes(yr)) OPEN_YEARS.push(yr);
   openCamp(c); toast('Campagne créée : remplissez la colonne A et les fees MAX');
-};
+}
 document.getElementById('cClose').onclick=()=>{ document.getElementById('campView').classList.remove('on'); CUR=null; campList(); };
 document.getElementById('cDelete').onclick=()=>{ if(!confirm(`Supprimer la campagne « ${CUR.name} » de la liste ? (les PDF déjà générés ne sont pas touchés)`)) return;
   CAMPS.splice(CAMPS.indexOf(CUR),1); saveCamps(); document.getElementById('cClose').onclick(); };
@@ -1985,6 +2027,41 @@ document.getElementById('pdfBtn').onclick=()=>{
   Object.entries(map).forEach(([file,[fam,w,st]])=>{ const b64=pdfMake.vfs[file]; if(!b64) return;
     const f=new FontFace(fam,'url(data:font/ttf;base64,'+b64+')',{weight:w,style:st}); document.fonts.add(f); f.load().then(()=>fitPreview()).catch(()=>{}); });
 }catch(e){} })();
+
+// ---------- page d'accueil ----------
+let HOME_MODE='';
+function homeShow(){ HOME_MODE=''; document.querySelectorAll('.hcard').forEach(b=>b.classList.remove('on')); document.getElementById('homePanel').classList.remove('on'); document.getElementById('homeView').classList.add('on'); document.getElementById('homeBox').classList.add('on'); }
+function homeHide(){ document.getElementById('homeView').classList.remove('on'); document.getElementById('homeBox').classList.remove('on'); }
+function homeCampChips(){
+  if(!CAMPS.length) return '<div class="empty">Aucune campagne pour l’instant. Commence par « Créer une nouvelle campagne ».</div>';
+  const years=[...new Set(CAMPS.map(campYear))].sort((a,b)=>b.localeCompare(a));
+  return years.map(y=>`<div class="yr">${esc(y)}</div><div class="chips">`+CAMPS.map((c,i)=>[c,i]).filter(([c])=>campYear(c)===y).map(([c,i])=>{ const n=c.rows.filter(r=>!r.cancelled).length;
+    return `<button class="chip" data-ci="${i}">${esc(c.name)}<span>${n} influenceur${n>1?'s':''} · ${kEur(c.rows.reduce((a,r)=>a+rPrix(r),0))}</span></button>`; }).join('')+'</div>').join('');
+}
+document.querySelector('.hgrid').addEventListener('click',e=>{ const b=e.target.closest('.hcard'); if(!b) return;
+  HOME_MODE=b.dataset.h; document.querySelectorAll('.hcard').forEach(x=>x.classList.toggle('on',x===b));
+  const p=document.getElementById('homePanel'); p.classList.add('on');
+  if(HOME_MODE==='new') p.innerHTML=`<h3>Nouvelle campagne</h3><div class="newrow"><label class="f"><span>Nom de la campagne</span><input id="hName" placeholder="Ajouter le nom (comme dans les contrats)" list="campNames"></label><label class="f" style="flex:0 0 110px"><span>Année</span><input id="hYear" inputmode="numeric" value="${new Date().getFullYear()}"></label><button class="btn pri" id="hCreate">Créer</button></div>`;
+  else p.innerHTML=`<h3>${{add:'À quelle campagne ajouter l’influenceur ?',av:'Dans quelle campagne est l’influenceur ?',see:'Quelle campagne veux-tu voir ?'}[HOME_MODE]}</h3>`+homeCampChips();
+  if(HOME_MODE==='new') setTimeout(()=>document.getElementById('hName').focus(),30);
+  p.scrollIntoView({behavior:'smooth',block:'nearest'}); });
+document.getElementById('homePanel').addEventListener('click',e=>{
+  if(e.target.id==='hCreate'){ const nm=document.getElementById('hName').value.trim(), yr=document.getElementById('hYear').value.trim();
+    if(!nm||!yr){ toast('Ajoute le nom et l’année'); return; } createCamp(nm,yr); return; }
+  const ch=e.target.closest('.chip'); if(!ch) return; const c=CAMPS[+ch.dataset.ci]; if(!c) return;
+  if(HOME_MODE==='add'){
+    const ty=S.type==='ugc'?'ugc':'infl';
+    S=Object.assign({},DEF,{type:ty,date_sign:TODAY()}); save(); syncUI();
+    const sel=document.getElementById('campPick'); sel.value=String(CAMPS.indexOf(c)); sel.dispatchEvent(new Event('change'));
+    homeHide(); document.querySelector('.tab[data-p="infl"]').click(); return; }
+  openCamp(c);
+  if(HOME_MODE==='av'){ setTimeout(()=>document.querySelectorAll('#cSheet button.av').forEach(b=>b.classList.add('pulse')),50); toast('Clique sur A+ sur la ligne de l’influenceur'); }
+});
+document.getElementById('homePanel').addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.target.id==='hName'||e.target.id==='hYear')) document.getElementById('hCreate').click(); });
+document.getElementById('homeBox').onclick=()=>document.getElementById('homeBtn').onclick();
+document.getElementById('homeBtn').onclick=()=>{ document.getElementById('campView').classList.remove('on'); CUR=null; campList(); homeShow(); };
+document.querySelector('.side').addEventListener('click',e=>{ if(!e.target.closest('#homeBtn')&&!e.target.closest('#homeBox')&&!e.target.closest('#campList')&&!e.target.closest('#campNew')) homeHide(); });
+if(/nohome/.test(location.search)) homeHide();
 S.date_sign=TODAY(); // toujours la date du jour à l’ouverture
 syncUI();
 if('serviceWorker' in navigator&&location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
