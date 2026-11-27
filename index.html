@@ -618,6 +618,8 @@ function avChanges(fr){
   const B=S.av.base||{}, out=[]; const isMed=o=>o==='cp_free'||o==='cp_paid';
   const bC=withS(B,contentsTxt), cC=contentsTxt(); const cross=S.opt!=='nocp';
   if(bC!==cC) out.push(fr?"Les Contenus attendus de l'Influenceur sont désormais les suivants : {{enum:fr:"+(cross?'en':'sans')+"}}.":"The Content expected from the Influencer is now as follows: {{enum:en:"+(cross?'with':'without')+"}}.");
+  if(B.paid==='free'&&!freeOn()) out.push(fr?"La participation de l'Influenceur, prévue au Contrat à titre gratuit, devient rémunérée dans les conditions de l'article 3.":"The Influencer's participation, provided for free of charge in the Agreement, becomes paid under the terms of Article 3.");
+  if(B.paid!=='free'&&freeOn()) out.push(fr?"La participation de l'Influenceur devient gratuite : aucune rémunération ne lui sera versée.":"The Influencer's participation becomes free of charge: no fee will be paid.");
   if(B.opt==='nocp'&&cross) out.push(fr?"L'Influenceur s'engage à co-publier (crosspost) les Reels Instagram avec le compte officiel du Client.":"The Influencer undertakes to co-publish (crosspost) the Instagram Reels with the Client's official account.");
   if(B.opt!=='nocp'&&!cross) out.push(fr?"Le crosspost prévu au Contrat est supprimé.":"The crossposting provided for in the Agreement is removed.");
   const medChanged=MED_KEYS.some(k=>JSON.stringify(B[k]??DEF[k])!==JSON.stringify(S[k]??DEF[k]));
@@ -660,6 +662,8 @@ function avTpl(){
     A.push(H('ARTICLE 1. OBJET'),P("Le présent avenant a pour objet de modifier le Contrat dans les conditions décrites ci-après. Il fait partie intégrante du Contrat."));
     A.push(H('ARTICLE 2. MODIFICATIONS'));
     if(ch.length){ A.push(P("À compter de la signature du présent avenant, le Contrat est modifié comme suit :")); ch.forEach(x=>A.push(L(x))); } else A.push(P("[Aucune modification sélectionnée : modifiez les contenus, la médiatisation, les dates ou la dotation dans le formulaire.]"));
+    const wasFree=(S.av.base||{}).paid==='free'&&!freeOn();
+    if(wasFree&&extra) A.push(H('ARTICLE 3. RÉMUNÉRATION'),P("En contrepartie des Contenus et des modifications prévues à l'article 2, l'Influenceur percevra une rémunération de ({{av_w}} euros) {{av_n}},00€ HT. Elle fera l'objet d'une facture émise par l'Influenceur après signature du présent avenant, réglée dans un délai de 30 (trente) jours à compter de sa réception.")); else
     A.push(H('ARTICLE 3. RÉMUNÉRATION COMPLÉMENTAIRE'),P(extra?"En contrepartie des modifications prévues à l'article 2, "+(ugc?"le Créateur":"l'Influenceur")+" percevra une rémunération complémentaire de ({{av_w}} euros) {{av_n}},00€ HT, qui s'ajoute à la rémunération prévue au Contrat. "+(avFact()==='2'?"Elle fera l'objet d'une seconde facture, distincte de celle prévue au Contrat, émise par "+(ugc?"le Créateur":"l'Influenceur")+" après signature du présent avenant. Cette facture sera réglée dans un délai de 30 (trente) jours à compter de sa réception et devra comporter les mêmes éléments de facturation que ceux prévus au Contrat.":"Elle sera facturée selon les modalités prévues au Contrat."):"Les modifications prévues à l'article 2 n'entraînent aucune rémunération complémentaire."));
     A.push(H('ARTICLE 4. AUTRES DISPOSITIONS'),P((S.av.mode==='complet'?"Le Contrat initial figure avant le présent avenant. ":"")+"Toutes les autres clauses du Contrat demeurent inchangées et continuent de s'appliquer. En cas de contradiction entre le Contrat et le présent avenant, les stipulations du présent avenant prévalent."));
   } else {
@@ -667,6 +671,8 @@ function avTpl(){
     A.push(H('ARTICLE 1. PURPOSE'),P("The purpose of this amendment is to amend the Agreement as set out below. It forms an integral part of the Agreement."));
     A.push(H('ARTICLE 2. AMENDMENTS'));
     if(ch.length){ A.push(P("With effect from the signature of this amendment, the Agreement is amended as follows:")); ch.forEach(x=>A.push(L(x))); } else A.push(P("[No change selected: update the content, paid media, dates or products supply in the form.]"));
+    const wasFreeEn=(S.av.base||{}).paid==='free'&&!freeOn();
+    if(wasFreeEn&&extra) A.push(H('ARTICLE 3. FEE'),P("In consideration of the Content and the amendments set out in Article 2, the Influencer shall receive a fee of {{av_w}} {{cur_word}} ({{cur}}{{av_n}}.00) excluding VAT. It shall be invoiced by the Influencer after signature of this amendment and paid within thirty (30) days of receipt.")); else
     A.push(H('ARTICLE 3. ADDITIONAL FEE'),P(extra?"In consideration of the amendments set out in Article 2, the Influencer shall receive an additional fee of {{av_w}} {{cur_word}} ({{cur}}{{av_n}}.00) excluding VAT, in addition to the fee set out in the Agreement. "+(avFact()==='2'?"It shall be invoiced by the Influencer on a second invoice, separate from the one provided for in the Agreement, issued after signature of this amendment. This invoice shall be paid within thirty (30) days of receipt and shall include the same invoicing details as those required under the Agreement.":"It shall be invoiced in accordance with the terms of the Agreement."):"The amendments set out in Article 2 do not give rise to any additional fee."));
     A.push(H('ARTICLE 4. OTHER PROVISIONS'),P((S.av.mode==='complet'?"The original Agreement precedes this amendment. ":"")+"All other provisions of the Agreement remain unchanged and continue to apply. In the event of any conflict between the Agreement and this amendment, the provisions of this amendment shall prevail."));
   }
@@ -759,7 +765,7 @@ function terrTxt(fr){ if((S[MK('terr')]||'monde')!=='pays') return fr?'Monde ent
   const L=terrList().map(k=>PAYS[k][fr?0:1]); if(!L.length) return ''; return L.length===1?L[0]:L.slice(0,-1).join(', ')+(fr?' et ':' and ')+L[L.length-1]; }
 // total du contrat = prestation contenus + médiatisation payante
 function avMedIsNew(){ return !!S.av&&S.opt==='cp_paid'&&(S.av.base||{}).opt!=='cp_paid'; }
-function TOT(){ const t=num(S.total); if(t==null) return null;
+function TOT(){ let t=num(S.total); if(t==null&&S.av&&(S.av.base||{}).paid==='free') t=0; if(t==null) return null;
   const med=medOn()?(avMedIsNew()?(num(S.av_prix)||0):(num(S.med_prix)||0)):0;
   const add=S.av&&!avMedIsNew()?(num(S.av_prix)||0):0;
   return t+med+add; }
@@ -930,11 +936,11 @@ function avUI(){ const on=!!S.av, ex=on&&S.type==='ext';
   document.getElementById('avBox').style.display=on?'':'none';
   if(on){ document.getElementById('avTitle').textContent=`Avenant n°${S.av.n||1} au contrat ${ex?'externe ':''}de @${String(S.handle||'').replace(/^@/,'')}${S.av.date&&!ex?' du '+fmtDate(S.av.date):''}`;
     document.getElementById('medBox').style.display='none';
-    document.getElementById('avmRow').style.display=ex?'none':''; setSeg('s-avm',S.av.mode==='complet'?'complet':'seul'); document.getElementById('avFactRow').style.display=(num(S.av_prix)||0)>0?'':'none'; setSeg('s-avf',avFact());
+    document.getElementById('avmRow').style.display=ex?'none':''; setSeg('s-avm',S.av.mode==='complet'?'complet':'seul'); const wf=(S.av.base||{}).paid==='free'&&!freeOn(); document.getElementById('avFactRow').style.display=(num(S.av_prix)||0)>0&&!wf?'':'none'; setSeg('s-avf',avFact());
     const n=avChanges(lang()==='fr').length, x=num(S.av_prix)||0;
     if(ex) document.querySelector('#avBanner small').textContent='Glissez le PDF de l’avenant reçu, modifiez ce qui change (contenus, médiatisation…) et indiquez le montant de l’avenant.';
     else document.querySelector('#avBanner small').textContent='Modifiez seulement ce qui change (contenus, médiatisation, dates…) et indiquez la rémunération complémentaire dans l’onglet Rémunération.';
-    document.getElementById('avCalc').textContent=`${n} modification${n>1?'s':''} détectée${n>1?'s':''} par rapport au contrat d'origine · rémunération complémentaire : ${x?Math.round(x).toLocaleString('fr-FR')+' € HT':'aucune'}`; }
+    document.getElementById('avCalc').textContent=`${n} modification${n>1?'s':''} détectée${n>1?'s':''} par rapport au contrat d'origine · ${(S.av.base||{}).paid==='free'&&!freeOn()?'passage de Free à Paid · rémunération : '+(x?Math.round(x).toLocaleString('fr-FR')+' € HT':'à indiquer ci-dessus'):'rémunération complémentaire : '+(x?Math.round(x).toLocaleString('fr-FR')+' € HT':'aucune')}`; }
 }
 document.getElementById('avQuit').onclick=()=>{ if(!confirm('Quitter l’avenant ? Le formulaire sera vidé (le contrat d’origine ne change pas).')) return; S=Object.assign({},DEF,{type:S.type,date_sign:TODAY()}); save(); syncUI(); render(); };
 const EXT_HOME_FAKE=0;
@@ -1754,7 +1760,7 @@ function recordCampaign(){
     const hist=(r.avenants||[]).filter(a=>a.n!==nn).concat([{n:nn,date:S.date_sign,prix:add,deal:dealText(),fichier:S.av.ext?S.ext_file:'',st:S.av.ext?undefined:avSt}]);
     const base=Number(S.av.basePrix)||prev;
     const st=snapS(); if(S.av.ext){ st.ext_prix=String(base+(r.avenants||[]).filter(a=>a.n!==nn).reduce((t,a)=>t+(Number(a.prix)||0),0)+add); } else if(avMedIsNew()) st.med_prix=String(add); else st.total=String((num(S.total)||0)+add); // le contrat consolidé devient la nouvelle base
-    Object.assign(r,{ninf:(S.av.ext?'Contrat externe reçu + avenant':'Contrat envoyé + avenant')+(hist.length>1?'s n°1 à '+hist.length:' n°'+nn),deal:(freeOn()?'FREE · ':'')+dealText(),periode:S.periode,prix:base+hist.reduce((t,a)=>t+(Number(a.prix)||0),0),avenants:hist,cancelled:false,snap:st,updated:Date.now()});
+    Object.assign(r,{ninf:(S.av.ext?'Contrat externe reçu + avenant':'Contrat envoyé + avenant')+(hist.length>1?'s n°1 à '+hist.length:' n°'+nn),deal:(freeOn()?'FREE · ':'')+dealText(),periode:S.periode,prix:freeOn()?0:base+hist.reduce((t,a)=>t+(Number(a.prix)||0),0),free:freeOn(),avenants:hist,cancelled:false,snap:st,updated:Date.now()});
     if(tv) r.ttc=Math.round(r.prix*(1+tvaRate()/100)*100)/100;
     c.updated=Date.now(); CAMPS.splice(CAMPS.indexOf(c),1); CAMPS.unshift(c); saveCamps(); campList(); return name; }
   if(S.type==='ext'){ const ht=num(S.ext_prix)||0, tt=num(S.ext_ttc);
@@ -1816,8 +1822,8 @@ function drawSheet(){
   cc.textContent=`${n} influenceur${n>1?'s':''} · ${eur(total)} HT`+(fm?(total>fm?` · dépasse le fees MAX de ${eur(total-fm)}`:` · reste ${eur(fm-total)} sur ${eur(fm)}`):'');
   cc.classList.toggle('miss',fm>0&&total>fm); cc.title=fm>0&&total>fm?'La somme dépasse le fees MAX':'';
   document.getElementById('cFees').value=fm?fm:'';
-  const rows=c.rows.map((r,i)=>`<tr class="${r.cancelled?'cancel':''}${r.free?' free':''}">${i===0?`<td class="notea" rowspan="${n}"><textarea data-note rows="${Math.max(2,n)}" placeholder="Texte libre (ex. 10K budget global&#10;3K Hono / 7K fees)">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td>`:''}
-    <td><textarea class="cell" data-r="${i}" data-f="sophie" rows="1">${esc(r.sophie||'')}</textarea></td>
+  const rows=c.rows.map((r,i)=>`<tr class="${r.cancelled?'cancel':''}${r.free?' free':''}">${i===0?`<td class="notea" rowspan="${n}"><textarea data-note rows="${Math.max(2,n)}" placeholder="Texte libre">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td>`:''}
+    <td><textarea class="cell" data-r="${i}" data-f="sophie" rows="1" placeholder="à remplir">${esc(r.sophie||'')}</textarea></td>
     <td><textarea class="cell" data-r="${i}" data-f="colC" rows="1">${esc(r.colC||'')}</textarea></td>
     <td><textarea class="cell" data-r="${i}" data-f="ninf" rows="1">${esc(r.ninf??(r.free?'-':'Contrat envoyé'))}</textarea></td>
     <td><textarea class="cell" data-r="${i}" data-f="handle" rows="1">${esc(r.handle||'')}</textarea></td>
@@ -1828,7 +1834,7 @@ function drawSheet(){
     <td><textarea class="cell" data-r="${i}" data-f="facture" rows="1" placeholder="à remplir">${esc(r.facture||'')}</textarea></td>
     <td class="acts">${r.snap&&!r.external?`<button data-pdf="${i}" title="Retélécharger le contrat (PDF), sans quitter le tableau">⤓</button>`:''}<button data-edit="${i}" title="${r.snap?'Rouvrir ce contrat dans le formulaire pour le modifier':'Contrat enregistré avant cette version : à ressaisir'}" ${r.snap?'':'disabled'}>✎</button>${r.snap?`<button class="av" data-av="${i}" title="Faire un avenant à ce contrat${(r.avenants||[]).length?' (déjà '+r.avenants.length+' avenant'+(r.avenants.length>1?'s':'')+')':''}">A+</button>`:''}<button data-cancel="${i}" title="${r.cancelled?'Rétablir cet influenceur':'Annulation : la ligne reste visible, barrée, et sort de la somme'}">${r.cancelled?'↺':'⊘'}</button><button class="del" data-del="${i}" title="Retirer complètement la ligne">✕</button></td></tr>`).join('');
   document.getElementById('cSheet').innerHTML=`<table class="sheet"><colgroup><col style="width:12%"><col style="width:7%"><col style="width:3%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:7%"><col style="width:15%"><col style="width:8%"><col style="width:14%"></colgroup><thead><tr><th>${esc(c.title)}</th><th>Note Sophie</th><th></th><th>Note<br>influence</th><th>Créateur<br>contenus</th><th>Période<br>activation</th><th>Prix HT</th><th>Prix TTC</th><th>Livrable</th><th>Facture</th><th style="background:none"></th></tr></thead>
-    <tbody>${rows||`<tr><td class="notea"><textarea data-note rows="3" placeholder="Texte libre (ex. 10K budget global&#10;3K Hono / 7K fees)">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td><td colspan="9" style="color:#999">Aucun influenceur pour l’instant : ils s’ajoutent à chaque PDF généré avec ce nom de campagne</td></tr>`}</tbody>
+    <tbody>${rows||`<tr><td class="notea"><textarea data-note rows="3" placeholder="Texte libre">${esc(c.note||'')}</textarea><div class="feesline">${feesLines(c).map(esc).join('<br>')}</div></td><td colspan="9" style="color:#999">Aucun influenceur pour l’instant : ils s’ajoutent à chaque PDF généré avec ce nom de campagne</td></tr>`}</tbody>
     <tfoot><tr><td colspan="5"></td><td class="sum">Somme :</td><td class="sum">${Math.round(total).toLocaleString('en-US')}€</td><td class="sum">${ttcTot(c)?Math.round(ttcTot(c)).toLocaleString('en-US')+'€':''}</td><td colspan="2"></td><td></td></tr></tfoot></table>`;
   fitLivr();
 }
